@@ -51,7 +51,6 @@
 					<view class="footerBottom-h10"></view>
 					<view class="footerBottom"></view>
 				</view>
-				<!-- #ifdef MP --><aTip :isCustom="true" :text="wxText" :borderR="5"></aTip><!-- #endif -->
 			</view>
 		</view>
 		<view v-else>
@@ -75,7 +74,6 @@
 import tuiSkeleton from '@/components/base/tui-skeleton.vue';
 import Cache from '../../utils/cache';
 import recommend from "@/components/base/recommend.vue";
-import aTip from './components/addTips.vue';
 import pageFooter from "@/components/pageFooter/index.vue";
 import homeComb from '@/components/homeIndex/homeComb.vue';
 import seckillData from '@/components/homeIndex/seckill.vue';
@@ -116,7 +114,7 @@ var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 let app = getApp();
 export default {
   computed: mapGetters(['isLogin', 'uid', 'bottomNavigationIsCustom']),
-  components: { tuiSkeleton,aTip,homeComb,recommend,seckillData,pageFooter,coupon,menus,pictureCube,news,goodList,articleList,swiperBg,headerSearch,cateNav,guide,richTextEditor,shortVideo,homeTab,blankPage,homeTitle,hotSpot,group,bargain
+  components: { tuiSkeleton,homeComb,recommend,seckillData,pageFooter,coupon,menus,pictureCube,news,goodList,articleList,swiperBg,headerSearch,cateNav,guide,richTextEditor,shortVideo,homeTab,blankPage,homeTitle,hotSpot,group,bargain
 	// #ifdef H5
 	,copyRight
 	// #endif
