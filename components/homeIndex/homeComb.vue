@@ -233,7 +233,7 @@
 				return this.dataConfig.swiperStyleConfig.tabVal
 			},
 			hotWords() {
-				return this.dataConfig.hotWords.list
+				return []
 			},
 			lineColor() {
 				return {
@@ -261,9 +261,9 @@
 				return this.dataConfig.fontColor.color[0].item;
 			},
 			tabList() {
-				let tabList = this.dataConfig.listConfig.list;
+				let tabList = (this.dataConfig.listConfig.list || []).filter(item => !this.isMojibakeTitle(item.title));
 				tabList.unshift({
-					title: '棣栭〉',
+					title: '首页',
 					type: 2,
 					val: 0
 				})
@@ -371,6 +371,9 @@
 			}, 200)
 		},
 		methods: {
+			isMojibakeTitle(title) {
+				return /[�锟鐧鐨鐢鐩閰閫闃闈鍟鍏鍙鍔瀹佸剆婊姝傛淇绋潖銆锛妫棣栭]/.test(title || '')
+			},
 			menusTap(url) {
 				this.$util.navigateTo(url);
 			},

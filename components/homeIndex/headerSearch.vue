@@ -110,7 +110,7 @@
 				}
 			},
 			hotWords() {
-				return this.dataConfig.hotWords.list
+				return []
 			},
 			contentStyle() {
 				return {

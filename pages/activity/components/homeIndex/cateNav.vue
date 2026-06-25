@@ -58,7 +58,7 @@
 				return this.dataConfig.themeStyleConfig.tabVal?this.dataConfig.checkColor.color[0].item:this.themeColor
 			},
 			tabList() {
-				return this.dataConfig.listConfig.list || []
+				return (this.dataConfig.listConfig.list || []).filter(item => !this.isMojibakeTitle(item.title))
 			},
 		},
 		created() {
@@ -98,6 +98,9 @@
 			}
 		},
 		methods: {
+			isMojibakeTitle(title) {
+				return /[�锟鐧鐨鐢鐩閰閫闃闈鍟鍏鍙鍔瀹佸剆婊姝傛淇绋潖銆锛妫棣栭]/.test(title || '')
+			},
 			longClick(index, item) {
 				this.tabItem = item;
 				this.tabClick = index; //鐠佸墽鐤嗙€佃壈鍩呴悙鐟板毊娴滃棗鎽㈡稉鈧稉?
