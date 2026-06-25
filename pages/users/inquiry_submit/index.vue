@@ -724,6 +724,13 @@ export default {
 				remark: part.remark || ''
 			}));
 		},
+		getQuotedType() {
+			const smart = !!this.supplierOptions.smart;
+			const specified = !!this.supplierOptions.specified;
+			if (smart && specified) return 'COMBINATIONHANDLER';
+			if (specified) return 'MANHANDLER';
+			return 'SYSTEMHANDLER';
+		},
 		buildInquiryCreateRequest() {
 			const getters = (this.$store && this.$store.getters) || {};
 			const userInfo = getters.userInfo || {};
@@ -754,7 +761,7 @@ export default {
 				userNeeds: this.buildUserNeeds(),
 				picDemands: [],
 				storeIds: this.supplierOptions.specified ? this.selectedSupplierStoreIds : [],
-				quotedType: this.supplierOptions.specified ? 'MANHANDLER' : 'SYSTEMHANDLER'
+				quotedType: this.getQuotedType()
 			};
 		},
 		buildInquiryAppendRequest() {
@@ -767,7 +774,9 @@ export default {
 				userName: userInfo.nickname || userInfo.realName || '',
 				externalInquiryId: this.externalInquiryId,
 				qualities: this.selectedQualityValues.slice(),
-				userNeeds: this.buildUserNeeds()
+				userNeeds: this.buildUserNeeds(),
+				storeIds: this.supplierOptions.specified ? this.selectedSupplierStoreIds : [],
+				quotedType: this.getQuotedType()
 			};
 		},
 		requestInquiryCreate(payload) {

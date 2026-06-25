@@ -360,7 +360,7 @@ export default {
 					return {
 						...part,
 						quotes: filteredQuotes,
-						quoteCount: filteredQuotes.length
+						quoteCount: this.getSupplierQuoteCount(filteredQuotes)
 					};
 				})
 				.filter(part => part.quoteCount > 0);
@@ -694,6 +694,22 @@ export default {
 		getQuoteSupplierName(quote) {
 			if (!quote || typeof quote !== 'object') return '';
 			return String(quote.venderSellerName || quote.merchantName || '').trim();
+		},
+		getQuoteSupplierKey(quote) {
+			if (!quote || typeof quote !== 'object') return '';
+			const id = String(quote.venderSellerId || '').trim();
+			if (id) return `id:${id}`;
+			const name = this.getQuoteSupplierName(quote);
+			if (name) return `name:${name}`;
+			return `quote:${quote.id || ''}`;
+		},
+		getSupplierQuoteCount(quotes) {
+			if (!Array.isArray(quotes)) return 0;
+			return new Set(
+				quotes
+					.map(quote => this.getQuoteSupplierKey(quote))
+					.filter(Boolean)
+			).size;
 		},
 		isQiaoshouQuote(quote) {
 			const serviceTagIds = Array.isArray(quote && quote.serviceTagIds)
@@ -1280,7 +1296,7 @@ export default {
 			});
 			return Object.values(partMap).map(part => ({
 				...part,
-				quoteCount: part.quotes.length
+				quoteCount: this.getSupplierQuoteCount(part.quotes)
 			}));
 		},
 		async fetchDetail() {
