@@ -1,0 +1,50 @@
+<template>
+	<view>
+		<view class="lines" :style="[boxStyle]">
+			<view class="item" :style="[lineStyle]"></view>
+		</view>
+	</view>
+
+</template>
+
+<script>
+	export default {
+		name: 'guide',
+		props: {
+			dataConfig: {
+				type: Object,
+				default: () => {}
+			},
+		},
+		computed: {
+			boxStyle() {
+				return {
+					background: `linear-gradient(${this.dataConfig.bgColor.color[0].item}, ${this.dataConfig.bgColor.color[1].item})`,
+					margin: this.dataConfig.mbConfig.val * 2 + 'rpx' + ' ' + this.dataConfig.lrConfig.val * 2 + 'rpx' +
+						' ' + 0,
+				}
+			},
+			lineStyle() {
+				return {
+					borderBottomWidth: 2*this.dataConfig.heightConfig.val + 'rpx',
+					borderBottomColor: this.dataConfig.lineColor.color[0].item,
+					borderBottomStyle: this.dataConfig.lineStyle.list[this.dataConfig.lineStyle.tabVal].style
+				}
+			}
+		},
+	}
+</script>
+
+<style lang="scss" scoped>
+	.lines {
+		padding: 0 20rpx;
+
+		.item {
+			width: 100%;
+			box-sizing: border-box;
+			border-bottom-color: #666;
+			border-bottom-width: 1px;
+			border-bottom-style: dotted;
+		}
+	}
+</style>

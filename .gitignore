@@ -1,0 +1,35 @@
+.DS_Store
+node_modules
+/dist
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.hbuilderx
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+build.sh
+.idea
+unpackage
+
+# Local assistant/workspace metadata
+.agents
+.codex
+
+# Local/private mini program config
+project.private.config.json
+
+# Removed/backup source snapshots
+_unused_root_components_backup
