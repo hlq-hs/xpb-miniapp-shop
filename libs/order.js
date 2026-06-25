@@ -61,7 +61,7 @@ export function getPreOrder(preOrderType, orderDetails) {
 				let tokenIsExist = tokenRes.data;
 				if (!tokenIsExist && (preOrderType == 'buyNow' || preOrderType == 'shoppingCart')) {
 					uni.navigateTo({
-						url: '/pages/users/login/index',
+						url: '/pages/users/wechat_login/index',
 						success: () => {
 							store.commit("LOGOUT");
 							uni.showToast({

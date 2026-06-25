@@ -343,17 +343,6 @@
 					}
 				},
 				{
-					"path": "login/index",
-					"style": {
-						"navigationBarTitleText": "登录",
-						"app-plus": {
-							"titleNView": {
-								"type": "default"
-							}
-						}
-					}
-				},
-				{
 					"path": "wechat_login/index",
 					"style": {
 						"navigationBarTitleText": "账号登录",
@@ -773,19 +762,6 @@
 					"path": "user_phone/index",
 					"style": {
 						"navigationBarTitleText": "修改手机号",
-						"navigationBarBackgroundColor": "#e93323",
-						"navigationBarTextStyle": "#fff",
-						"app-plus": {
-							"titleNView": {
-								"type": "default"
-							}
-						}
-					}
-				},
-				{
-					"path": "user_pwd_edit/index",
-					"style": {
-						"navigationBarTitleText": "修改密码",
 						"navigationBarBackgroundColor": "#e93323",
 						"navigationBarTextStyle": "#fff",
 						"app-plus": {

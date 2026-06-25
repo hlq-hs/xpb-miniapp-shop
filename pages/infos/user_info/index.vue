@@ -61,22 +61,6 @@
 						</view>
 					</view>
 					<!-- #endif -->
-					<!-- #ifdef H5 -->
-					<view class="item acea-row row-between-wrapper" v-if="userInfo.phone && wechat">
-						<view>密码</view>
-						<navigator url="/pages/infos/user_pwd_edit/index" hover-class="none" class="input">
-							点击修改密码<text class="iconfont icon-xiangyou"></text>
-						</navigator>
-					</view>
-					<!-- #endif -->
-					<!-- #ifdef APP-PLUS -->
-					<view class="item acea-row row-between-wrapper" v-if="userInfo.phone">
-						<view>密码</view>
-						<navigator url="/pages/infos/user_pwd_edit/index" hover-class="none" class="input">
-							点击修改密码<text class="iconfont icon-xiangyou"></text>
-						</navigator>
-					</view>
-					<!-- #endif -->
 					<view class='item acea-row row-between-wrapper'>
 						<view>地址管理</view>
 						<view class="input" @click="toAddress">

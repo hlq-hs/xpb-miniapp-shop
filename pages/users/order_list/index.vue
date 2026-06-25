@@ -96,7 +96,6 @@
 	} from '@/api/order.js';
 	import {openOrderSubscribe} from '@/utils/SubscribeMessage.js';
 	import payment from '@/pages/users/components/payment';
-	import navBar from '@/pages/users/components/navBar';
 	import {
 		toLogin
 	} from '@/libs/login.js';
@@ -111,7 +110,6 @@
 		components: {
 			payment,
 			emptyPage,
-			navBar
 		},
 		data() {
 			return {

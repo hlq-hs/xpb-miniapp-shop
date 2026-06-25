@@ -431,7 +431,6 @@
 	import {
 		Debounce
 	} from '@/utils/validate.js'
-	import navBar from '@/pages/goods/components/navBar';
 	export default {
 		components: {
 			productConSwiper,
@@ -442,7 +441,6 @@
 			cusPreviewImg,
 			"jyf-parser": parser,
 			activityStyle,
-			navBar,
 			tuiSkeleton
 		},
 		data() {

@@ -9,13 +9,12 @@
 			</view>
 		</view>
 		<view class="cancel" v-if="type == 'useraccountcancelinfo' && loaded">
-			<view class="acea-row row-center">
-				<view class="checkbox acea-row row-middle" @click="setCheck">
-					<text v-if="!check" class="iconfont icon-weixuanzhong"></text>
-					<text v-else class="iconfont icon-xuanzhong1"></text>
-				</view>
-				<view class="ml10">已阅读并同意<text class="font font-color" @click="toCancel">《重要提醒》</text></view>
-			</view>
+			<checkbox-group @change="setCheck">
+				<label class="acea-row row-center row-middle">
+					<checkbox class="read-checkbox" value="read" :checked="check" color="#E93323" />
+					<view class="ml10">已阅读并同意<text class="font font-color" @click.stop="toCancel">《重要提醒》</text></view>
+				</label>
+			</checkbox-group>
 		</view>
 		<view class="outMoal" v-if="moal">
 			<view class="box">
@@ -79,8 +78,8 @@
 			toCancel() {
 				goToAgreement('useraccountcancelnoticeinfo')
 			},
-			setCheck() {
-				this.check = !this.check
+			setCheck(e) {
+				this.check = e.detail.value.indexOf('read') !== -1
 			},
 			cancelMoal() {
 				this.moal = false
@@ -197,6 +196,9 @@
 			bottom: 120rpx;
 			padding: 10rpx 0;
 			background: #fff;
+			.read-checkbox {
+				transform: scale(0.8);
+			}
 			.checkbox {
 				text-align: center;
 				font-size: 24rpx;

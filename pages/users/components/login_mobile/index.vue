@@ -236,7 +236,7 @@
 				// #endif
 				// #ifdef APP-PLUS
 				if (this.isApp == 0) {
-					if (backUrl.indexOf('/pages/users/login/index') !== -1) {
+					if (backUrl.indexOf('/pages/users/wechat_login/index') !== -1) {
 						backUrl = '/pages/index/index';
 					}
 					uni.reLaunch({

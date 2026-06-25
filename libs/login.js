@@ -39,7 +39,7 @@ export function _toLogin(push, pathLogin) {
 	path = location.pathname + location.search;
 	// #endif
 	if(!pathLogin){
-		pathLogin = '/page/users/login/index'
+		pathLogin = '/pages/users/wechat_login/index'
 		Cache.set(BACK_URL,path);
 	}
 		
@@ -63,7 +63,7 @@ export function _toLogin(push, pathLogin) {
 	} else {
 		if (['/pages/user/index'].indexOf(login_back_url) == -1) {
 			uni.navigateTo({
-				url: '/pages/users/login/index'
+				url: '/pages/users/wechat_login/index'
 			})
 		}
 	}
@@ -84,7 +84,7 @@ export function _toLogin(push, pathLogin) {
 			    success: function (res) {
 			        if (res.confirm) {
 			           uni.navigateTo({
-			           	url: '/pages/users/login/index'
+			           	url: '/pages/users/wechat_login/index'
 			           })
 			        } else if (res.cancel) {
 			            // console.log('用户点击取消');

@@ -41,7 +41,6 @@
 </template>
 <script>
 	import emptyPage from '@/components/emptyPage.vue';
-	import GoodList from '@/pages/activity/components/goodList/index';
 	import {getGroomList} from '@/api/store';
 	import {goPage} from '@/libs/order.js';
 	import {productRank} from '@/api/api.js'
@@ -51,7 +50,6 @@
 	export default {
 		name: 'HotNewGoods',
 		components: {
-			GoodList,
 			emptyPage,
 			Loading
 		},
