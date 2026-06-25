@@ -367,6 +367,7 @@ export default {
 				uni.request({
 					url: 'https://xpbhd.kbiso.com/postData.ashx?action=GetBaiduOauth',
 					method: 'GET',
+					timeout: 15000,
 					success: (res) => resolve((res && res.data) || {}),
 					fail: reject
 				});
@@ -454,6 +455,7 @@ export default {
 				uni.request({
 					url,
 					method: 'POST',
+					timeout: 20000,
 					header: {
 						'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
 					},
@@ -493,6 +495,7 @@ export default {
 				uni.request({
 					url: 'https://xpbn.kbiso.com/api/Kaisi/SetVinUrl',
 					method: 'POST',
+					timeout: 10000,
 					header: {
 						'Content-Type': 'application/json'
 					},
@@ -534,6 +537,35 @@ export default {
 			this.reportRecognizedVin(vin).catch(() => {});
 			return vin;
 		},
+		showNoneToast(title, duration = 2200) {
+			uni.hideLoading();
+			setTimeout(() => {
+				uni.showToast({
+					title,
+					icon: 'none',
+					duration
+				});
+			}, 80);
+		},
+		getVinRecognitionErrorMessage(error) {
+			const message = String((error && (error.message || error.errMsg)) || error || '');
+			if (message === 'VIN_NOT_FOUND') {
+				return '未识别到VIN码，请重新拍摄或手动输入';
+			}
+			if (message === 'EMPTY_ACCESS_TOKEN') {
+				return '识别服务授权失败，请稍后重试';
+			}
+			if (message === 'EMPTY_IMAGE_BASE64') {
+				return '图片读取失败，请重新选择';
+			}
+			if (/timeout|timed out|超时/i.test(message)) {
+				return '识别接口超时，请稍后重试';
+			}
+			if (/request:fail|fail|network|网络/i.test(message)) {
+				return '识别接口请求失败，请检查网络';
+			}
+			return 'VIN识别失败，请手动输入';
+		},
 		handleScan() {
 			if (this.isRecognizingVin) return;
 
@@ -543,7 +575,10 @@ export default {
 				sourceType: ['camera', 'album'],
 				success: async (res) => {
 					const imagePath = res.tempFilePaths && res.tempFilePaths[0];
-					if (!imagePath) return;
+					if (!imagePath) {
+						this.showNoneToast('未获取到图片，请重试');
+						return;
+					}
 
 					this.vinImagePath = imagePath;
 					this.isRecognizingVin = true;
@@ -557,10 +592,7 @@ export default {
 						this.vinCode = vin;
 						await this.proceedWithVin(vin, '查询中');
 					} catch (error) {
-						uni.showToast({
-							title: 'VIN识别失败，请手动输入',
-							icon: 'none'
-						});
+						this.showNoneToast(this.getVinRecognitionErrorMessage(error));
 					} finally {
 						this.isRecognizingVin = false;
 						uni.hideLoading();
@@ -570,10 +602,7 @@ export default {
 					const errorMessage = error && error.errMsg ? error.errMsg : '';
 					if (errorMessage.includes('cancel')) return;
 
-					uni.showToast({
-						title: '图片选择失败',
-						icon: 'none'
-					});
+					this.showNoneToast('图片选择失败');
 				}
 			});
 		},
@@ -582,6 +611,7 @@ export default {
 				uni.request({
 					url: 'https://xpbn.kbiso.com/api/MiniKaisi/vin',
 					method: 'GET',
+					timeout: 15000,
 					data: {
 						vin
 					},
@@ -605,10 +635,7 @@ export default {
 		async proceedWithVin(vinCode, loadingTitle = '查询中') {
 			const normalizedVin = (vinCode || '').trim().toUpperCase();
 			if (normalizedVin.length !== 17) {
-				uni.showToast({
-					title: '请输入17位VIN码',
-					icon: 'none'
-				});
+				this.showNoneToast('请输入17位VIN码');
 				return false;
 			}
 
@@ -632,10 +659,7 @@ export default {
 				const vehicleName = this.getVehicleName(vehicleInfo);
 
 				if (!vehicleName) {
-					uni.showToast({
-						title: result.msgtext || '未查询到车型信息',
-						icon: 'none'
-					});
+					this.showNoneToast(result.msgtext || '未查询到车型信息');
 					return false;
 				}
 
@@ -645,10 +669,8 @@ export default {
 				});
 				return true;
 			} catch (error) {
-				uni.showToast({
-					title: '查询失败，请稍后重试',
-					icon: 'none'
-				});
+				const message = String((error && (error.errMsg || error.message)) || error || '');
+				this.showNoneToast(/timeout|超时/i.test(message) ? '车型查询超时，请稍后重试' : '查询失败，请稍后重试');
 				return false;
 			} finally {
 				this.isSubmitting = false;

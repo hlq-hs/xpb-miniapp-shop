@@ -5,12 +5,18 @@
 			<view class="page-footer" id="target">
 				<view class="foot-item" v-for="(item,index) in obj.bottomNavigationList" :key="index"
 					@click="goRouter(item)">
-					<block v-if="item.link.split('?')[0] == activeRouter">
-						<image :src="formatImage(item.checked)"></image>
+					<block v-if="isActive(item)">
+						<view v-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon checked">
+							<view></view><view></view><view></view><view></view>
+						</view>
+						<text v-else class="iconfont nav-icon checked" :class="fixedIcons[index] || fixedIcons[0]"></text>
 						<view class="txt">{{item.name}}</view>
 					</block>
 					<block v-else>
-						<image :src="formatImage(item.unchecked)"></image>
+						<view v-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon">
+							<view></view><view></view><view></view><view></view>
+						</view>
+						<text v-else class="iconfont nav-icon" :class="fixedIcons[index] || fixedIcons[0]"></text>
 						<view class="unchecked">{{item.name}}</view>
 					</block>
 				</view>
@@ -34,7 +40,16 @@
 				theme: app.globalData.theme,
 				obj: {},
 				activeRouter: '',
-				imgHost: this.$Cache.get('imgHost') || ''
+				imgHost: this.$Cache.get('imgHost') || '',
+				fixedIcons: [
+					'icon-shouye8',
+					{
+						type: 'category'
+					},
+					'icon-quanbudingdan-xingerenzhongxin',
+					'icon-fanhuishouye',
+					'icon-gerenzhongxin1'
+				]
 			}
 		},
 		created() {
@@ -46,6 +61,9 @@
 			this.getInit()
 		},
 		methods: {
+			isActive(item) {
+				return this.normalizeLink(item.link).split('?')[0] == this.activeRouter;
+			},
 			formatImage(url) {
 				if (!url) return '';
 				if (/^(data:|https?:\/\/|\/\/|\/static\/)/i.test(url)) return url;
@@ -159,6 +177,45 @@
 			width: 50rpx;
 			text-align: center;
 			margin: 0 auto;
+		}
+
+		.foot-item .nav-icon {
+			width: 50rpx;
+			height: 50rpx;
+			line-height: 50rpx;
+			text-align: center;
+			margin: 0 auto;
+			font-size: 44rpx;
+			color: #666;
+		}
+
+		.foot-item .nav-icon.checked {
+			@include main-color(theme);
+		}
+
+		.foot-item .nav-category-icon {
+			width: 50rpx;
+			height: 50rpx;
+			margin: 0 auto;
+			display: grid;
+			grid-template-columns: repeat(2, 16rpx);
+			grid-template-rows: repeat(2, 16rpx);
+			gap: 6rpx;
+			align-content: center;
+			justify-content: center;
+			color: #666;
+		}
+
+		.foot-item .nav-category-icon view {
+			width: 16rpx;
+			height: 16rpx;
+			border: 3rpx solid currentColor;
+			border-radius: 3rpx;
+			box-sizing: border-box;
+		}
+
+		.foot-item .nav-category-icon.checked {
+			@include main-color(theme);
 		}
 
 		.txtchecked {
