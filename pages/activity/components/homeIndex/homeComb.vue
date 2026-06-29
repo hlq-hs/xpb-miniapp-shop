@@ -308,7 +308,6 @@
 				this.myMainHeight = (this.isSmallPage ? 0 : this.statusBarHeight) + 40 + 42; //澶撮儴tab鍒囨崲椤靛拰鎼滅储鎸夐挳鐨勯珮搴﹀拰
 			}
 			// #endif
-			
 			// #ifdef MP
 			const res = uni.getMenuButtonBoundingClientRect()
 			const statusHeight = res.top //鑳跺泭璺濈椤堕儴

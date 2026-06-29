@@ -10,6 +10,7 @@
 
 import Vue from 'vue'
 import App from './App'
+import uView from 'uview-ui'
 import store from './store'
 import Cache from './utils/cache'
 import util from 'utils/util'
@@ -25,6 +26,7 @@ Vue.prototype.$eventHub = new Vue();
 Vue.config.productionTip = false
 Vue.prototype.$Order = Order;
 Vue.prototype.$LoginAuth = apps;
+Vue.use(uView);
 
 Vue.mixin({
 	onLoad() {

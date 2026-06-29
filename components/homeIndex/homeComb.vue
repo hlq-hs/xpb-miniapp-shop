@@ -1,18 +1,16 @@
 <template>
-	<view class="page_count tui-skeleton" :data-theme="theme">
-		<view class="bg-img" :style="{'background-image': bgColor}">
+	<view class="page_count tui-skeleton" :data-theme="theme" :style="renderMode === 'header' ? 'height:' + myMainHeight + 'px;' : ''">
+		<view v-if="renderMode === 'full'" class="bg-img" :style="{'background-image': bgColor}">
 			<block v-for="(item,index) in banner" :key="index">
 				<img :src="item.img" alt="" v-show="index == swiperCur">
 			</block>
 			<view class="maskBg" :style="[maskBgStyle]"></view>
 		</view>
-		<view :class="{scrolled:isScrolled, 'my-main': true}" :style="{ height: myMainHeight+'px' }">
+		<view v-if="renderMode !== 'content'" :class="{scrolled:isScrolled, 'my-main': true}" :style="{ height: myMainHeight+'px' }">
 			<!-- #ifdef H5 -->
 			<view class="header">
 				<view class="serch-wrapper acea-row">
-					<view v-if="logoConfig" class="logo skeleton-rect">
-						<image :src="logoUrl" mode="scaleToFill"></image>
-					</view>
+					<city-locator style="display:block;width:124rpx;height:100%;margin-right:12rpx;flex-shrink:0;"></city-locator>
 					<navigator v-if="hotWords.length > 0" :url="'/pages/goods/goods_search/index?searchVal='+searchVal"
 						:style="[searchBoxStyle]" :class="logoConfig ? 'input' : 'uninput'" hover-class="none"
 						class="input">
@@ -42,13 +40,21 @@
 			</view>
 			<!-- #endif -->
 			<!-- #ifdef MP || APP-PLUS -->
-			<view class="mp-header">
+			<view class="mp-header" :class="{ 'mp-header-scrolled': isScrolled }">
 				<view class="sys-head" :style="{ height: `${isSmallPage?0:statusBarHeight}px`}"></view>
-				<view class="serch-box" :style="{ 'margin-top': `${searchTop}px`,'height': `${searchHeight}px`}">
-					<view class="serch-wrapper acea-row">
-						<view v-if="logoConfig" class="logo tui-skeleton-rect">
-							<image :src="logoUrl" mode="scaleToFill"></image>
-						</view>
+				<view
+					v-if="!isSmallPage"
+					class="vehicle-head-row"
+					:style="{ marginTop: `${searchTop}px`, height: `${searchHeight}px`, paddingRight: `${capsuleReserveRight}px` }"
+				>
+					<default-vehicle-bar ref="defaultVehicleBar" style="display:block;width:100%;height:100%;"></default-vehicle-bar>
+				</view>
+				<view class="serch-box" :style="{ 'margin-top': `${isSmallPage ? searchTop : 8}px`,'height': `${searchHeight}px`}">
+					<view
+						class="serch-wrapper acea-row"
+						:style="searchWrapperStyle"
+					>
+						<city-locator style="display:block;width:124rpx;height:100%;margin-right:12rpx;flex-shrink:0;"></city-locator>
 						<navigator v-if="hotWords.length > 0"
 							:url="'/pages/goods/goods_search/index?searchVal='+searchVal" :style="[searchBoxStyle]"
 							hover-class="none" class="input" :class="logoConfig&&!isSmallPage ? 'input' : 'uninput'">
@@ -87,7 +93,7 @@
 							:class="tabClick === index? 'navChecked':''">
 							<view class="acea-row row-middle">
 								<view class="name tui-skeleton-rect">{{item.title}}</view>
-								<view class="underlineBox" v-if="index===tabClick">
+								<view class="underlineBox" v-if="index===tabClick && item.title">
 								</view>
 							</view>
 						</view>
@@ -112,7 +118,7 @@
 			</view>
 		</view>
 
-		<view class="swiperBg" :style="{ marginTop: swiperTop+'px'}">
+		<view v-if="renderMode !== 'header'" class="swiperBg" :style="{ marginTop: (renderMode === 'content' ? 0 : swiperTop)+'px'}">
 			<view class="swiper page_swiper" v-if="navIndex === 0">
 				<swiper :autoplay="true" :circular="circular" :interval="intervalBanner" :duration="duration"
 					:previous-margin="swiperType==0?'30rpx':''" :next-margin="swiperType==0?'30rpx':''"
@@ -150,13 +156,20 @@
 </template>
 
 <script>
+	import cityLocator from "@/components/homeIndex/cityLocator.vue";
+	import defaultVehicleBar from "@/components/homeIndex/defaultVehicleBar.vue";
 	let app = getApp();
 	import {
 		goPage
 	} from '@/libs/iframe.js'
 	export default {
+		components: { cityLocator, defaultVehicleBar },
 		name: 'homeComb',
 		props: {
+			renderMode: {
+				type: String,
+				default: 'full'
+			},
 			dataConfig: {
 				type: Object,
 				default: () => {}
@@ -206,6 +219,7 @@
 				searchRight:0,
 				searchHeight:0,
 				statusWidth:0,
+				capsuleLeft:0,
 			};
 		},
 		watch: {
@@ -217,6 +231,15 @@
 			},
 		},
 		computed: {
+			searchWrapperStyle() {
+				return "width:100%;box-sizing:border-box;";
+			},
+			capsuleReserveRight() {
+				return Math.max(Number(this.statusWidth || 0) + Number(this.searchRight || 0) + 16, 108);
+			},
+			vehicleHeaderOffset() {
+				return this.isSmallPage ? 0 : Number(this.searchHeight || 0) + 8;
+			},
 			tabShowConfig() {
 				return this.dataConfig.tabShowConfig.tabVal == 0;
 			},
@@ -263,7 +286,7 @@
 			tabList() {
 				let tabList = (this.dataConfig.listConfig.list || []).filter(item => !this.isMojibakeTitle(item.title));
 				tabList.unshift({
-					title: '首页',
+					title: '',
 					type: 2,
 					val: 0
 				})
@@ -280,8 +303,9 @@
 					textAlign: this.dataConfig.textPosition.list[this.dataConfig.textPosition.tabVal].style,
 					// #ifdef MP
 					height:this.searchHeight + 'px',
-					flex:!this.isSmallPage?1:'',
-					marginRight:!this.isSmallPage?(this.statusWidth + this.searchRight+'px'):'',
+					width:!this.isSmallPage?'70%':'',
+					flex:!this.isSmallPage?'0 0 70%':'',
+					marginRight:'',
 					// #endif
 				}
 			},
@@ -315,8 +339,15 @@
 			const statusRight = res.right //鑳跺泭鍙宠竟鐣屽潗鏍?
 			const jnHeight = res.height //鑳跺泭楂樺害
 			this.statusWidth= res.width
+			this.capsuleLeft = res.left || 0
 			this.searchTop=statusHeight-this.statusBarHeight
 			this.searchHeight=jnHeight
+			const vehicleOffset = jnHeight + 8
+			this.isTop = this.statusBarHeight + 48 + vehicleOffset + 'px'
+			this.myMainHeight = this.statusBarHeight + (this.tabShowConfig ? 82 : 50) + vehicleOffset
+			this.swiperTop = this.tabShowConfig
+				? (this.isSmallPage ? 85 : this.statusBarHeight + 85 + vehicleOffset)
+				: (this.isSmallPage ? this.statusBarHeight : this.statusBarHeight + 48 + vehicleOffset)
 			uni.getSystemInfo({
 				success:res=>{
 					this.searchRight=res.windowWidth-statusRight
@@ -347,13 +378,13 @@
 						if (this.isSmallPage) {
 							this.swiperTop = this.statusBarHeight; //杞挱鍥剧殑top鍊?
 						} else {
-							this.swiperTop = this.statusBarHeight + 48; //杞挱鍥剧殑top鍊?
+							this.swiperTop = this.statusBarHeight + 48 + this.vehicleHeaderOffset; //杞挱鍥剧殑top鍊?
 						}
 						// #endif
 					}).exec();
 				} else {
 					query.select('.navTabBox').boundingClientRect(data => {
-						this.navHeight = data.height //鍏冪礌navHeight鐨勯珮搴?
+						if (data) this.navHeight = data.height //鍏冪礌navHeight鐨勯珮搴?
 						// #ifdef H5
 						this.swiperTop = this.navHeight + this.marTop + this.statusBarHeight +
 							4; //杞挱鍥剧殑top鍊?
@@ -362,7 +393,7 @@
 						if (this.isSmallPage) {
 							this.swiperTop = 85; //杞挱鍥剧殑top鍊?
 						} else {
-							this.swiperTop = this.statusBarHeight + 85; //杞挱鍥剧殑top鍊?
+							this.swiperTop = this.statusBarHeight + 85 + this.vehicleHeaderOffset; //杞挱鍥剧殑top鍊?
 						}
 						// #endif
 					}).exec();
@@ -370,7 +401,15 @@
 
 			}, 200)
 		},
+		mounted() {
+			if (this.renderMode !== 'content') {
+				this.$emit('headerHeightChange', Number(this.myMainHeight || 0));
+			}
+		},
 		methods: {
+			refreshDefaultVehicle() {
+				if (this.$refs.defaultVehicleBar) this.$refs.defaultVehicleBar.refresh();
+			},
 			isMojibakeTitle(title) {
 				return /[�锟鐧鐨鐢鐩閰閫闃闈鍟鍏鍙鍔瀹佸剆婊姝傛淇绋潖銆锛妫棣栭]/.test(title || '')
 			},
@@ -670,7 +709,6 @@
 		width: 100%;
 		background-color: #fff !important;
 		color: #000 !important;
-		transition: background-color .5s ease;
 
 		.longItem,
 		.click,
@@ -740,8 +778,8 @@
 		position: fixed;
 		top: 0;
 		width: 100%;
-		z-index: 30;
-		transition: background-color .5s ease;
+		z-index: 9999;
+		background: #fff;
 	}
 
 	.page_count {
@@ -788,12 +826,24 @@
 
 		/* #ifdef MP || APP-PLUS */
 		.mp-header {
-			z-index: 999;
+			z-index: 10000;
 			position: fixed;
 			left: 0;
 			top: 0;
 			width: 100%;
 			padding-bottom: 20rpx;
+			background-color: #fff;
+
+			&.mp-header-scrolled {
+				background-color: #fff;
+			}
+
+			.vehicle-head-row {
+				width: 100%;
+				box-sizing: border-box;
+				overflow: hidden;
+				background-color: #fff;
+			}
 
 			.serch-wrapper {
 				height: 100%;

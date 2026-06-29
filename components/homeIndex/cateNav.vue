@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view v-if="tabList.length">
 		<view class="navTabBox" :class="{isFixed:isFixed}" :style="[boxStyle]">
 			<view class="longTab">
 				<scroll-view scroll-x="true" style="white-space: nowrap; display: flex;" scroll-with-animation
@@ -58,7 +58,10 @@
 				return this.dataConfig.themeStyleConfig.tabVal?this.dataConfig.checkColor.color[0].item:this.themeColor
 			},
 			tabList() {
-				return (this.dataConfig.listConfig.list || []).filter(item => !this.isMojibakeTitle(item.title))
+				return (this.dataConfig.listConfig.list || []).filter(item => {
+					const title = String(item.title || '').trim();
+					return title !== '首页' && !this.isMojibakeTitle(title);
+				})
 			},
 		},
 		created() {

@@ -10,15 +10,15 @@
 								<view class='money'>{{statistics.nowMoney || 0}}</view>
 							</view>
 							<view v-if="userInfo.rechargeSwitch"  @click="openSubscribe('/pages/users/user_payment/index')" class='recharge font_color'>充值</view>
-					    </view>
+						</view>
 						<view class='cumulative acea-row row-top'>
-							<view class='item' v-if="userInfo.rechargeSwitch">
-								<view>累计充值(元)</view>
-								<view class='money'>{{statistics.recharge || 0}}</view>
+							<view class='item'>
+								<view>平台余额(元)</view>
+								<view class='money'>{{ platformBalance }}</view>
 							</view>
 							<view class='item'>
-								<view>累计消费(元)</view>
-								<view class='money'>{{statistics.orderStatusSum || 0}}</view>
+								<view>门店余额(元)</view>
+								<view class='money'>{{ storeBalance }}</view>
 							</view>
 						</view>
 					</view>
@@ -81,7 +81,7 @@
 </template>
 
 <script>
-	import {userActivity,getuserDalance} from '@/api/user.js';
+	import {userActivity,getuserDalance,getVipCashAmount} from '@/api/user.js';
 	import {toLogin} from '@/libs/login.js';
 	import {mapGetters} from "vuex";
 	import { alipayQueryPayResult } from '@/api/order.js';
@@ -98,17 +98,39 @@
 				isClose: false,
 				activity: {},
 				statistics:{},
+				vipCashAmount: null,
 				theme:app.globalData.theme,
 				isNoCommodity: false // 是否显示缺省图
 			};
 		},
-		computed: mapGetters(['isLogin', 'userInfo']),
+		computed: {
+			...mapGetters(['isLogin', 'userInfo']),
+			platformBalance() {
+				return (this.statistics && this.statistics.nowMoney) || 0;
+			},
+			storeBalance() {
+				if (this.vipCashAmount !== null && this.vipCashAmount !== undefined) {
+					return this.vipCashAmount;
+				}
+				const data = this.statistics || {};
+				return data.storeBalance || data.storeMoney || data.storeNowMoney || data.store_balance || 0;
+			}
+		},
 		watch:{
 			isLogin:{
 				handler:function(newV,oldV){
 					if(newV){
 						this.get_activity();
 						this.userDalance();
+						this.fetchVipCashAmount();
+					}
+				},
+				deep:true
+			},
+			userInfo: {
+				handler:function() {
+					if (this.isLogin) {
+						this.fetchVipCashAmount();
 					}
 				},
 				deep:true
@@ -133,6 +155,7 @@
 				// #endif
 				this.get_activity();
 				this.userDalance();
+				this.fetchVipCashAmount();
 			} else {
 				toLogin();
 			}
@@ -150,6 +173,7 @@
 				});
 				alipayQueryPayResult(this.orderId).then(res => {
 					this.userDalance();
+					this.fetchVipCashAmount();
 					return this.$util.Tips({
 						title: '充值成功'
 					});
@@ -164,11 +188,29 @@
 			onLoadFun: function() {
 				this.get_activity();
 				this.userDalance();
+				this.fetchVipCashAmount();
 			},
 			userDalance(){
 				getuserDalance().then(res=>{
 					this.statistics = res.data;
 				})
+			},
+			fetchVipCashAmount() {
+				const phone = String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+				if (!phone) {
+					this.vipCashAmount = null;
+					return;
+				}
+				getVipCashAmount(phone).then(res => {
+					this.vipCashAmount = this.formatVipCashAmount(res.data);
+				}).catch(() => {
+					this.vipCashAmount = null;
+				});
+			},
+			formatVipCashAmount(data) {
+				if (data === null || data === undefined) return 0;
+				if (typeof data === 'number' || typeof data === 'string') return data || 0;
+				return data.amount || data.cashAmount || data.vipCashAmount || data.balance || data.storeBalance || 0;
 			},
 			// 授权关闭
 			authColse: function(e) {

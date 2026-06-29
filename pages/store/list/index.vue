@@ -16,7 +16,7 @@
 		</view>
 
 		<view class="store-list" v-if="list.length">
-			<view class="store-card" v-for="item in list" :key="item.id" @click="goDetail(item)">
+			<view class="store-card" v-for="item in visibleList" :key="item.id" @click="goDetail(item)">
 				<image class="store-image" :src="getStoreImage(item.picture)" mode="aspectFill" />
 				<view class="store-main">
 					<view class="store-top">
@@ -37,7 +37,7 @@
 					</view>
 				</view>
 			</view>
-			<Loading :loaded="loaded" :loading="loading"></Loading>
+			<Loading :loaded="pageLoaded" :loading="loading"></Loading>
 		</view>
 
 		<emptyPage title="暂无门店数据" v-if="!list.length && loaded"></emptyPage>
@@ -58,7 +58,9 @@
 			return {
 				keywords: "",
 				page: 1,
-				limit: 10,
+				limit: 10000,
+				renderPageSize: 10,
+				visibleCount: 0,
 				loading: false,
 				loaded: false,
 				list: [],
@@ -75,7 +77,16 @@
 			this.getList(true, true);
 		},
 		onReachBottom() {
+			if (this.showMoreLocal()) return;
 			this.getList();
+		},
+		computed: {
+			visibleList() {
+				return this.list.slice(0, this.visibleCount);
+			},
+			pageLoaded() {
+				return this.loaded && this.visibleCount >= this.list.length;
+			}
 		},
 		methods: {
 			initLocation() {
@@ -93,7 +104,7 @@
 							uni.setStorageSync("user_latitude", res.latitude);
 							uni.setStorageSync("user_longitude", res.longitude);
 						} catch (e) {}
-						this.list = this.list.slice();
+						this.sortStoreList();
 					}
 				});
 			},
@@ -119,14 +130,7 @@
 				const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 				return earthRadius * c;
 			},
-			getStoreTags(item) {
-				const intro = this.storeIntro(item);
-				if (intro) {
-					return intro.split(/[，,、\s]+/).filter(Boolean).slice(0, 5);
-				}
-				return ["服务热情", "环境整洁", "施工直播", "途虎直送"].slice(0, 4);
-			},
-			formatDistance(item) {
+			getStoreDistanceKm(item) {
 				const storeLatitude = Number(item.dimensionY);
 				const storeLongitude = Number(item.longitudeX);
 				const userLatitude = Number(this.userLatitude);
@@ -136,20 +140,40 @@
 					this.isValidCoordinate(userLatitude, userLongitude)
 				) {
 					const km = this.getDistanceKm(userLatitude, userLongitude, storeLatitude, storeLongitude);
-					if (!Number.isNaN(km) && km >= 0) return `距您 ${km.toFixed(2)}km`;
+					if (!Number.isNaN(km) && km >= 0) return km;
 				}
-				if (item.distance) {
-					const km = Number(item.distance) / 1000;
-					if (!Number.isNaN(km) && km > 0) return `距您 ${km.toFixed(2)}km`;
+				const distance = Number(item.distance);
+				if (!Number.isNaN(distance) && distance > 0) return distance / 1000;
+				return Number.MAX_SAFE_INTEGER;
+			},
+			sortStoreList() {
+				this.list = this.list.slice().sort((a, b) => this.getStoreDistanceKm(a) - this.getStoreDistanceKm(b));
+			},
+			showMoreLocal() {
+				if (this.visibleCount >= this.list.length) return false;
+				this.visibleCount = Math.min(this.visibleCount + this.renderPageSize, this.list.length);
+				return true;
+			},
+			getStoreTags(item) {
+				const intro = this.storeIntro(item);
+				if (intro) {
+					return intro.split(/[，,、\s]+/).filter(Boolean).slice(0, 5);
 				}
+				return ["服务热情", "环境整洁", "施工直播", "途虎直送"].slice(0, 4);
+			},
+			formatDistance(item) {
+				const km = this.getStoreDistanceKm(item);
+				if (km !== Number.MAX_SAFE_INTEGER) return `距您 ${km.toFixed(2)}km`;
 				return item.shopid ? `#${item.shopid}` : "";
 			},
 			formatScore(item) {
 				return item.score || "4.98";
 			},
 			formatOrderText(item) {
-				if (item.orderCount) return `${item.orderCount}单`;
-				return "1.8万+单";
+				const count = Number(item.repairJobCount || item.orderCount);
+				if (Number.isNaN(count) || count <= 0) return "1.8万+单";
+				if (count >= 10000) return `${(count / 10000).toFixed(1)}万+单`;
+				return `${count}单`;
 			},
 			getStoreImages(picture) {
 				if (!picture) return [];
@@ -219,6 +243,7 @@
 					this.page = 1;
 					this.loaded = false;
 					this.list = [];
+					this.visibleCount = 0;
 				}
 				this.loading = true;
 				adminStoreListApi({
@@ -230,7 +255,13 @@
 					const pageData = res.data || {};
 					const rows = pageData.list || [];
 					this.list = reset ? rows : this.list.concat(rows);
-					this.loaded = rows.length < this.limit || this.page >= (pageData.totalPage || 0);
+					this.sortStoreList();
+					this.visibleCount = Math.min(
+						(reset ? 0 : this.visibleCount) + this.renderPageSize,
+						this.list.length
+					);
+					const totalPage = Number(pageData.totalPage || pageData.totalPages || 0);
+					this.loaded = rows.length < this.limit || (totalPage > 0 && this.page >= totalPage);
 					this.page += 1;
 				}).catch((err) => {
 					uni.showToast({

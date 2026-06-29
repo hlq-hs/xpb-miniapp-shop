@@ -1,12 +1,35 @@
 <template>
+	<view class="home-page-shell">
+	<homeComb
+		ref="homeHeader"
+		renderMode="header"
+		v-if="showHomeComb"
+		:bgInfo="bgInfo"
+		:dataConfig="homeCombData"
+		:isScrolled="isScrolled"
+		:navIndex="navIndex"
+		@changeTab="changeTab"
+		@headerHeightChange="setHomeHeaderHeight"
+	></homeComb>
+	<scroll-view
+		class="home-scroll"
+		:style="{ top: homeHeaderHeight + 'px', height: 'calc(100vh - ' + homeHeaderHeight + 'px)' }"
+		scroll-y
+		:enhanced="true"
+		:bounces="false"
+		:show-scrollbar="false"
+		lower-threshold="100"
+		@scroll="handleHomeScroll"
+		@scrolltolower="handleHomeReachBottom"
+	>
 	<view id="home" :data-theme="theme" :style="[pageStyle]">
 		<tui-skeleton v-if="showSkeleton"></tui-skeleton>
 		<view v-if="!errorNetwork">
 			<view class="page-index tui-skeleton page_count" :class="{'bgf':navIndex >0}"
 				:style="{visibility: showSkeleton ? 'hidden' : 'visible'}">
-				<homeComb v-if="showHomeComb" :bgInfo="bgInfo" :dataConfig="homeCombData" @changeTab="changeTab" :isScrolled="isScrolled"
+				<homeComb renderMode="content" v-if="showHomeComb" :bgInfo="bgInfo" :dataConfig="homeCombData"
 					:navIndex="navIndex"></homeComb>
-				<headerSearch :isScrolled="isScrolled" v-if="showHeaderSerch" :dataConfig="headerSerchCombData"></headerSearch>
+				<headerSearch ref="headerSearch" :isScrolled="isScrolled" v-if="showHeaderSerch" :dataConfig="headerSerchCombData"></headerSearch>
 				<cateNav v-if="showCateNav" :dataConfig="cateNavData" @changeTab="changeTab"></cateNav>
 				<view class="page_content skeleton">
 					<view v-if="navIndex === 0">
@@ -66,7 +89,9 @@
 				<view class="btn" @click="reconnect">閲嶆柊杩炴帴</view>
 			</view>
 		</view>
-		<pageFooter></pageFooter>
+	</view>
+	</scroll-view>
+	<pageFooter></pageFooter>
 	</view>
 </template>
 
@@ -119,11 +144,24 @@ export default {
 	,copyRight
 	// #endif
   },
-  data() { return { urlDomain: this.$Cache.get("imgHost"),isNoCommodity:false,isScrolled:false,categoryId:0,showSkeleton:true,isNodes:0,statusBarHeight:statusBarHeight,navIndex:0,ProductNavindex:0,sortProduct:[],site_name:'',configApi:{},listActive:0,theme:app.globalData.theme,imgHost:'',appUpdate:{},wxText:"鐐瑰嚮娣诲姞鍒版垜鐨勫皬绋嬪簭锛屽井淇￠椤典笅鎷夊嵆鍙闂晢鍩庛€?",locationContent:'授权位置信息，提供完整服务',sortMpTop:0,isFixed:true,domOffsetTop:50,prodeuctTop:30,sortList:[],sortMarTop:0,navHeight:38,domHeight:0,cateNavActive:0,couponModal:false,styleConfig:[],diyId:0,smallPage:false,isHeaderSerch:false,homeCombData:{},showCateNav:false,cateNavData:{},showHomeComb:false,showHeaderSerch:false,headerSerchCombData:{},isShowTitle:false,bgColor:'',bgPic:'',bgTabVal:'',windowHeight:0,pageStyle:{},isDefault:1,errorNetwork:false,bgInfo:{colorPicker:'#f5f5f5',isBgColor:1,}, } },
+  data() { return { urlDomain: this.$Cache.get("imgHost"),isNoCommodity:false,isScrolled:false,homeHeaderHeight:0,categoryId:0,showSkeleton:true,isNodes:0,statusBarHeight:statusBarHeight,navIndex:0,ProductNavindex:0,sortProduct:[],site_name:'',configApi:{},listActive:0,theme:app.globalData.theme,imgHost:'',appUpdate:{},wxText:"鐐瑰嚮娣诲姞鍒版垜鐨勫皬绋嬪簭锛屽井淇￠椤典笅鎷夊嵆鍙闂晢鍩庛€?",locationContent:'授权位置信息，提供完整服务',sortMpTop:0,isFixed:true,domOffsetTop:50,prodeuctTop:30,sortList:[],sortMarTop:0,navHeight:38,domHeight:0,cateNavActive:0,couponModal:false,styleConfig:[],diyId:0,smallPage:false,isHeaderSerch:false,homeCombData:{},showCateNav:false,cateNavData:{},showHomeComb:false,showHeaderSerch:false,headerSerchCombData:{},isShowTitle:false,bgColor:'',bgPic:'',bgTabVal:'',windowHeight:0,pageStyle:{},isDefault:1,errorNetwork:false,bgInfo:{colorPicker:'#f5f5f5',isBgColor:1,}, } },
   onLoad(options){ if(options.spread) this.$Cache.set('spread',options.spread); if(options.scene){ let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene)); let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue); app.globalData.spread = mapeMpQrCodeValue.spread; } let diyid = options.id ? options.id : 0; this.diyData(diyid,false); this.getIndexConfig(); let that = this; this.$nextTick(function(){ uni.getSystemInfo({ success:function(res){ that.windowHeight = res.windowHeight; } }); }) },
-  onShow(){ !this.bottomNavigationIsCustom&&uni.showTabBar(); this.getTokenIsExist(); },
-  onPageScroll(e){ uni.$emit('scroll'); if(e.scrollTop>this.domOffsetTop){ this.isScrolled=true; } if(e.scrollTop<this.domOffsetTop){ this.$nextTick(()=>{ this.isScrolled=false; }); } },
+  onShow(){ !this.bottomNavigationIsCustom&&uni.showTabBar(); this.getTokenIsExist(); this.$nextTick(()=>{ if(this.$refs.homeHeader) this.$refs.homeHeader.refreshDefaultVehicle(); if(this.$refs.headerSearch) this.$refs.headerSearch.refreshDefaultVehicle(); }); },
   methods:{
+		setHomeHeaderHeight(height){
+			this.homeHeaderHeight = Math.max(Number(height || 0), 0);
+		},
+		handleHomeScroll(e){
+			const scrollTop = e && e.detail ? e.detail.scrollTop : 0;
+			uni.$emit('scroll');
+			this.isScrolled = Number(scrollTop || 0) > 0;
+		},
+		handleHomeReachBottom(){
+			const recommend = this.$refs.recommendIndex;
+			if (recommend && typeof recommend.get_host_product === 'function') {
+				recommend.get_host_product();
+			}
+		},
     getTokenIsExist(){ this.$LoginAuth.getTokenIsExist().then(data=>{ if(data){ silenceBindingSpread(); } }); },
     getInitTheme(){ getTheme().then(resP=>{ this.$Cache.set('theme', `theme${Number(resP.data.value)}`); }) },
     snycNetWork(){ uni.getNetworkType({success:res=>{ this.errorNetwork = res.networkType === 'none'; if(this.errorNetwork) this.reloadData(); }}); },
@@ -179,6 +217,19 @@ export default {
 	page { height: auto; display: flex; flex-direction: column; height: 100%; background-color: #fff; }
 </style>
 <style lang="scss" scoped>
+	.home-page-shell {
+		position: relative;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.home-scroll {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		overflow: hidden;
+	}
+
 	.error-network { position: fixed; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding-top: 30%; background: #fff; }
 	.ysize { background-size: 100%; }
 	.fullsize { background-size: 100% 100%; }

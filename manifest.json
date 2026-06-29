@@ -177,7 +177,7 @@
         },
         "permission" : {
             "scope.userLocation" : {
-                "desc" : "你的位置信息将用于和门店的距离长度"
+                "desc" : "你的位置信息将用于显示当前城市及计算与门店的距离"
             }
         },
         "optimization" : {

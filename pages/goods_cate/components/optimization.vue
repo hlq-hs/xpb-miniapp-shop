@@ -111,11 +111,11 @@
 		</view>
 		<view class="footer acea-row row-between-wrapper">
 			<view class="cartIcon acea-row row-center-wrapper" @click="getCartLists(0)" v-if="cartData.cartList.length">
-				<image :src="urlDomain+'crmebimage/perset/staticImg/cart.png'"></image>
+				<text class="iconfont icon-gouwuche-yangshi1"></text>
 				<view class="num">{{cartCount}}</view>
 			</view>
 			<view class="cartIcon acea-row row-center-wrapper noCart" v-else>
-				<image :src="urlDomain+'crmebimage/perset/staticImg/no_cart.png'"></image>
+				<text class="iconfont icon-gouwuche-yangshi1"></text>
 			</view>
 			<view class="money acea-row row-middle">
 				<view>￥<text class="num">{{totalPrice}}</text></view>
@@ -518,19 +518,34 @@
 						});
 					}
 				} else {
-					index.cartNum--;
-					changeCartNum(index.id, index.cartNum).then(res => {
-						this.getCartNum(true);
+					if (Number(index.cartNum) <= 1) {
+						let cartId = index.id;
+						let list = this.cartData.cartList;
+						let cartIndex = list.findIndex(item => item.id === cartId);
+						if (cartIndex !== -1) {
+							list.splice(cartIndex, 1);
+						}
 						this.getTotalPrice();
-					});
-					if (index.cartNum == 0) {
-						cartDel(index.id).then(res => {
+						if (!list.length) {
+							this.cartData.iScart = false;
+							this.page = 1;
+							this.loadend = false;
+							this.tempArr = [];
+							this.productslist();
+						}
+						cartDel(cartId).then(res => {
 							this.getCartLists(1);
 							this.getTotalPrice();
 							this.productslist();
 							this.getCartNum();
 						})
+						return;
 					}
+					index.cartNum--;
+					changeCartNum(index.id, index.cartNum).then(res => {
+						this.getCartNum(true);
+						this.getTotalPrice();
+					});
 				}
 			},
 			// 多规格加入购物车；
@@ -840,25 +855,31 @@
 
 		.wrapper {
 			position: relative;
-			margin-top: 104rpx;
-			padding-top: 10rpx;
+			margin-top: 0;
+			padding-top: 0;
 			width: 77%;
 			float: right;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 			padding-bottom: 130rpx;
 		}
 
 		.hide_slide {
-			margin-top: 104rpx;
+			margin-top: 0;
 			width: 100%;
 			float: right;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
+			padding-top: 0;
 			padding-bottom: 130rpx;
 		}
 
 		.bgcolor {
 			width: 100%;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
+			height: 44rpx;
+			position: relative;
+			z-index: 99;
+			display: flex;
+			align-items: center;
 		}
 
 		.goodsList {
@@ -866,23 +887,19 @@
 		}
 
 		.longTab {
-			width: 65%;
-			position: fixed;
-			top: 0;
-			margin-top: 128rpx;
-			height: 100rpx;
-			z-index: 99;
-			background-color: $crmeb-bg-color;
+			width: 88%;
+			position: static;
+			margin-top: 0;
+			height: 44rpx;
+			background-color: #fff;
 		}
 
 		.hongTab {
-			width: 100%;
-			position: fixed;
-			top: 0;
-			margin-top: 128rpx;
-			height: 100rpx;
-			z-index: 99;
-			background-color: $crmeb-bg-color;
+			width: 88%;
+			position: static;
+			margin-top: 0;
+			height: 44rpx;
+			background-color: #fff;
 		}
 
 		.longItem {
@@ -923,15 +940,14 @@
 
 		.openList {
 			width: 12%;
-			height: 100rpx;
-			background-color: $crmeb-bg-color;
-			line-height: 100rpx;
-			padding-left: 30rpx;
-			margin-top: 128rpx;
-			position: fixed;
-			right: 0;
+			height: 44rpx;
+			background-color: #fff;
+			line-height: 44rpx;
+			padding-left: 0;
+			margin-top: 0;
+			position: static;
+			text-align: center;
 			// top: 128rpx;
-			z-index: 99;
 
 			.iconfont {
 				font-size: 22rpx;
@@ -945,7 +961,7 @@
 			top: 0;
 			margin-top: 128rpx;
 			z-index: 99;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 			right: 0;
 		}
 
@@ -955,7 +971,7 @@
 			top: 0;
 			margin-top: 128rpx;
 			z-index: 99;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 			right: 0;
 		}
 
@@ -1157,10 +1173,10 @@
 					background: #CBCBCB !important;
 				}
 
-				image {
-					width: 49rpx;
-					height: 46rpx;
-					display: block;
+				.iconfont {
+					color: #fff;
+					font-size: 54rpx;
+					line-height: 1;
 				}
 
 				.num {

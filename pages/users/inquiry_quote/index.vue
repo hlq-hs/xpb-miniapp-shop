@@ -125,6 +125,7 @@
 
 <script>
 import { pathToBase64 } from '@/plugin/image-tools/index.js';
+import { getUserCarInfo, getUserCarList } from '@/api/userCar.js';
 
 const VIN_REGEX = /[A-HJ-NPR-Z0-9]{17}/;
 const BAIDU_TOKEN_BUFFER_SECONDS = 120;
@@ -179,6 +180,7 @@ export default {
 		this.vinUploadKey = this.safeDecode(options.key || options.vinKey || '');
 		this.fetchRecentInquiryList();
 		this.warmupBaiduAccessToken();
+		this.prefillVinFromSingleVehicle();
 	},
 	onShow() {
 		this.fetchRecentInquiryList();
@@ -188,6 +190,27 @@ export default {
 		this.tryHideLoading();
 	},
 	methods: {
+		prefillVinFromSingleVehicle() {
+			getUserCarList({
+				page: 1,
+				limit: 2,
+				uid: this.$store.state.app.uid || ''
+			}).then((res) => {
+				const pageData = (res && res.data) || {};
+				const list = Array.isArray(pageData.list) ? pageData.list : [];
+				if (list.length !== 1 || !list[0]) return null;
+				const vehicle = list[0];
+				if (!vehicle.id) return vehicle;
+				return getUserCarInfo(vehicle.id).then(detailRes => ({
+					...vehicle,
+					...((detailRes && detailRes.data) || {})
+				})).catch(() => vehicle);
+			}).then((vehicle) => {
+				if (!vehicle || this.vinCode) return;
+				const vinCode = String(vehicle.vinCode || '').trim().toUpperCase();
+				if (vinCode) this.vinCode = vinCode;
+			}).catch(() => {});
+		},
 		safeDecode(value) {
 			if (value === undefined || value === null) return '';
 			try {
@@ -568,11 +591,20 @@ export default {
 		},
 		handleScan() {
 			if (this.isRecognizingVin) return;
-
+			uni.showActionSheet({
+				itemList: ['拍摄', '从手机相册选择', '车辆信息选择'],
+				success: (res) => {
+					if (res.tapIndex === 0) this.chooseAndRecognizeVin('camera');
+					if (res.tapIndex === 1) this.chooseAndRecognizeVin('album');
+					if (res.tapIndex === 2) this.selectVehicleInfo();
+				}
+			});
+		},
+		chooseAndRecognizeVin(sourceType) {
 			uni.chooseImage({
 				count: 1,
 				sizeType: ['original', 'compressed'],
-				sourceType: ['camera', 'album'],
+				sourceType: [sourceType],
 				success: async (res) => {
 					const imagePath = res.tempFilePaths && res.tempFilePaths[0];
 					if (!imagePath) {
@@ -605,6 +637,53 @@ export default {
 					this.showNoneToast('图片选择失败');
 				}
 			});
+		},
+		async selectVehicleInfo() {
+			uni.showLoading({
+				title: '加载车辆信息',
+				mask: true
+			});
+			try {
+				const res = await getUserCarList({
+					page: 1,
+					limit: 6,
+					uid: this.$store.state.app.uid || ''
+				});
+				const pageData = (res && res.data) || {};
+				const list = Array.isArray(pageData.list) ? pageData.list : [];
+				const vehicles = await Promise.all(list.map((item) => {
+					if (!item || !item.id) return Promise.resolve(item);
+					return getUserCarInfo(item.id).then(detailRes => ({
+						...item,
+						...((detailRes && detailRes.data) || {})
+					})).catch(() => item);
+				}));
+				uni.hideLoading();
+				if (!vehicles.length) {
+					this.showNoneToast('暂无车辆信息，请先添加车辆');
+					return;
+				}
+				uni.showActionSheet({
+					itemList: vehicles.map((item) => (
+						[item.carNo || '未填写车牌', item.brandName, item.seriesName]
+							.filter(Boolean)
+							.join(' ')
+							.slice(0, 30)
+					)),
+					success: (sheetRes) => {
+						const vehicle = vehicles[sheetRes.tapIndex];
+						const vinCode = String((vehicle && vehicle.vinCode) || '').trim().toUpperCase();
+						if (!vinCode) {
+							this.showNoneToast('该车辆暂无车架号');
+							return;
+						}
+						this.vinCode = vinCode;
+					}
+				});
+			} catch (error) {
+				uni.hideLoading();
+				this.showNoneToast('车辆信息加载失败');
+			}
 		},
 		queryVinInfo(vin) {
 			return new Promise((resolve, reject) => {

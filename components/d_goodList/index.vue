@@ -62,7 +62,7 @@
 
 <style lang="scss">
 	.goodsList{
-		padding: 0 30rpx;
+		padding: 12rpx 30rpx 0;
 		.item{
 			width: 100%;
 			box-sizing: border-box;

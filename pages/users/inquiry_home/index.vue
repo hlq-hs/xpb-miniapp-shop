@@ -131,6 +131,7 @@
 import {
 	getAddressList
 } from '@/api/user.js';
+import { getUserCarList } from '@/api/userCar.js';
 
 const app = getApp();
 const INQUIRY_BRAND_LOGO =
@@ -147,7 +148,8 @@ export default {
 			isViewReady: false,
 			isBrandReady: !initialLogo,
 			selectedAddress: {},
-			hasSavedAddress: null
+			hasSavedAddress: null,
+			checkingVehicle: false
 		};
 	},
 	computed: {
@@ -236,6 +238,35 @@ export default {
 					: '/pages/users/user_address_list/index?selectType=inquiry'
 			});
 		},
+		checkVehicleAndEnterQuote() {
+			if (this.checkingVehicle) return;
+			this.checkingVehicle = true;
+			uni.showLoading({
+				title: '检查车辆信息',
+				mask: true
+			});
+			getUserCarList({
+				page: 1,
+				limit: 1,
+				uid: this.$store.state.app.uid || ''
+			}).then((res) => {
+				const pageData = (res && res.data) || {};
+				const list = Array.isArray(pageData.list) ? pageData.list : [];
+				uni.navigateTo({
+					url: list.length
+						? '/pages/users/inquiry_quote/index'
+						: '/pages/users/vehicle_manage/index?add=1&from=inquiry'
+				});
+			}).catch((err) => {
+				uni.showToast({
+					title: (err && (err.message || err.msg)) || err || '车辆信息加载失败',
+					icon: 'none'
+				});
+			}).finally(() => {
+				this.checkingVehicle = false;
+				uni.hideLoading();
+			});
+		},
 		handleQuoteEntry() {
 			uni.removeStorageSync('inquirySelectedAddress');
 			uni.showLoading({
@@ -271,9 +302,7 @@ export default {
 					});
 					return;
 				}
-				uni.navigateTo({
-					url: '/pages/users/inquiry_quote/index'
-				});
+				this.checkVehicleAndEnterQuote();
 				return;
 			}
 			if (type === 'history') {

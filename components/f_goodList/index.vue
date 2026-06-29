@@ -78,9 +78,11 @@
 			width: 100%;
 			box-sizing: border-box;
 			margin-bottom: 63rpx;
+			align-items: flex-start;
 			.pic{
 				width: 140rpx;
 				height: 140rpx;
+				flex: 0 0 140rpx;
 				border-radius: 10rpx;
 				position: relative;
 				border-radius: 22rpx;
@@ -91,19 +93,28 @@
 				}
 			}
 			.pictxt{
-				width: 372rpx;
+				flex: 1;
+				min-width: 0;
+				margin-left: 20rpx;
 				.text{
 					font-size:26rpx;
 					font-family:PingFang SC;
 					font-weight:500;
 					color: $crmeb-font-color;
+					width: 100%;
 				}
 				.bottom{
 					margin-top: 22rpx;
+					width: 100%;
+					min-width: 0;
+					> view:not(.money) {
+						flex-shrink: 0;
+					}
 					.money{
 						font-size: 34rpx;
 						font-weight: 800;
-						width: 212rpx;
+						flex: 1;
+						min-width: 0;
 						@include price_color(theme);
 						.sign{
 							font-size: 24rpx;
@@ -150,6 +161,10 @@
 						padding: 0 20rpx;
 						height: 46rpx;
 						line-height: 46rpx;
+						min-width: 92rpx;
+						box-sizing: border-box;
+						text-align: center;
+						flex-shrink: 0;
 						@include main_bg_color(theme);
 						border-radius:23rpx;
 						font-size: 22rpx;

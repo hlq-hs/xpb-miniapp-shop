@@ -503,19 +503,34 @@
 						});
 					}
 				} else {
-					index.cartNum--;
-					changeCartNum(index.id, index.cartNum).then(res => {
-						this.getCartNum(true);
+					if (Number(index.cartNum) <= 1) {
+						let cartId = index.id;
+						let list = this.cartData.cartList;
+						let cartIndex = list.findIndex(item => item.id === cartId);
+						if (cartIndex !== -1) {
+							list.splice(cartIndex, 1);
+						}
 						this.getTotalPrice();
-					});
-					if(index.cartNum == 0){
-						cartDel(index.id).then(res=>{
+						if (!list.length) {
+							this.cartData.iScart = false;
+							this.page = 1;
+							this.loadend = false;
+							this.tempArr = [];
+							this.productslist();
+						}
+						cartDel(cartId).then(res=>{
 							this.getCartLists(1);
 							this.getTotalPrice();
 							this.productslist();
 							this.getCartNum();
 						})
+						return;
 					}
+					index.cartNum--;
+					changeCartNum(index.id, index.cartNum).then(res => {
+						this.getCartNum(true);
+						this.getTotalPrice();
+					});
 				}
 			},
 			// 多规格加入购物车；
@@ -833,22 +848,24 @@
 		}
 		.wrapper {
 			position: relative;
-			margin-top: 104rpx;
+			margin-top: 88rpx;
 			width: 77%;
 			float: right;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
+			padding-top: 0;
 			padding-bottom: 130rpx;
 		}
 		.hide_slide{
-			margin-top: 104rpx;
+			margin-top: 88rpx;
 			width: 100%;
 			float: right;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
+			padding-top: 0;
 			padding-bottom: 130rpx;
 		}
 		.bgcolor {
 			width: 100%;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 		}
 				
 		.goodsList {
@@ -860,18 +877,18 @@
 			position: fixed;
 			top: 0;
 			margin-top: 128rpx;
-			height: 100rpx;
+			height: 44rpx;
 			z-index: 99;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 		}
 		.hongTab{
 			width: 100%;
 			position: fixed;
 			top: 0;
 			margin-top: 128rpx;
-			height: 100rpx;
+			height: 44rpx;
 			z-index:99;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 		}
 		.longItem {
 			height: 44rpx;
@@ -909,9 +926,9 @@
 		}	
 		.openList {
 			width: 12%;
-			height: 100rpx;
-			background-color: $crmeb-bg-color;
-			line-height: 100rpx;
+			height: 44rpx;
+			background-color: #fff;
+			line-height: 44rpx;
 			padding-left: 30rpx;
 			margin-top: 128rpx;
 			position: fixed;
@@ -931,7 +948,7 @@
 			top: 0;
 			margin-top: 128rpx;
 			z-index: 99;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 			right: 0;
 		}
 		.hownTab{
@@ -940,7 +957,7 @@
 			top: 0;
 			margin-top: 128rpx;
 			z-index: 99;
-			background-color: $crmeb-bg-color;
+			background-color: #fff;
 			right: 0;
 		}
 		.title {
@@ -991,9 +1008,11 @@
 				width: 100%;
 				box-sizing: border-box;
 				margin-bottom: 40rpx;
+				align-items: flex-start;
 				.pic{
 					width: 180rpx;
 					height: 180rpx;
+					flex: 0 0 180rpx;
 					position: relative;
 					image{
 						width: 100%;
@@ -1003,19 +1022,28 @@
 				}
 			}
 			.pictxt{
-				width: 490rpx;
+				flex: 1;
+				min-width: 0;
+				margin-left: 20rpx;
 				.text{
 					font-size:26rpx;
 					font-family:PingFang SC;
 					font-weight:500;
 					color: $crmeb-font-color;
+					width: 100%;
 				}
 				.bottom{
 					margin-top: 22rpx;
+					width: 100%;
+					min-width: 0;
+					> view:not(.money) {
+						flex-shrink: 0;
+					}
 					.money{
 						font-size: 34rpx;
 						font-weight: 800;
-						width: 212rpx;
+						flex: 1;
+						min-width: 0;
 						@include price_color(theme);
 						.sign{
 							font-size: 24rpx;
@@ -1054,6 +1082,10 @@
 						padding: 0 20rpx;
 						height: 46rpx;
 						line-height: 46rpx;
+						min-width: 92rpx;
+						box-sizing: border-box;
+						text-align: center;
+						flex-shrink: 0;
 						@include main_bg_color(theme);
 						border-radius:23rpx;
 						font-size: 22rpx;

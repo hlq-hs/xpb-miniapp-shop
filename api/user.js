@@ -20,6 +20,14 @@ export function getUserInfo(){
 }
 
 /**
+ * 根据车牌号识别车型
+ * @param {String} cusCarNo 车牌号
+ */
+export function getCarInfoByCarNo(cusCarNo) {
+	return request.get('user/getCarInfoByCarNo', { cusCarNo });
+}
+
+/**
  * 设置用户分享
  * 
 */
@@ -495,6 +503,14 @@ export function copyrightApi(){
  */
 export function getPackageInfo(phone){
   return request.get('user/getPackageInfo', { phone }, { noAuth : true });
+}
+
+/**
+ * 获取会员门店余额
+ * @param {string} phone
+ */
+export function getVipCashAmount(phone){
+  return request.get('user/getVipCashAmount', { phone });
 }
 
 /**

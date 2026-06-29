@@ -1,12 +1,20 @@
 <template>
 	<view>
 		<view class="mp-header">
-			<view class="sys-head tui-skeleton" :style="{ height: `${isSmallPage ? 0 : statusBarHeight}px` }"></view>
+			<view class="sys-head tui-skeleton" :style="{ height: `${statusBarHeight}px` }"></view>
+			<view
+				v-if="!isSmallPage"
+				class="vehicle-head-row"
+				:style="{ marginTop: `${searchTop}px`, height: `${searchHeight}px`, paddingRight: `${capsuleReserveRight}px` }"
+			>
+				<default-vehicle-bar ref="defaultVehicleBar" style="display:block;width:100%;height:100%;"></default-vehicle-bar>
+			</view>
 			<view class="serch-box tui-skeleton" :style="[boxStyle]">
-				<view class="serch-wrapper flex">
-					<view v-if="logoConfig" class="logo skeleton-rect">
-						<image :src="logoUrl" mode=""></image>
-					</view>
+				<view
+					class="serch-wrapper flex"
+					:style="searchWrapperStyle"
+				>
+					<city-locator style="display:block;width:124rpx;height:100%;margin-right:12rpx;flex-shrink:0;"></city-locator>
 					<navigator
 						v-if="hotWords.length > 0"
 						:style="[contentStyle]"
@@ -51,9 +59,12 @@
 </template>
 
 <script>
+	import cityLocator from "@/components/homeIndex/cityLocator.vue";
+	import defaultVehicleBar from "@/components/homeIndex/defaultVehicleBar.vue";
 	let app = getApp();
 	export default {
 		name: 'headerSerch',
+		components: { cityLocator, defaultVehicleBar },
 		props: {
 			dataConfig: {
 				type: Object,
@@ -81,10 +92,17 @@
 				searchRight:0,
 				searchHeight:0,
 				statusWidth:0,
+				capsuleLeft:0,
 				searchBoxHeight:0
 			};
 		},
 		computed: {
+			searchWrapperStyle() {
+				return "width:100%;box-sizing:border-box;";
+			},
+			capsuleReserveRight() {
+				return Math.max(Number(this.statusWidth || 0) + Number(this.searchRight || 0) + 16, 108);
+			},
 			interval(){
 				return this.dataConfig.titleConfig.val * 1000
 			},
@@ -120,8 +138,9 @@
 					textAlign: this.dataConfig.textPosition.list[this.dataConfig.textPosition.tabVal].style,
 					// #ifdef MP
 					height:this.searchHeight + 'px',
-					flex:!this.isSmallPage?1:'',
-					marginRight:!this.isSmallPage?(this.statusWidth + this.searchRight+'px'):'',
+					width:!this.isSmallPage?'70%':'',
+					flex:!this.isSmallPage?'0 0 70%':'',
+					marginRight:'',
 					// #endif
 				}
 			},
@@ -133,9 +152,9 @@
 			// #ifdef MP || APP-PLUS
 			this.$nextTick(() => {
 				setTimeout(() => {
-					let info = uni.createSelectorQuery().in(this).select(".serch-box");
+					let info = uni.createSelectorQuery().in(this).select(".mp-header");
 					info.boundingClientRect((data)=> {
-						this.marTop = this.isSmallPage ? data.height :data.height + this.statusBarHeight
+						this.marTop = data ? data.height : 0
 					}).exec()
 				}, 100)
 			})
@@ -147,6 +166,7 @@
 			const statusRight = res.right //鑳跺泭鍙宠竟鐣屽潗鏍?
 			const jnHeight = res.height //鑳跺泭楂樺害
 			this.statusWidth= res.width
+			this.capsuleLeft = res.left || 0
 			this.searchTop=statusHeight-this.statusBarHeight
 			this.searchHeight=jnHeight
 			this.searchBoxHeight = this.searchTop*2 + jnHeight
@@ -162,6 +182,9 @@
 			// #endif
 		},
 		methods: {
+			refreshDefaultVehicle() {
+				if (this.$refs.defaultVehicleBar) this.$refs.defaultVehicleBar.refresh();
+			},
 			textChange(e) {
 				let {
 					current,
@@ -248,11 +271,18 @@
 	}
 
 	.mp-header {
-		z-index: 90;
+		z-index: 10000;
 		position: fixed;
 		left: 0;
 		top: 0;
 		width: 100%;
+		background: #fff;
+
+		.vehicle-head-row {
+			width: 100%;
+			box-sizing: border-box;
+			overflow: hidden;
+		}
 
 		.logo {
 			line-height: 0;

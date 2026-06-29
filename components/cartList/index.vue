@@ -18,9 +18,13 @@
 							<view class="bottom acea-row row-between-wrapper">
 								<view class="money">￥<text class="num">{{item.vipPrice ? item.vipPrice :item.price}}</text></view>
 								<view class="cartNum acea-row row-middle">
-									<view class="reduce iconfont icon-jianhao1" @click="leaveCart(index)"></view>
+									<view class="reduce" @click="leaveCart(index)">
+										<text class="cart-symbol">-</text>
+									</view>
 									<view class="num">{{item.cartNum}}</view>
-									<view :class="item.cartNum >= item.stock?'on':''" class="plus iconfont icon-jiahao1" @click="joinCart(index)"></view>
+									<view :class="item.cartNum >= item.stock?'on':''" class="plus" @click="joinCart(index)">
+										<text class="cart-symbol">+</text>
+									</view>
 								</view>
 							</view>
 						</view>
@@ -179,27 +183,48 @@
 						}
 						.cartNum{
 							font-weight:bold;
+							width: 226rpx;
+							height: 74rpx;
+							display: flex;
+							align-items: center;
+							justify-content: space-between;
 						    .num{
-								font-size: 34rpx;
+								width: 86rpx;
+								height: 52rpx;
+								line-height: 52rpx;
+								border-radius: 10rpx;
+								background-color: #F5F5F5;
+								font-size: 30rpx;
 								color: #282828;
-								width: 120rpx;
 								text-align: center;
 							}
 							.reduce{
 								color: #282828;
-								font-size: 24rpx;
-								width: 60rpx;
-								height: 60rpx;
+								width: 58rpx;
+								height: 74rpx;
 								text-align: center;
-								line-height: 60rpx;
+								line-height: 74rpx;
+								background-color: transparent;
 							}
 							.plus{
 								color: #282828;
-								font-size: 24rpx;
-								width: 60rpx;
-								height: 60rpx;
+								width: 58rpx;
+								height: 74rpx;
 								text-align: center;
-								line-height: 60rpx;
+								line-height: 74rpx;
+								background-color: transparent;
+								&.on{
+									.cart-symbol{
+										color: #A3A3A3;
+									}
+								}
+							}
+							.cart-symbol{
+								display: block;
+								color: #282828;
+								font-size: 38rpx;
+								font-weight: 600;
+								line-height: 74rpx;
 							}
 						}
 					}

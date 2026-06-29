@@ -5,6 +5,7 @@
 			"style": {
 				"navigationBarTitleText": "首页",
 				"navigationStyle": "custom",
+				"disableScroll": true,
 				"navigationBarTextStyle": "white",
 				"app-plus": {
 					"scrollIndicator": false
@@ -220,6 +221,17 @@
 					"path": "user_address/index",
 					"style": {
 						"navigationBarTitleText": "添加地址",
+						"app-plus": {
+							"titleNView": {
+								"type": "default"
+							}
+						}
+					}
+				},
+				{
+					"path": "vehicle_manage/index",
+					"style": {
+						"navigationBarTitleText": "车辆管理",
 						"app-plus": {
 							"titleNView": {
 								"type": "default"
@@ -883,6 +895,9 @@
 			]
 		}
 	],
+	"easycom": {
+		"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "加载中...",

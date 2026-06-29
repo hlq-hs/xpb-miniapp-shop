@@ -198,24 +198,24 @@
 			height: 50rpx;
 			margin: 0 auto;
 			display: grid;
-			grid-template-columns: repeat(2, 16rpx);
-			grid-template-rows: repeat(2, 16rpx);
-			gap: 6rpx;
+			grid-template-columns: repeat(2, 15rpx);
+			grid-template-rows: repeat(2, 15rpx);
+			gap: 7rpx;
 			align-content: center;
 			justify-content: center;
 			color: #666;
 		}
 
 		.foot-item .nav-category-icon view {
-			width: 16rpx;
-			height: 16rpx;
-			border: 3rpx solid currentColor;
-			border-radius: 3rpx;
+			width: 15rpx;
+			height: 15rpx;
+			border: 4rpx solid currentColor;
+			border-radius: 4rpx;
 			box-sizing: border-box;
 		}
 
 		.foot-item .nav-category-icon.checked {
-			@include main-color(theme);
+			color: #666;
 		}
 
 		.txtchecked {
