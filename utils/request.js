@@ -20,6 +20,25 @@ import {
 } from '../libs/login';
 import store from '../store';
 
+const REMOVED_IMAGE_URLS = [
+	'https://xpb.cn-shenzhen.oss.aliyuncs.com/crmebimage/public/product/2025/05/30/50834cdbadba4f49a004ee6e420dade4jwf1kewf8e.png'
+];
+
+function removeInvalidImageReferences(data) {
+	if (typeof data === 'string') {
+		return REMOVED_IMAGE_URLS.indexOf(data) !== -1 ? '' : data;
+	}
+	if (Array.isArray(data)) {
+		return data.map(item => removeInvalidImageReferences(item));
+	}
+	if (data && typeof data === 'object') {
+		Object.keys(data).forEach(key => {
+			data[key] = removeInvalidImageReferences(data[key]);
+		});
+	}
+	return data;
+}
+
 
 /**
  * 发送请求
@@ -49,6 +68,7 @@ function baseRequest(url, method, data, {
 			header: header,
 			data: data || {},
 			success: (res) => {
+				res.data = removeInvalidImageReferences(res.data);
 				if (noVerify)
 					reslove(res.data, res);
 				else if (res.data.code == 200)

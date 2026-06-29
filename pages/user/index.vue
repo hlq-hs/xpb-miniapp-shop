@@ -8,7 +8,7 @@
 						<view class="user-card">
 							<view class="user-info" @click="goEdit()">
 								<image class="avatar" :src='userInfo.avatar' v-if="userInfo.avatar && uid"></image>
-								<image v-else class="avatar" :src="urlDomain+'crmebimage/perset/staticImg/f.png'" mode=""></image>
+								<view v-else class="avatar"></view>
 								<view class="info">
 										<view class="name" v-if="!isLogin" @tap="openAuto">
 											{{ loginText }}
@@ -24,7 +24,6 @@
 									<view class="num" v-if="userInfo && userInfo.phone && uid">
 										<view class="num-txt">{{userInfo.phone}}</view>
 										<view class="icon">
-											<image :src="urlDomain+'crmebimage/perset/staticImg/edit.png'" mode=""></image>
 										</view>
 									</view>
 										<view class="phone" v-if="!userInfo.phone && isLogin" @tap.stop="bindPhone">{{ bindPhoneText }}</view>
@@ -35,7 +34,7 @@
 							</view>
 							<view class="num-wrapper">
 								<view class="num-item" @click="goMenuPage('/pages/users/user_money/index')">
-									<text class="num">{{userInfo.nowMoney && uid ? userInfo.nowMoney:0}}</text>
+									<text class="num">{{ totalAssets }}</text>
 										<view class="txt">{{ balanceText }}</view>
 								</view>
 								<view class="num-item" @click="goMenuPage('/pages/users/user_integral/index')">
@@ -132,7 +131,7 @@
 	import Cache from '@/utils/cache';
 	import {goPage} from '@/libs/iframe.js'
 	import {BACK_URL} from '@/config/cache';
-	import {getMenuList} from '@/api/user.js';
+	import {getMenuList, getVipCashAmount} from '@/api/user.js';
 	import {orderData} from '@/api/order.js';
 	import {getCity, tokenIsExistApi} from '@/api/api.js';
 	import {toLogin} from '@/libs/login.js';
@@ -154,7 +153,18 @@
 		components:{
 			pageFooter
 		},
-		computed: mapGetters(['isLogin', 'chatUrl', 'uid','bottomNavigationIsCustom']),
+		computed: {
+			...mapGetters(['isLogin', 'chatUrl', 'uid','bottomNavigationIsCustom']),
+			totalAssets() {
+				return this.formatMoney(this.toMoneyNumber(this.platformBalance) + this.toMoneyNumber(this.storeBalance));
+			},
+			platformBalance() {
+				return this.formatMoney((this.userInfo && this.userInfo.nowMoney) || 0);
+			},
+			storeBalance() {
+				return this.formatMoney(this.vipCashAmount);
+			}
+		},
 		data() {
 			return {
 				urlDomain: this.$Cache.get("imgHost"),
@@ -213,6 +223,8 @@
 				myServiceText: '\u6211\u7684\u670d\u52a1',
 				contactServiceText: '\u8054\u7cfb\u5ba2\u670d',
 				userInfo: {},
+				vipCashAmount: 0,
+				userCenterLoading: false,
 				copyImage: '',//鐗堟潈鍥剧墖
 				viewAllText: '\u67e5\u770b\u5168\u90e8',
 			}
@@ -260,8 +272,7 @@
 			 // #endif
 		},
 		onShow: function() {
-			this.getMyMenus();
-			this.getTokenIsExist();
+			this.loadUserCenterData();
 			// 暂时注释版权图接口加载，避免拉取额外装饰图片
 			// this.copyrightImage();
 			this.theme = this.$Cache.get('theme')
@@ -282,23 +293,71 @@
 			// #endif
 		},
 		methods: {
+			waitAll(tasks) {
+				return Promise.all(tasks.map(task => Promise.resolve(task).catch(error => error)));
+			},
+			loadUserCenterData() {
+				if (this.userCenterLoading) {
+					return;
+				}
+				this.userCenterLoading = true;
+				uni.showLoading({
+					title: '加载中...',
+					mask: true
+				});
+				this.waitAll([
+					this.getMyMenus(),
+					this.getTokenIsExist()
+				]).finally(() => {
+					this.userCenterLoading = false;
+					uni.hideLoading();
+				});
+			},
 			//鏍￠獙token鏄惁鏈夋晥,true涓烘湁鏁堬紝false涓烘棤鏁?
 			getTokenIsExist() {
-				tokenIsExistApi().then(res => {
+				return tokenIsExistApi().then(res => {
 					let tokenIsExist = res.data;
 					if (this.isLogin && tokenIsExist) {
-						this.getOrderData();
-						this.$store.dispatch('USERINFO').then(res => {
+						return this.$store.dispatch('USERINFO').then(res => {
 							this.userInfo = res;
-							this.refreshInquiryOrderMenu();
+							return this.waitAll([
+								this.getOrderData(),
+								this.fetchVipCashAmount(),
+								this.refreshInquiryOrderMenu()
+							]);
 						});
 					}else{
 						this.$store.commit("LOGOUT");
 						this.$store.commit('UPDATE_LOGIN', '');
 						this.$store.commit('UPDATE_USERINFO', {});
 						this.userInfo = {}
+						this.vipCashAmount = 0;
 					}
-				})
+				}).catch(error => error);
+			},
+			fetchVipCashAmount() {
+				const phone = String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+				if (!phone) {
+					this.vipCashAmount = 0;
+					return Promise.resolve();
+				}
+				return getVipCashAmount(phone).then(res => {
+					this.vipCashAmount = this.formatVipCashAmount(res.data);
+				}).catch(() => {
+					this.vipCashAmount = 0;
+				});
+			},
+			formatVipCashAmount(data) {
+				if (data === null || data === undefined) return 0;
+				if (typeof data === 'number' || typeof data === 'string') return data || 0;
+				return data.amount || data.cashAmount || data.vipCashAmount || data.balance || data.storeBalance || 0;
+			},
+			toMoneyNumber(value) {
+				const num = Number(value);
+				return Number.isNaN(num) ? 0 : num;
+			},
+			formatMoney(value) {
+				return this.toMoneyNumber(value).toFixed(2);
 			},
 			// 暂时注释版权图接口加载，避免拉取额外装饰图片
 			// copyrightImage() {
@@ -403,7 +462,7 @@
 			},
 			getOrderData() {
 				let that = this;
-				orderData().then(res => {
+				return orderData().then(res => {
 					that.orderMenu.forEach((item, index) => {
 						switch (item.title) {
 								case '\u5f85\u4ed8\u6b3e':
@@ -424,8 +483,7 @@
 						}
 					})
 					that.$set(that, 'orderMenu', that.orderMenu);
-					that.refreshInquiryOrderMenu();
-				})
+				}).catch(error => error);
 			},
 			requestInquiryOrderList(payload) {
 				return new Promise((resolve, reject) => {
@@ -526,7 +584,7 @@
 			getMyMenus: function() {
 				let that = this;
 				// if (this.MyMenus.length) return;
-				getMenuList().then(res => {
+				return getMenuList().then(res => {
 					const normalizedMenus = that.normalizeMyMenus(res.data.routine_my_menus);
 					app.globalData.MyMenus = normalizedMenus;
 					that.$set(that, 'MyMenus', normalizedMenus);
@@ -542,6 +600,7 @@
 					}
 				}).catch(err=>{
 					console.log(err);
+					return err;
 				});
 			},
 			normalizeMyMenus(menus = []) {

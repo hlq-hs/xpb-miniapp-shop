@@ -13,7 +13,7 @@
 								</view>
 								{{item.name}}
 							</view>
-							<view class="acea-row">
+							<view class="payRight acea-row row-middle">
 								<view class='tip'>
 									{{item.title}}
 									<block v-if="item.value === 'yue'">
@@ -536,14 +536,15 @@
 			height: 138rpx;
 			line-height: 138rpx;
 			width: 100%;
+			padding: 0 22rpx;
 			box-sizing: border-box;
 			font-size: 32pxrpx;
 			color: #333333;
 
-			.on {
-				// border-color: #fc5445;
-				@include coupons_border_color(theme);
-				color: $theme-color;
+			&.on {
+				border-bottom-color: transparent;
+				border-radius: 14rpx;
+				background-color: #fff7f6;
 			}
 
 			.name {
@@ -565,6 +566,16 @@
 				background-color: #41b035;
 			}
 
+			.iconfont.icon-weixinzhifu1::before {
+				content: "\e604";
+			}
+
+			.iconfont.icon-yuezhifu::before {
+				content: "\00A5";
+				font-family: Arial, sans-serif;
+				font-weight: 700;
+			}
+
 			.iconfont.icon-zhifubao {
 				background-color: #00AAEA;
 			}
@@ -574,11 +585,53 @@
 				font-size: 26rpx;
 				color: #aaa;
 				margin-right: 20rpx;
+				line-height: 1;
+			}
+
+			.payRight {
+				align-items: center;
+				height: 100%;
 			}
 
 			.radio {
+				width: 40rpx;
+				height: 40rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
 				.iconfont {
-					font-size: 46rpx;
+					font-size: 0;
+				}
+
+				.icon-xuanzhong1 {
+					width: 34rpx;
+					height: 34rpx;
+					border-radius: 50%;
+					background-color: #f12b24;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					line-height: 34rpx;
+				}
+
+				.icon-xuanzhong1::before {
+					content: "";
+					width: 14rpx;
+					height: 8rpx;
+					border-left: 3rpx solid #fff;
+					border-bottom: 3rpx solid #fff;
+					transform: rotate(-45deg);
+					margin-top: -3rpx;
+				}
+
+				.icon-weixuanzhong {
+					width: 34rpx;
+					height: 34rpx;
+					border: 2rpx solid #d6d6d6;
+					border-radius: 50%;
+					box-sizing: border-box;
+					line-height: 34rpx;
 				}
 			}
 		}

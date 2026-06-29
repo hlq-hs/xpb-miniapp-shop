@@ -514,10 +514,27 @@ export function getVipCashAmount(phone){
 }
 
 /**
+ * 获取会员门店余额列表
+ * @param {string} phone
+ */
+export function getVipCashAmountByShop(phone){
+  return request.get('user/getVipCashAmountByShop', { phone });
+}
+
+/**
  * 获取套餐计划
  * @param {string|number} saleNo
  * @param {string|number} shopId
  */
+/**
+ * 获取会员门店余额明细
+ * @param {string|number} cusNo
+ * @param {string|number} shopId
+ */
+export function getVipCashInfoList(cusNo, shopId){
+  return request.get('user/getVipCashInfoList', { cusNo, shopId });
+}
+
 export function getPackagePlans(saleNo, shopId){
   return request.get('user/getPackagePlans', { saleNo, shopId }, { noAuth : true });
 }

@@ -7,7 +7,7 @@
 						<view class='account acea-row row-top row-between'>
 							<view class='assets'>
 								<view>总资产(元)</view>
-								<view class='money'>{{statistics.nowMoney || 0}}</view>
+								<view class='money'>{{ totalAssets }}</view>
 							</view>
 							<view v-if="userInfo.rechargeSwitch"  @click="openSubscribe('/pages/users/user_payment/index')" class='recharge font_color'>充值</view>
 						</view>
@@ -16,7 +16,7 @@
 								<view>平台余额(元)</view>
 								<view class='money'>{{ platformBalance }}</view>
 							</view>
-							<view class='item'>
+							<view class='item store-balance-item' @click="openStoreBalance">
 								<view>门店余额(元)</view>
 								<view class='money'>{{ storeBalance }}</view>
 							</view>
@@ -81,7 +81,7 @@
 </template>
 
 <script>
-	import {userActivity,getuserDalance,getVipCashAmount} from '@/api/user.js';
+	import {userActivity,getuserDalance,getVipCashAmount,getVipCashAmountByShop} from '@/api/user.js';
 	import {toLogin} from '@/libs/login.js';
 	import {mapGetters} from "vuex";
 	import { alipayQueryPayResult } from '@/api/order.js';
@@ -105,15 +105,18 @@
 		},
 		computed: {
 			...mapGetters(['isLogin', 'userInfo']),
+			totalAssets() {
+				return this.formatMoney(this.toMoneyNumber(this.platformBalance) + this.toMoneyNumber(this.storeBalance));
+			},
 			platformBalance() {
-				return (this.statistics && this.statistics.nowMoney) || 0;
+				return this.formatMoney((this.statistics && this.statistics.nowMoney) || 0);
 			},
 			storeBalance() {
 				if (this.vipCashAmount !== null && this.vipCashAmount !== undefined) {
-					return this.vipCashAmount;
+					return this.formatMoney(this.vipCashAmount);
 				}
 				const data = this.statistics || {};
-				return data.storeBalance || data.storeMoney || data.storeNowMoney || data.store_balance || 0;
+				return this.formatMoney(data.storeBalance || data.storeMoney || data.storeNowMoney || data.store_balance || 0);
 			}
 		},
 		watch:{
@@ -212,6 +215,13 @@
 				if (typeof data === 'number' || typeof data === 'string') return data || 0;
 				return data.amount || data.cashAmount || data.vipCashAmount || data.balance || data.storeBalance || 0;
 			},
+			toMoneyNumber(value) {
+				const num = Number(value);
+				return Number.isNaN(num) ? 0 : num;
+			},
+			formatMoney(value) {
+				return this.toMoneyNumber(value).toFixed(2);
+			},
 			// 授权关闭
 			authColse: function(e) {
 				this.isShowAuth = e
@@ -220,6 +230,32 @@
 				uni.navigateTo({
 					url: page,
 				});
+			},
+			async openStoreBalance() {
+				const phone = String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+				if (!phone) {
+					return this.$util.Tips({
+						title: '当前用户未绑定手机号'
+					});
+				}
+				uni.showLoading({
+					title: '加载中...'
+				});
+				try {
+					const res = await getVipCashAmountByShop(phone);
+					uni.setStorageSync('vipCashAmountByShopData', res && Object.prototype.hasOwnProperty.call(res, 'data') ? res.data : res);
+					uni.navigateTo({
+						url: `/pages/users/vip_cash_shop/index?phone=${encodeURIComponent(phone)}`
+					});
+				} catch (error) {
+					this.$util.Tips({
+						title: typeof error === 'string'
+							? error
+							: (error && (error.message || error.msg)) || '请求失败'
+					});
+				} finally {
+					uni.hideLoading();
+				}
 			},
 			/**
 			 * 获取活动可参与否
@@ -299,6 +335,14 @@
 	.my-account .wrapper .header .headerCon .cumulative .item {
 		flex: 1;
 		padding-left: 35rpx;
+	}
+
+	.my-account .wrapper .header .headerCon .cumulative .store-balance-item {
+		cursor: pointer;
+	}
+
+	.my-account .wrapper .header .headerCon .cumulative .store-balance-item:active {
+		opacity: 0.86;
 	}
 
 	.my-account .wrapper .header .headerCon .cumulative .item .money {

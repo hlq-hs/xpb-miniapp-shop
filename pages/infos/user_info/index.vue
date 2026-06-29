@@ -141,7 +141,7 @@
 			if (!this.isLogin) {
 				toLogin();
 			}
-			this.newAvatar = this.userInfo.avatar ? this.userInfo.avatar : `${this.$Cache.get("imgHost")}crmebimage/perset/staticImg/f.png`;
+			this.newAvatar = this.userInfo.avatar || '';
 			this.nickname = this.userInfo.nickname ? this.userInfo.nickname : '-';
 			// #ifdef H5
 			let ua = navigator.userAgent.toLowerCase();
