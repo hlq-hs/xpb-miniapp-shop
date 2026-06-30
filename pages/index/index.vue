@@ -92,6 +92,25 @@
 	</view>
 	</scroll-view>
 	<pageFooter></pageFooter>
+	<view v-if="launchCouponVisible && launchCoupon" class="launch-coupon-mask" @touchmove.stop.prevent="stopTouchMove">
+		<view class="launch-coupon-dialog">
+			<view class="launch-coupon-close" @tap="closeLaunchCoupon">x</view>
+			<view class="launch-coupon-title">优惠券待领取</view>
+			<view class="launch-coupon-subtitle">进店好礼，先领券再逛</view>
+			<view class="launch-coupon-card">
+				<view class="launch-coupon-money">
+					<text class="launch-coupon-symbol">￥</text>
+					<text class="launch-coupon-num">{{ formatCouponMoney(launchCoupon.money) }}</text>
+				</view>
+				<view class="launch-coupon-info">
+					<view class="launch-coupon-name line1">{{ launchCoupon.name }}</view>
+					<view class="launch-coupon-condition">满{{ formatCouponMoney(launchCoupon.minPrice) }}元可用</view>
+					<view class="launch-coupon-date">{{ getLaunchCouponDate(launchCoupon) }}</view>
+				</view>
+			</view>
+			<view class="launch-coupon-btn" @tap="receiveLaunchCoupon">立即领取</view>
+		</view>
+	</view>
 	</view>
 </template>
 
@@ -123,7 +142,7 @@ import bargain from '@/components/homeIndex/bargain.vue';
 // #ifdef H5
 import copyRight from './components/copyRight.vue';
 // #endif
-import { getIndexData, getTheme, getCategoryTwo, pagediyInfoApi } from '@/api/api.js';
+import { getIndexData, getTheme, getCategoryTwo, pagediyInfoApi, getCoupons, setCouponReceive } from '@/api/api.js';
 // #ifdef MP-WEIXIN || APP-PLUS
 import { getTemlIds } from '@/api/api.js';
 // #endif
@@ -134,6 +153,7 @@ import { mapGetters } from "vuex";
 import { silenceBindingSpread } from '@/utils/index.js';
 import animationType from '@/utils/animationType.js'
 import { goProductDetail } from "../../libs/order";
+import { toLogin } from '@/libs/login.js';
 const arrTemp = ["beforePay", "afterPay", "createBargain", "pink"];
 var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 let app = getApp();
@@ -144,10 +164,74 @@ export default {
 	,copyRight
 	// #endif
   },
-  data() { return { urlDomain: this.$Cache.get("imgHost"),isNoCommodity:false,isScrolled:false,homeHeaderHeight:0,categoryId:0,showSkeleton:true,isNodes:0,statusBarHeight:statusBarHeight,navIndex:0,ProductNavindex:0,sortProduct:[],site_name:'',configApi:{},listActive:0,theme:app.globalData.theme,imgHost:'',appUpdate:{},wxText:"鐐瑰嚮娣诲姞鍒版垜鐨勫皬绋嬪簭锛屽井淇￠椤典笅鎷夊嵆鍙闂晢鍩庛€?",locationContent:'授权位置信息，提供完整服务',sortMpTop:0,isFixed:true,domOffsetTop:50,prodeuctTop:30,sortList:[],sortMarTop:0,navHeight:38,domHeight:0,cateNavActive:0,couponModal:false,styleConfig:[],diyId:0,smallPage:false,isHeaderSerch:false,homeCombData:{},showCateNav:false,cateNavData:{},showHomeComb:false,showHeaderSerch:false,headerSerchCombData:{},isShowTitle:false,bgColor:'',bgPic:'',bgTabVal:'',windowHeight:0,pageStyle:{},isDefault:1,errorNetwork:false,bgInfo:{colorPicker:'#f5f5f5',isBgColor:1,}, } },
+  data() { return { urlDomain: this.$Cache.get("imgHost"),isNoCommodity:false,isScrolled:false,homeHeaderHeight:0,categoryId:0,showSkeleton:true,isNodes:0,statusBarHeight:statusBarHeight,navIndex:0,ProductNavindex:0,sortProduct:[],site_name:'',configApi:{},listActive:0,theme:app.globalData.theme,imgHost:'',appUpdate:{},wxText:"鐐瑰嚮娣诲姞鍒版垜鐨勫皬绋嬪簭锛屽井淇￠椤典笅鎷夊嵆鍙闂晢鍩庛€?",locationContent:'授权位置信息，提供完整服务',sortMpTop:0,isFixed:true,domOffsetTop:50,prodeuctTop:30,sortList:[],sortMarTop:0,navHeight:38,domHeight:0,cateNavActive:0,couponModal:false,styleConfig:[],diyId:0,smallPage:false,isHeaderSerch:false,homeCombData:{},showCateNav:false,cateNavData:{},showHomeComb:false,showHeaderSerch:false,headerSerchCombData:{},isShowTitle:false,bgColor:'',bgPic:'',bgTabVal:'',windowHeight:0,pageStyle:{},isDefault:1,errorNetwork:false,bgInfo:{colorPicker:'#f5f5f5',isBgColor:1,},launchCoupon:null,launchCouponVisible:false,launchCouponLoading:false,launchCouponChecked:false,launchCouponLoginPending:false, } },
   onLoad(options){ if(options.spread) this.$Cache.set('spread',options.spread); if(options.scene){ let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene)); let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue); app.globalData.spread = mapeMpQrCodeValue.spread; } let diyid = options.id ? options.id : 0; this.diyData(diyid,false); this.getIndexConfig(); let that = this; this.$nextTick(function(){ uni.getSystemInfo({ success:function(res){ that.windowHeight = res.windowHeight; } }); }) },
-  onShow(){ !this.bottomNavigationIsCustom&&uni.showTabBar(); this.getTokenIsExist(); this.$nextTick(()=>{ if(this.$refs.homeHeader) this.$refs.homeHeader.refreshDefaultVehicle(); if(this.$refs.headerSearch) this.$refs.headerSearch.refreshDefaultVehicle(); }); },
+  onShow(){ !this.bottomNavigationIsCustom&&uni.showTabBar(); this.getTokenIsExist(); this.checkLaunchCoupon(); this.$nextTick(()=>{ if(this.$refs.homeHeader) this.$refs.homeHeader.refreshDefaultVehicle(); if(this.$refs.headerSearch) this.$refs.headerSearch.refreshDefaultVehicle(); }); },
   methods:{
+		checkLaunchCoupon(){
+			// #ifndef MP-WEIXIN
+			return;
+			// #endif
+			if (this.launchCouponLoading || (this.launchCouponChecked && !this.launchCouponLoginPending)) {
+				return;
+			}
+			this.launchCouponLoading = true;
+			getCoupons({ page: 1, limit: 20 }).then(res => {
+				const list = res && res.data && Array.isArray(res.data.list) ? res.data.list : [];
+				const coupon = list.find(item => item && item.isUse !== true && item.isUse !== 2);
+				this.launchCoupon = coupon || null;
+				this.launchCouponVisible = !!coupon;
+				this.launchCouponChecked = true;
+				this.launchCouponLoginPending = false;
+			}).catch(() => {
+				this.launchCouponChecked = true;
+			}).finally(() => {
+				this.launchCouponLoading = false;
+			});
+		},
+		closeLaunchCoupon(){
+			this.launchCouponVisible = false;
+			this.launchCouponLoginPending = false;
+		},
+		receiveLaunchCoupon(){
+			if (!this.launchCoupon || this.launchCouponLoading) {
+				return;
+			}
+			if (!this.isLogin) {
+				this.launchCouponVisible = false;
+				this.launchCouponLoginPending = true;
+				this.launchCouponChecked = false;
+				toLogin();
+				return;
+			}
+			this.launchCouponLoading = true;
+			setCouponReceive(this.launchCoupon.id).then(() => {
+				this.launchCouponVisible = false;
+				this.launchCoupon = null;
+				this.launchCouponChecked = true;
+				this.$util.Tips({ title: '领取成功' });
+			}).catch(err => {
+				this.$util.Tips({ title: err || '领取失败' });
+			}).finally(() => {
+				this.launchCouponLoading = false;
+			});
+		},
+		formatCouponMoney(value){
+			const num = Number(value);
+			if (Number.isNaN(num)) {
+				return value || '0';
+			}
+			return Number.isInteger(num) ? String(num) : num.toFixed(2);
+		},
+		getLaunchCouponDate(coupon){
+			if (!coupon) {
+				return '';
+			}
+			if (coupon.day > 0) {
+				return `领取后${coupon.day}天内可用`;
+			}
+			return coupon.useStartTimeStr && coupon.useEndTimeStr ? `${coupon.useStartTimeStr} - ${coupon.useEndTimeStr}` : '';
+		},
 		setHomeHeaderHeight(height){
 			this.homeHeaderHeight = Math.max(Number(height || 0), 0);
 		},
@@ -240,4 +324,94 @@ export default {
 	.pageIndex { padding: 0 24rpx; }
 	.productList { background-color: #F5F5F5; margin-top: 20rpx; }
 	.footerBottom-h10 { height: 20rpx; color: j8bc6f6 }
+	.launch-coupon-mask {
+		position: fixed;
+		left: 0;
+		top: 0;
+		z-index: 9999;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.55);
+	}
+	.launch-coupon-dialog {
+		position: relative;
+		width: 620rpx;
+		padding: 52rpx 36rpx 40rpx;
+		border-radius: 24rpx;
+		background: linear-gradient(180deg, #fff7f2 0%, #ffffff 48%, #ffffff 100%);
+		box-sizing: border-box;
+	}
+	.launch-coupon-close {
+		position: absolute;
+		right: 24rpx;
+		top: 20rpx;
+		width: 44rpx;
+		height: 44rpx;
+		line-height: 42rpx;
+		text-align: center;
+		border-radius: 50%;
+		color: #999;
+		font-size: 32rpx;
+	}
+	.launch-coupon-title {
+		text-align: center;
+		color: #e93323;
+		font-size: 40rpx;
+		font-weight: 700;
+	}
+	.launch-coupon-subtitle {
+		margin-top: 12rpx;
+		text-align: center;
+		color: #999;
+		font-size: 26rpx;
+	}
+	.launch-coupon-card {
+		display: flex;
+		align-items: center;
+		margin-top: 36rpx;
+		padding: 28rpx 24rpx;
+		border-radius: 18rpx;
+		background: #fff2ec;
+	}
+	.launch-coupon-money {
+		min-width: 190rpx;
+		color: #e93323;
+		font-weight: 700;
+	}
+	.launch-coupon-symbol {
+		font-size: 34rpx;
+	}
+	.launch-coupon-num {
+		font-size: 64rpx;
+	}
+	.launch-coupon-info {
+		flex: 1;
+		min-width: 0;
+		padding-left: 22rpx;
+		color: #333;
+	}
+	.launch-coupon-name {
+		font-size: 30rpx;
+		font-weight: 600;
+	}
+	.launch-coupon-condition,
+	.launch-coupon-date {
+		margin-top: 10rpx;
+		color: #888;
+		font-size: 24rpx;
+	}
+	.launch-coupon-btn {
+		margin-top: 36rpx;
+		height: 82rpx;
+		line-height: 82rpx;
+		text-align: center;
+		border-radius: 41rpx;
+		background: linear-gradient(90deg, #ff6a3c, #e93323);
+		color: #fff;
+		font-size: 30rpx;
+		font-weight: 600;
+	}
 </style>
