@@ -348,12 +348,13 @@ export default {
 		getDetailFields(item) {
 			const fieldMap = [
 				{ key: '车牌号', fields: ['cusCarNo', 'carNo', 'plateNo', 'carNumber'] },
-				{ key: '客户编号', fields: ['cusNo', 'customerNo', 'customerCode'] }
+				{ key: '品牌', fields: ['cusCarOem'] }
 			];
 			const usedFields = SHOP_NAME_FIELDS
 				.concat(SHOP_ID_FIELDS)
 				.concat(BALANCE_FIELDS)
 				.concat(['address', 'shopAddress', 'storeAddress', 'shopPhone', 'tel', 'phone', 'mobile', 'updateTime', 'updatedAt', 'createTime', 'createdAt'])
+				.concat(['cusNo', 'customerNo', 'customerCode'])
 				.concat(fieldMap.reduce((fields, itemField) => fields.concat(itemField.fields), []));
 			const knownFields = fieldMap
 				.map(itemField => ({
