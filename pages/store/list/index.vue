@@ -356,7 +356,7 @@
 		width: 132rpx;
 		height: 76rpx;
 		border-radius: 38rpx;
-		background: #ff4d3f;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 		color: #fff;
 		font-size: 28rpx;
 		text-align: center;
@@ -434,7 +434,7 @@
 
 	.score-text {
 		color: #ff3b30;
-		font-size: 30rpx;
+		font-size: 24rpx;
 		font-weight: 600;
 	}
 

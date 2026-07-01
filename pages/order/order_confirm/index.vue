@@ -730,7 +730,7 @@
 
 	.order-submission .allAddress {
 		width: 100%;
-		@include index-gradient(theme);
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 		padding: 110rpx 30rpx 0 30rpx;
 	}
 
@@ -967,7 +967,7 @@
 		color: #fff;
 		width: 240rpx;
 		height: 70rpx;
-		@include main_bg_color(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 		border-radius: 50rpx;
 		text-align: center;
 		line-height: 70rpx;

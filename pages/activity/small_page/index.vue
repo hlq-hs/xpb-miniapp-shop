@@ -301,7 +301,7 @@
 				goProductDetail(item.id, 0, '')
 			},
 			bindMore(){
-				uni.switchTab({
+				uni.navigateTo({
 					url: `/pages/goods_cate/goods_cate`
 				})
 			}

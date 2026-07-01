@@ -316,6 +316,10 @@
 		margin: 43rpx auto;
 	}
 
+	.apply-return .returnBnt.bg_color {
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+	}
+
 	.bg_color {
 		@include main_bg_color(theme);
 	}

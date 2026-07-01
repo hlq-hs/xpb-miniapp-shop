@@ -1,9 +1,6 @@
 <template :data-theme="theme">
 	<view class="goodCate1">
 		<view class="header acea-row row-center-wrapper" :style="{top: iStatusBarHeight + 'px'}">
-			<navigator url='/pages/index/index' class="pageIndex acea-row row-center-wrapper" hover-class="none" open-type="switchTab">
-				<text class="iconfont icon-fanhuishouye"></text>
-			</navigator>
 			<navigator url="/pages/goods/goods_search/index" class="search acea-row row-middle" hover-class="none">
 				<text class="iconfont icon-sousuo5"></text>
 				搜索商品

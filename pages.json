@@ -275,7 +275,9 @@
 				{
 					"path": "inquiry_home/index",
 					"style": {
-						"navigationStyle": "custom",
+						"navigationBarTitleText": "询价",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"disableScroll": true,
 						"app-plus": {
 							"titleNView": false
@@ -285,7 +287,9 @@
 				{
 					"path": "inquiry_history/index",
 					"style": {
-						"navigationStyle": "custom",
+						"navigationBarTitleText": "历史询价订单",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"disableScroll": true,
 						"app-plus": {
 							"titleNView": false
@@ -295,7 +299,9 @@
 				{
 					"path": "inquiry_order/index",
 					"style": {
-						"navigationStyle": "custom",
+						"navigationBarTitleText": "询价订单",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"disableScroll": true,
 						"app-plus": {
 							"titleNView": false
@@ -316,8 +322,8 @@
 					"path": "inquiry_quote/index",
 					"style": {
 						"navigationBarTitleText": "成本询价",
-						"navigationBarBackgroundColor": "#363636",
-						"navigationBarTextStyle": "white",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"disableScroll": true,
 						"app-plus": {
 							"titleNView": false
@@ -327,7 +333,9 @@
 				{
 					"path": "inquiry_parts/index",
 					"style": {
-						"navigationStyle": "custom",
+						"navigationBarTitleText": "添加配件",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"disableScroll": true,
 						"app-plus": {
 							"titleNView": false
@@ -337,7 +345,9 @@
 				{
 					"path": "inquiry_submit/index",
 					"style": {
-						"navigationStyle": "custom",
+						"navigationBarTitleText": "提交询价",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"disableScroll": true,
 						"app-plus": {
 							"titleNView": false
@@ -928,9 +938,6 @@
 		"list": [
 			{
 				"pagePath": "pages/index/index"
-			},
-			{
-				"pagePath": "pages/goods_cate/goods_cate"
 			},
 			{
 				"pagePath": "pages/order_addcart/order_addcart"

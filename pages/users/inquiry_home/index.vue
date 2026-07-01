@@ -1,21 +1,5 @@
 <template>
 	<view class="inquiry-home">
-		<view
-			class="nav-shell"
-			:style="{
-				paddingTop: statusBarHeight + 'px',
-				height: navTotalHeight + 'px'
-			}"
-		>
-			<view class="nav-row" :style="{ height: navContentHeight + 'px' }">
-				<view class="nav-back" @click="handleBack">
-					<view class="nav-back-line nav-back-line-top"></view>
-					<view class="nav-back-line nav-back-line-bottom"></view>
-				</view>
-				<text class="nav-title">询价</text>
-			</view>
-		</view>
-
 		<view class="page-body">
 			<view class="brand-block">
 				<image
@@ -88,7 +72,7 @@
 					</view>
 				</view>
 
-				<view class="menu-card theme-purple" @click="handleTap('vehicle')">
+				<view v-if="false" class="menu-card theme-purple" @click="handleTap('vehicle')">
 					<view class="menu-accent"></view>
 					<view class="menu-icon">
 						<image class="menu-icon-image" src="/static/images/inquiry_vehicle_icon.svg" mode="aspectFit"></image>
@@ -343,7 +327,7 @@ export default {
 }
 
 .nav-shell {
-	background: #363636;
+	background: #ffffff;
 }
 
 .nav-row {
@@ -368,7 +352,7 @@ export default {
 	left: 16rpx;
 	width: 4rpx;
 	height: 30rpx;
-	background: #ffffff;
+	background: #172840;
 	border-radius: 999rpx;
 	transform-origin: center;
 }
@@ -388,7 +372,7 @@ export default {
 	font-size: 34rpx;
 	font-weight: 500;
 	line-height: 1;
-	color: #ffffff;
+	color: #172840;
 	text-align: center;
 }
 

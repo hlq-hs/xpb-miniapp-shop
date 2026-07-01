@@ -1,4 +1,6 @@
 {
-  "navigationStyle": "custom",
+  "navigationBarTitleText": "添加配件",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
   "disableScroll": true
 }

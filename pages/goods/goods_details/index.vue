@@ -54,7 +54,7 @@
 							:productInfo="productInfo"></activity-style>
 						<view class="pad30">
 							<view class='wrapper mb30 borRadius14'>
-								<view class='share acea-row row-between row-bottom share-icon-box'>
+								<view v-if="false" class='share acea-row row-between row-bottom share-icon-box'>
 									<view class='x-money skeleton-rect flex align-baseline' v-if="!productInfo.activityStyle">￥
 										<text class='num font-44'>{{attr.productSelect.price}}</text>
 										<view class="flex  pl-2" v-if="attr.productSelect.vipPrice && attr.productSelect.vipPrice > 0">
@@ -257,7 +257,7 @@
 					</form>
 				</view>
 			</view>
-			<shareRedPackets :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet" @showShare="showShare">
+			<shareRedPackets v-if="false" :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet" @showShare="showShare">
 			</shareRedPackets>
 			<!-- 组件 -->
 			<productWindow :attr="attr" :isShow='1' :iSplus='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
@@ -2268,7 +2268,7 @@
 
 	.product-con .footer .bnt .buy {
 		border-radius: 0 50rpx 50rpx 0;
-		@include main_bg_color(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.product-con .store-info {

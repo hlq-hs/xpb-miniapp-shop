@@ -1,6 +1,6 @@
 {
 	"navigationBarTitleText": "成本询价",
-	"navigationBarBackgroundColor": "#363636",
-	"navigationBarTextStyle": "white",
+	"navigationBarBackgroundColor": "#fff",
+	"navigationBarTextStyle": "black",
 	"disableScroll": true
 }

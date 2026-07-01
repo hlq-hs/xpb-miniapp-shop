@@ -1,21 +1,5 @@
 <template>
 	<view class="parts-page">
-		<view
-			class="nav-shell"
-			:style="{
-				paddingTop: statusBarHeight + 'px',
-				height: navTotalHeight + 'px'
-			}"
-		>
-			<view class="nav-row" :style="{ height: navContentHeight + 'px' }">
-				<view class="nav-back" @click="handleBack">
-					<view class="nav-back-line nav-back-line-top"></view>
-					<view class="nav-back-line nav-back-line-bottom"></view>
-				</view>
-				<text class="nav-title">添加配件</text>
-			</view>
-		</view>
-
 		<view class="parts-body">
 			<view class="vehicle-card">
 				<text class="vehicle-name vehicle-name-dynamic">{{ vehicleName }}</text>

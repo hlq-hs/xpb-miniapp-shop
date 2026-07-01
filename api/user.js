@@ -510,7 +510,7 @@ export function getPackageInfo(phone){
  * @param {string} phone
  */
 export function getVipCashAmount(phone){
-  return request.get('user/getVipCashAmount', { phone: '17708436610' });
+  return request.get('user/getVipCashAmount', { phone });
 }
 
 /**
@@ -518,7 +518,7 @@ export function getVipCashAmount(phone){
  * @param {string} phone
  */
 export function getVipCashAmountByShop(phone){
-  return request.get('user/getVipCashAmountByShop', { phone: '17708436610' });
+  return request.get('user/getVipCashAmountByShop', { phone });
 }
 
 /**

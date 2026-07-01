@@ -167,7 +167,7 @@
 				const link = this.normalizeLink(item.link);
 				if (link == page) return
 				if (['/pages/index/index', '/pages/order_addcart/order_addcart',
-						'/pages/user/index', '/pages/discover_index/index', '/pages/goods_cate/goods_cate'
+						'/pages/user/index', '/pages/discover_index/index'
 					].indexOf(link) > -1) {
 					this.openLink(link, true);
 				} else {

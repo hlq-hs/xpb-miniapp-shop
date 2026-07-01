@@ -1,21 +1,5 @@
 <template>
 	<view class="history-page">
-		<view
-			class="nav-shell"
-			:style="{
-				paddingTop: statusBarHeight + 'px',
-				height: navTotalHeight + 'px'
-			}"
-		>
-			<view class="nav-row" :style="{ height: navContentHeight + 'px' }">
-				<view class="nav-back" @click="handleBack">
-					<view class="nav-back-line nav-back-line-top"></view>
-					<view class="nav-back-line nav-back-line-bottom"></view>
-				</view>
-				<text class="nav-title">历史询价订单</text>
-			</view>
-		</view>
-
 		<view class="toolbar">
 			<text class="section-title">询价单</text>
 			<view class="toolbar-actions">
@@ -396,13 +380,13 @@ export default {
 
 <style scoped lang="scss">
 .history-page { height: 100vh; background: #f6f7f9; display: flex; flex-direction: column; overflow: hidden; }
-.nav-shell { flex-shrink: 0; background: #303030; }
+.nav-shell { flex-shrink: 0; background: #ffffff; }
 .nav-row { position: relative; display: flex; align-items: center; justify-content: center; padding: 0 36rpx; }
 .nav-back { position: absolute; left: 22rpx; top: 50%; width: 60rpx; height: 60rpx; transform: translateY(-50%); }
-.nav-back-line { position: absolute; left: 16rpx; width: 4rpx; height: 30rpx; border-radius: 999rpx; background: #ffffff; transform-origin: center; }
+.nav-back-line { position: absolute; left: 16rpx; width: 4rpx; height: 30rpx; border-radius: 999rpx; background: #172840; transform-origin: center; }
 .nav-back-line-top { top: 10rpx; transform: rotate(45deg); }
 .nav-back-line-bottom { top: 28rpx; transform: rotate(-45deg); }
-.nav-title { font-size: 36rpx; font-weight: 500; color: #ffffff; }
+.nav-title { font-size: 36rpx; font-weight: 500; color: #172840; }
 .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 26rpx 28rpx 18rpx; background: #ffffff; }
 .section-title { font-size: 42rpx; font-weight: 700; color: #161b22; }
 .toolbar-actions { display: flex; align-items: center; column-gap: 16rpx; }

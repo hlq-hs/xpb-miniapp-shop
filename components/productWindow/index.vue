@@ -428,7 +428,7 @@
 	}
 
 	.bg_color {
-		@include main-bg_color(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.product-window .joinBnt.on {

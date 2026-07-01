@@ -155,6 +155,30 @@
 		flex-direction: column;
 		justify-content: center;
 	}
+
+	.coupon-list .item .money.main_bg {
+		position: relative;
+		overflow: hidden;
+		background-color: #2563eb !important;
+		background-blend-mode: luminosity;
+	}
+
+	.coupon-list .item .money.main_bg::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(90deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%);
+		pointer-events: none;
+	}
+
+	.coupon-list .item .money.main_bg > view {
+		position: relative;
+		z-index: 1;
+	}
+
 	.bg_color{
 		@include main_bg_color(theme);
 	}

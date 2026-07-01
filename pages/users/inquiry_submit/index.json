@@ -1,4 +1,6 @@
 {
-  "navigationStyle": "custom",
+  "navigationBarTitleText": "提交询价",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
   "disableScroll": true
 }

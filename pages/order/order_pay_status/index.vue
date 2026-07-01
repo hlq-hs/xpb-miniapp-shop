@@ -295,8 +295,12 @@
 		margin: 0 auto 20rpx auto;
 		
 	}
-	.cart-color {
-		@include main_color(theme);
-		@include coupons_border_color(theme);
+	.payment-status .returnBnt.bg_color {
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+	}
+	.payment-status .returnBnt.cart-color {
+		color: #2563eb;
+		border: 1rpx solid #2563eb;
+		background: #fff;
 	}
 </style>

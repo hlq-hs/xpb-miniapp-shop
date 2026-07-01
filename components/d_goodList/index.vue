@@ -109,14 +109,14 @@
 				.cart{
 					height: 56rpx;
 					.pictrue{
-						color: #E93323;
+						color: #2563eb;
 						font-size:46rpx;
 						width: 50rpx;
 						height: 50rpx;
 						text-align: center;
 						line-height: 50rpx;
 						&.icon-jiahao{
-							 background:linear-gradient(140deg, #FA6514 0%, #E93323 100%);
+							 background:linear-gradient(140deg, #3b82f6 0%, #2563eb 100%);
 							-webkit-background-clip:text;
 							-webkit-text-fill-color:transparent;
 						}
@@ -133,7 +133,7 @@
 					padding: 0 30rpx;
 					height: 56rpx;
 					line-height: 56rpx;
-					@include main_bg_color(theme);
+					background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 					border-radius:42rpx;
 					font-size: 26rpx;
 					color: #fff;

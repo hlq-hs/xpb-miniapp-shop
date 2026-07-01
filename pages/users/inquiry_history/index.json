@@ -1,4 +1,6 @@
 {
-  "navigationStyle": "custom",
+  "navigationBarTitleText": "历史询价订单",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
   "disableScroll": true
 }

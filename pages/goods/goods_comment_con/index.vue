@@ -307,6 +307,11 @@
 		line-height: 86rpx;
 		margin-top: 45rpx;
 	}
+
+	.evaluate-con .score .evaluateBnt.bg_color {
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+	}
+
 	.bg_color{
 		@include main_bg_color(theme);
 	}

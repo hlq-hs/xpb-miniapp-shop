@@ -37,7 +37,7 @@ export default {
 			})
 			// #endif
 		} else {
-			if (['/pages/goods_cate/goods_cate', '/pages/order_addcart/order_addcart', '/pages/user/index',
+			if (['/pages/order_addcart/order_addcart', '/pages/user/index',
 					'/pages/discover_index/index', '/pages/index/index'
 				].indexOf(url) == -1) {
 				uni.navigateTo({

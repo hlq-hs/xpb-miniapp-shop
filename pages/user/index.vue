@@ -255,18 +255,18 @@
 			// #ifdef H5
 			that.shareApi();
 			// #endif
-			that.bgColor = setThemeColor();
+			that.bgColor = '#f8fafc';
 			 // #ifdef APP-PLUS
 			setTimeout(()=>{
 			 	uni.setNavigationBarColor({
-			 		frontColor: '#ffffff',
+			 		frontColor: '#000000',
 			 		backgroundColor:that.bgColor,   
 			 	});
 			 },500)
 			 // #endif
 			 // #ifdef MP
 			 uni.setNavigationBarColor({
-			 	frontColor: '#ffffff',
+			 	frontColor: '#000000',
 			 	backgroundColor:that.bgColor,   
 			 });
 			 // #endif
@@ -389,7 +389,7 @@
 					this.openAuto(); 
 				}else{
 					goPage().then(res => {
-						if(['/pages/goods_cate/goods_cate','/pages/order_addcart/order_addcart','/pages/user/index','/pages/index/index'].indexOf(url) !== -1){
+						if(['/pages/order_addcart/order_addcart','/pages/user/index','/pages/index/index'].indexOf(url) !== -1){
 							uni.switchTab({
 								url: url
 							})
@@ -427,7 +427,7 @@
 					})
 					// #endif
 				}else{
-					if(['/pages/goods_cate/goods_cate','/pages/order_addcart/order_addcart','/pages/user/index'].indexOf(url) == -1){
+					if(['/pages/order_addcart/order_addcart','/pages/user/index'].indexOf(url) == -1){
 						uni.navigateTo({
 							url:url
 						})
@@ -682,7 +682,7 @@
 		height: 100%;
 	}
 	.mp-header{
-		@include main_bg_color(theme);
+		background: #f8fafc;
 	}
 	.bg {
 		position: absolute;
@@ -690,9 +690,7 @@
 		top: 0;
 		width:100%;
 		height: 420rpx;
-		background-image: url('../../static/images/user_bg.png');
-		background-repeat: no-repeat;
-		background-size: 100% 100%;
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 	}
 	.contenBox {
 		padding: 0 24rpx 100rpx;
@@ -727,7 +725,7 @@
 		}
 
 		.head {
-			@include index-gradient(theme);
+			background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 			.user-card {
 				position: relative;
 				width: 100%;
@@ -756,7 +754,7 @@
 						.name {
 							display: flex;
 							align-items: center;
-							color: #fff;
+							color: #0f172a;
 							font-size: 31rpx;
 
 							.vip {
@@ -777,7 +775,7 @@
 						.app_set{
 							position: absolute;
 							font-size: 36rpx;
-							color: #fff;
+							color: #334155;
 							top: 40rpx;
 							right: 20rpx;
 						}
@@ -786,7 +784,7 @@
 							display: flex;
 							align-items: center;
 							font-size: 26rpx;
-							color: rgba(255, 255, 255, 0.6);
+							color: #64748b;
 
 							image {
 								width: 22rpx;
@@ -804,7 +802,7 @@
 					align-items: center;
 					justify-content: space-between;
 					margin-top: 30rpx;
-					color: #fff;
+					color: #0f172a;
 
 					.num-item {
 						width: 33.33%;
@@ -818,7 +816,7 @@
 						.txt {
 							margin-top: 10rpx;
 							font-size: 26rpx;
-							color: rgba(255, 255, 255, 0.6);
+							color: #64748b;
 						}
 					}
 				}
@@ -1032,7 +1030,7 @@
 		}
 
 		.phone {
-			color: #fff;
+			color: #2563eb;
 		}
 		.pic_status{
 			font-size: 43rpx;

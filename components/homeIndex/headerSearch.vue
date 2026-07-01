@@ -332,6 +332,36 @@
 				width: 100%;
 			}
 		}
+
+		.serch-box {
+			background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%) !important;
+			box-shadow: 0 10rpx 30rpx rgba(15, 23, 42, 0.08);
+		}
+
+		/deep/ .city-locator {
+			color: #0f172a;
+		}
+
+		/deep/ .city-name {
+			font-weight: 500;
+		}
+
+		/deep/ .input,
+		/deep/ .uninput,
+		/deep/ .maxInput {
+			background: rgba(255, 255, 255, 0.96) !important;
+			border: 1rpx solid rgba(203, 213, 225, 0.9) !important;
+			box-shadow: 0 8rpx 22rpx rgba(15, 23, 42, 0.06);
+			color: #64748b !important;
+		}
+
+		/deep/ .input .iconfont,
+		/deep/ .uninput .iconfont,
+		/deep/ .maxInput .iconfont,
+		/deep/ .newsTitle,
+		/deep/ .line1 {
+			color: #64748b !important;
+		}
 	}
 	.maxInput{
 		width: 100% !important;

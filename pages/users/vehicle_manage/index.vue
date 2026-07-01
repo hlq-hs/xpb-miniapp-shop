@@ -254,6 +254,7 @@
 				searchKeyword: "",
 				loading: false,
 				settingDefaultCarId: "",
+				sourceFrom: "",
 				loadend: false,
 				loadTitle: "加载更多",
 				page: 1,
@@ -335,6 +336,9 @@
 			}
 		},
 		onLoad(options = {}) {
+			this.sourceFrom = String(options.add || "") === "1" && String(options.from || "") === "inquiry"
+				? "inquiry"
+				: "";
 			this.getVehicleList(true);
 			if (String(options.add || "") === "1") {
 				this.$nextTick(() => {
@@ -356,6 +360,15 @@
 			return false;
 		},
 		methods: {
+			redirectToInquiryAfterSave() {
+				if (this.sourceFrom !== "inquiry") return false;
+				setTimeout(() => {
+					uni.redirectTo({
+						url: "/pages/users/inquiry_quote/index"
+					});
+				}, 500);
+				return true;
+			},
 			normalizeCarNo(value) {
 				return String(value || "").replace(/\s+/g, "").toUpperCase();
 			},
@@ -462,7 +475,9 @@
 						icon: "success"
 					});
 					this.closeAddPage();
-					this.getVehicleList(true);
+					if (!this.redirectToInquiryAfterSave()) {
+						this.getVehicleList(true);
+					}
 				}).catch((err) => {
 					uni.showToast({
 						title: (err && (err.message || err.msg)) || err || "添加失败",
@@ -789,6 +804,7 @@
 					isDefault: Number(this.form.isDefault) === 1 ? 1 : 0,
 					isNewEnergy: Number(this.form.isNewEnergy) === 1 ? 1 : 0
 				};
+				const isNewVehicle = !payload.id;
 				const request = payload.id ? updateUserCar(payload.id, payload) : saveUserCar(payload);
 				request.then(() => {
 					uni.showToast({
@@ -798,7 +814,9 @@
 					uni.$emit("vehicleInfoChanged");
 					this.formVisible = false;
 					if (this.addPageVisible) this.closeAddPage();
-					this.getVehicleList(true);
+					if (!isNewVehicle || !this.redirectToInquiryAfterSave()) {
+						this.getVehicleList(true);
+					}
 				}).catch((err) => {
 					uni.showToast({
 						title: err || "保存失败",
@@ -945,7 +963,7 @@
 	.auto-btn {
 		height: 96rpx;
 		border-radius: 48rpx;
-		background: #ef3330;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 		color: #fff;
 		text-align: center;
 		line-height: 96rpx;
@@ -1024,7 +1042,7 @@
 		height: 80rpx;
 		margin: 24rpx auto 0;
 		border-radius: 40rpx;
-		background: #ef3330;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 		color: #fff;
 		font-size: 30rpx;
 		line-height: 80rpx;
@@ -1160,6 +1178,7 @@
 		line-height: 76rpx;
 		font-size: 30rpx;
 		color: #fff;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.footer .addressBnt.on {
@@ -1256,6 +1275,7 @@
 
 	.form-btn.confirm {
 		color: #fff;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.plate-keyboard-panel {

@@ -91,8 +91,7 @@
 								<view class="info line1">购买商品可获得对应是经验值</view>
 							</view>
 						</view>
-						<navigator url="/pages/goods_cate/goods_cate" class="button" hover-class="none"
-							open-type='switchTab'>去获取</navigator>
+						<navigator url="/pages/goods_cate/goods_cate" class="button" hover-class="none">去获取</navigator>
 					</view>
 					<!-- <view class="item acea-row row-between-wrapper">
 						<view class="picTxt acea-row row-middle">

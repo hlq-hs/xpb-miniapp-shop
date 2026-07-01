@@ -359,7 +359,7 @@
 				type: 'normal',
 				isShow:true,
 				theme:app.globalData.theme,
-				bgColor:'#e93323',
+				bgColor:'#f8fafc',
 				chatConfig:{
 					consumer_hotline:'',
 					telephone_service_switch:'close',
@@ -379,9 +379,9 @@
 			});
 			this.$set(this, 'order_id', options.order_id);
 			let that = this;
-			that.bgColor = setThemeColor();
+			that.bgColor = '#f8fafc';
 			uni.setNavigationBarColor({
-				frontColor: '#ffffff',
+				frontColor: '#000000',
 				backgroundColor:that.bgColor,
 			});
 			that.$set(that,'chatConfig',that.$Cache.getItem('chatConfig'));
@@ -759,7 +759,7 @@
 	}
 	.mp-header{
 		width: 100%;
-		@include main_bg_color(theme);
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 	}
 	.goodCall {
 		@include main_color(theme);
@@ -798,6 +798,7 @@
 	.order-details .header {
 		height: 250rpx;
 		padding: 0 30rpx;
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 	}
 	.bg_color{
 		@include main_bg_color(theme);
@@ -817,7 +818,7 @@
 	}
 
 	.order-details .header .data {
-		color: rgba(255, 255, 255, 0.8);
+		color: #475569;
 		font-size: 24rpx;
 		margin-left: 27rpx;
 	}
@@ -829,7 +830,7 @@
 	.order-details .header .data .state {
 		font-size: 30rpx;
 		font-weight: bold;
-		color: #fff;
+		color: #0f172a;
 		margin-bottom: 7rpx;
 	}
 
@@ -974,6 +975,7 @@
 		border-radius: 50rpx;
 		color: #fff;
 		font-size: 27rpx;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.order-details .footer .bnt.cancel {

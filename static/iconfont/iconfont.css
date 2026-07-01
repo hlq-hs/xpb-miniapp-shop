@@ -49,6 +49,10 @@
   content: "\e64e";
 }
 
+.icon-duihao2:before {
+  content: "\e64e";
+}
+
 .icon-fanhui2:before {
   content: "\e7a9";
 }
@@ -74,6 +78,12 @@
 }
 
 .icon-gouwuche6:before {
+  content: "\e6e8";
+}
+
+.icon-gouwuche1:before,
+.icon-gouwuche7:before,
+.icon-gouwuche8:before {
   content: "\e6e8";
 }
 
@@ -106,6 +116,11 @@
 }
 
 .icon-shoucang3:before {
+  content: "\e79d";
+}
+
+.icon-shoucang:before,
+.icon-shoucang1:before {
   content: "\e79d";
 }
 
@@ -166,6 +181,10 @@
 }
 
 .icon-dadianhua01:before {
+  content: "\e623";
+}
+
+.icon-kefu:before {
   content: "\e623";
 }
 

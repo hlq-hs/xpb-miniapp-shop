@@ -112,8 +112,7 @@
 				var page = (pages[pages.length - 1]).$page.fullPath;
 				const link = this.normalizeLink(item.link);
 				if (link == page) return
-				if (['/pages/index/index', '/pages/goods_cate/goods_cate',
-						'/pages/order_addcart/order_addcart', '/pages/user/index'
+				if (['/pages/index/index', '/pages/order_addcart/order_addcart', '/pages/user/index'
 					].indexOf(link) > -1) {
 					this.openLink(link, true);
 				} else {

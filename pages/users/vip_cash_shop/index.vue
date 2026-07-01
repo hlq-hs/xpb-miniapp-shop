@@ -507,8 +507,8 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: linear-gradient(135deg, #ff4b3e 0%, #f33c2b 100%);
-	color: #fff;
+	background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
+	color: #0f172a;
 }
 
 .summary-main {
@@ -518,7 +518,7 @@ export default {
 
 .summary-label {
 	font-size: 24rpx;
-	color: rgba(255, 255, 255, 0.78);
+	color: #64748b;
 }
 
 .summary-value {

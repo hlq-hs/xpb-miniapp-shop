@@ -1097,7 +1097,7 @@
 
 	.cart_nav {
 		position: fixed;
-		@include main_bg_color(theme);
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 		top: 0;
 		left: 0;
 		z-index: 99;
@@ -1112,7 +1112,7 @@
 	}
 
 	.h5_back {
-		color: #fff;
+		color: #0f172a;
 		position: fixed;
 		left: 20rpx;
 		font-size: 32rpx;
@@ -1124,8 +1124,8 @@
 		width: 170rpx !important;
 		height: 60rpx !important;
 		border-radius: 33rpx;
-		background: rgba(255, 255, 255, 0.6);
-		color: #000;
+		background: rgba(255, 255, 255, 0.9);
+		color: #0f172a;
 		position: fixed;
 		font-size: 18px;
 		line-height: 58rpx;
@@ -1142,7 +1142,7 @@
 		display: inline-block;
 		width: 1px;
 		height: 34rpx;
-		background: #fff;
+		background: #cbd5e1;
 		position: absolute;
 		left: 0;
 		right: 0;
@@ -1165,7 +1165,7 @@
 		width: 200rpx;
 		height: 58rpx;
 		line-height: 58rpx;
-		color: #fff;
+		color: #0f172a;
 		font-size: 36rpx;
 		position: fixed;
 		text-align: center;
@@ -1177,7 +1177,7 @@
 	.right_select {
 		position: fixed;
 		right: 20rpx;
-		color: #fff;
+		color: #0f172a;
 		text-align: center;
 		line-height: 58rpx;
 	}
@@ -1274,10 +1274,10 @@
 		height: 178rpx;
 		padding: 30rpx 30rpx 0;
 		font-size: 22rpx;
-		color: #fff;
+		color: #334155;
 		width: 100%;
 		box-sizing: border-box;
-		@include main_bg_color(theme);
+		background: linear-gradient(180deg, #eef5ff 0%, #f8fafc 100%);
 		z-index: 5;
 	}
 
@@ -1566,6 +1566,7 @@
 	}
 
 	.footer .placeOrder {
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%) !important;
 		color: #fff;
 		font-size: 30rpx;
 		width: 226rpx;

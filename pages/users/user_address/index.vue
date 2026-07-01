@@ -632,7 +632,7 @@
 	}
 
 	.bg_color {
-		@include main_bg_color(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.addAddress .list {
@@ -702,9 +702,8 @@
 		line-height: 86rpx;
 		margin: 0 auto;
 		font-size: 32rpx;
-		// color: #E93323 ;
-		@include main_color(theme);
-		@include coupons_border_color(theme);
+		color: #2563eb;
+		border: 1rpx solid #2563eb;
 	}
 
 	.font_color {

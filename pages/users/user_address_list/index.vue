@@ -414,7 +414,7 @@
 	}
 
 	.bg_color {
-		@include main_bg_color(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.line {
@@ -505,7 +505,7 @@
 	}
 
 	.footer .addressBnt.wxbnt {
-		@include left_color(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	/deep/ radio .wx-radio-input.wx-radio-input-checked {

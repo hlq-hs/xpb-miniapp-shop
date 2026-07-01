@@ -543,7 +543,8 @@
 
 	.payment .nav .item.on {
 		font-weight: bold;
-		@include tab_border_bottom(theme);
+		color: #0f172a;
+		border-bottom: 3rpx solid #2563eb;
 	}
 
 	.payment .input {
@@ -591,30 +592,30 @@
 		height: 86rpx;
 		border-radius: 43rpx;
 		margin: 50rpx auto 0 auto;
-		@include linear-gradient(theme);
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 		line-height: 86rpx;
 	}
 
 	.payment-top {
 		width: 100%;
 		height: 350rpx;
-		@include main_bg_color(theme);
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 
 		.name1 {
 			font-size: 26rpx;
-			color: rgba(255, 255, 255, 0.8);
+			color: #64748b;
 			margin-top: -38rpx;
 			margin-bottom: 30rpx;
 		}
 
 		.pic {
 			font-size: 32rpx;
-			color: #fff;
+			color: #0f172a;
 		}
 
 		.pic-font {
 			font-size: 78rpx;
-			color: #fff;
+			color: #0f172a;
 		}
 	}
 
@@ -653,7 +654,7 @@
 
 	}
     .pic-box-color-active {
-			@include linear-gradient(theme);
+			background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
 			color: #fff !important;
 	}
 	.tips-box {

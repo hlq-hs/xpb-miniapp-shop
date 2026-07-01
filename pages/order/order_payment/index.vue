@@ -502,6 +502,7 @@
 		border-radius: 43rpx;
 		text-align: center;
 		line-height: 86rpx;
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
 	.wrapper {

@@ -182,7 +182,7 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		color: #fff;
+		color: #0f172a;
 	}
 
 	.location-icon {

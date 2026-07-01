@@ -1,9 +1,6 @@
 <template>
 	<view class="goodCate">
 		<view class="header acea-row row-center-wrapper" :style="{top: iStatusBarHeight + 'px'}">
-			<navigator url='/pages/index/index' class="pageIndex" hover-class="none" open-type="switchTab">
-				<text class="iconfont icon-shouye3"></text>
-			</navigator>
 			<navigator url="/pages/goods/goods_search/index" class="search acea-row row-center-wrapper" hover-class="none">
 				<text class="iconfont icon-xiazai5"></text>
 				搜索商品</navigator>
@@ -779,7 +776,7 @@
 				width: 68rpx;
 				height: 68rpx;
 				border-radius: 50%;
-				@include main_bg_color(theme);
+				background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 				text-align: center;
 				line-height: 68rpx;
 
@@ -835,7 +832,7 @@
 						background-color: $crmeb-bg-color;
 						width: 100%;
 						text-align: center;
-						@include main_color(theme);
+						color: #2563eb;
 						font-weight: 500;
 						position: relative;
 
@@ -844,7 +841,7 @@
 							position: absolute;
 							width: 6rpx;
 							height: 46rpx;
-							@include main_bg_color(theme);
+							background: #2563eb;
 							border-radius: 0 4rpx 4rpx 0;
 							left: 0
 						}
@@ -918,8 +915,8 @@
 
 			&.click {
 				font-weight: bold;
-				@include cate-two-btn(theme);
-				@include main_color(theme);
+				background: #dbeafe;
+				color: #2563eb;
 			}
 		}
 
@@ -1012,8 +1009,8 @@
 
 				&.click {
 					font-weight: bold;
-					@include cate-two-btn(theme);
-					@include main_color(theme);
+					background: #dbeafe;
+					color: #2563eb;
 				}
 			}
 		}
@@ -1075,7 +1072,7 @@
 							height: 56rpx;
 
 							.pictrue {
-								color: #E93323;
+								color: #2563eb;
 								font-size: 46rpx;
 								width: 50rpx;
 								height: 50rpx;
@@ -1083,7 +1080,7 @@
 								line-height: 50rpx;
 
 								&.icon-jiahao {
-									background: linear-gradient(140deg, #FA6514 0%, #E93323 100%);
+									background: linear-gradient(140deg, #3b82f6 0%, #2563eb 100%);
 									-webkit-background-clip: text;
 									-webkit-text-fill-color: transparent;
 								}
@@ -1102,15 +1099,15 @@
 							padding: 0 30rpx;
 							height: 56rpx;
 							line-height: 56rpx;
-							@include main_bg_color(theme);
+							background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 							border-radius: 42rpx;
 							font-size: 26rpx;
 							color: #fff;
 							position: relative;
 
 							.num {
-								@include main_color(theme);
-								@include coupons_border_color(theme);
+								color: #2563eb;
+								border: 1rpx solid #2563eb;
 								background: #fff;
 								min-width: 12rpx;
 								border-radius: 15px;
@@ -1164,7 +1161,7 @@
 			.cartIcon {
 				width: 96rpx;
 				height: 96rpx;
-				@include main_bg_color(theme);
+				background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 				border-radius: 50%;
 				position: relative;
 				margin-top: -36rpx;
@@ -1216,7 +1213,7 @@
 				}
 
 				.main_bg {
-					@include main_bg_color(theme);
+					background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 				}
 
 				.gray_bg {

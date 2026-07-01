@@ -579,6 +579,10 @@
 		font-size: 27rpx;
 	}
 
+	.my-order .list .item .bottom .bnt.bg_color {
+		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+	}
+
 	.my-order .list .item .bottom .bnt.cancelBnt {
 		border: 1rpx solid #ddd;
 		color: #aaa;

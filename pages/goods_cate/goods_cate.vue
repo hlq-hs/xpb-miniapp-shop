@@ -1,5 +1,9 @@
 <template>
-		<view class="page" :data-theme="theme" :style="{height:winHeight + 'px'}">
+		<view
+			class="page"
+			:data-theme="theme"
+			:style="{height:winHeight + 'px'}"
+		>
 		<view class="cart-nav" :style="{ height: iStatusBarHeight + 'px'}"></view>
 		<cate v-if="currentPage === 'one'" ref="catePage" :showSlide="showSlide"></cate>
 		<contracted v-if="currentPage === 'two'" ref="catePage" :showSlide="showSlide"></contracted>

@@ -1,21 +1,5 @@
 <template>
 	<view class="detail-page">
-		<view
-			class="nav-shell"
-			:style="{
-				paddingTop: statusBarHeight + 'px',
-				height: navTotalHeight + 'px'
-			}"
-		>
-			<view class="nav-row" :style="{ height: navContentHeight + 'px' }">
-				<view class="nav-back" @click="handleBack">
-					<view class="nav-back-line nav-back-line-top"></view>
-					<view class="nav-back-line nav-back-line-bottom"></view>
-				</view>
-				<text class="nav-title">询价订单</text>
-			</view>
-		</view>
-
 		<view class="mode-tabs">
 			<view class="mode-tab" :class="{ active: activeMode === 'part' }" @click="setActiveMode('part')">按配件</view>
 			<view class="mode-tab" :class="{ active: activeMode === 'merchant' }" @click="setActiveMode('merchant')">按商家</view>
@@ -1469,13 +1453,13 @@ export default {
 
 <style scoped lang="scss">
 .detail-page { height: 100vh; background: #f4f5f8; display: flex; flex-direction: column; overflow: hidden; }
-.nav-shell { flex-shrink: 0; background: #303030; }
+.nav-shell { flex-shrink: 0; background: #ffffff; }
 .nav-row { position: relative; display: flex; align-items: center; justify-content: center; padding: 0 36rpx; }
 .nav-back { position: absolute; left: 22rpx; top: 50%; width: 60rpx; height: 60rpx; transform: translateY(-50%); }
-.nav-back-line { position: absolute; left: 16rpx; width: 4rpx; height: 30rpx; border-radius: 999rpx; background: #ffffff; transform-origin: center; }
+.nav-back-line { position: absolute; left: 16rpx; width: 4rpx; height: 30rpx; border-radius: 999rpx; background: #172840; transform-origin: center; }
 .nav-back-line-top { top: 10rpx; transform: rotate(45deg); }
 .nav-back-line-bottom { top: 28rpx; transform: rotate(-45deg); }
-.nav-title { font-size: 36rpx; font-weight: 500; color: #ffffff; }
+.nav-title { font-size: 36rpx; font-weight: 500; color: #172840; }
 .mode-tabs { display: flex; align-items: center; background: #ffffff; border-bottom: 1rpx solid #eceff3; }
 .mode-tab { position: relative; padding: 24rpx 36rpx 20rpx; font-size: 34rpx; font-weight: 700; color: #1e232b; }
 .mode-tab.active { color: #10151c; }
@@ -1591,6 +1575,6 @@ export default {
 .total-price { display: block; margin-top: 6rpx; font-size: 34rpx; font-weight: 800; color: #d52028; }
 .discount-text { display: block; margin-top: 6rpx; font-size: 24rpx; color: #9fa6af; }
 .bottom-actions { display: flex; align-items: center; column-gap: 16rpx; margin-left: 20rpx; }
-.secondary-btn { width: 164rpx; height: 84rpx; border-radius: 42rpx; display: flex; align-items: center; justify-content: center; font-size: 30rpx; font-weight: 600; color: #e02020; background: #fff1f1; border: 2rpx solid #ffb3b3; }
-.primary-btn { width: 164rpx; height: 84rpx; border-radius: 42rpx; display: flex; align-items: center; justify-content: center; font-size: 32rpx; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #ff6b6b 0%, #e02020 100%); box-shadow: 0 10rpx 24rpx rgba(224, 32, 32, 0.24); }
+.secondary-btn { width: 164rpx; height: 84rpx; border-radius: 42rpx; display: flex; align-items: center; justify-content: center; font-size: 30rpx; font-weight: 600; color: #2563eb; background: #ffffff; border: 2rpx solid #2563eb; }
+.primary-btn { width: 164rpx; height: 84rpx; border-radius: 42rpx; display: flex; align-items: center; justify-content: center; font-size: 32rpx; font-weight: 700; color: #ffffff; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 10rpx 24rpx rgba(37, 99, 235, 0.24); }
 </style>

@@ -147,7 +147,7 @@
 		width: 100%;
 	}
 	.cart_nav_color{
-		@include main_bg_color(theme);
+		background: linear-gradient(180deg, #f8fafc 0%, #eef5ff 100%);
 	}
 	.navbarCon {
 		position: absolute;
@@ -204,7 +204,7 @@
 		width: 200rpx;
 		height: 58rpx;
 		line-height: 58rpx;
-		color: #fff;
+		color: #0f172a;
 		font-size: 36rpx;
 		position: fixed;
 		text-align: center;

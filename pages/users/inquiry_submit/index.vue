@@ -1,21 +1,5 @@
 <template>
 	<view class="submit-page">
-		<view
-			class="nav-shell"
-			:style="{
-				paddingTop: statusBarHeight + 'px',
-				height: navTotalHeight + 'px'
-			}"
-		>
-			<view class="nav-row" :style="{ height: navContentHeight + 'px' }">
-				<view class="nav-back" @click="handleBack">
-					<view class="nav-back-line nav-back-line-top"></view>
-					<view class="nav-back-line nav-back-line-bottom"></view>
-				</view>
-				<text class="nav-title">提交询价</text>
-			</view>
-		</view>
-
 		<scroll-view scroll-y class="submit-body">
 			<view class="vehicle-card">
 				<text class="vehicle-name">{{ vehicleName }}</text>

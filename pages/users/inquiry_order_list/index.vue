@@ -1094,8 +1094,8 @@ export default {
 .footer-action.primary,
 .footer-action.secondary {
 	color: #ffffff;
-	background: linear-gradient(135deg, #ff7a66 0%, #e34d3f 100%);
-	box-shadow: 0 12rpx 24rpx rgba(227, 77, 63, 0.24);
+	background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+	box-shadow: 0 12rpx 24rpx rgba(37, 99, 235, 0.24);
 }
 
 .empty-state {
