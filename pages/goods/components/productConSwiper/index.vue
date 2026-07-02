@@ -32,7 +32,7 @@
 			<!-- #endif -->
 			<block v-for="(item,index) in imgUrls" :key='index'>
 				<swiper-item v-if="videoline?index>=1:index>=0">
-					<image :src="item" class="slide-image" />
+					<image :src="item" class="slide-image" @tap.stop="previewImage(item)" />
 				</swiper-item>
 			</block>
 		</swiper>
@@ -109,6 +109,13 @@
 			},
 			change: function(e) {
 				this.$set(this, 'currents', e.detail.current + 1);
+			},
+			previewImage: function(current) {
+				if (!current || !this.imgUrls.length) return;
+				uni.previewImage({
+					current,
+					urls: this.imgUrls
+				});
 			}
 		}
 	}
