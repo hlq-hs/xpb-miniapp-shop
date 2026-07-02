@@ -282,8 +282,9 @@ export function getAddressList(data){
  * 设置默认地址
  * @param int id
 */
-export function setAddressDefault(id){
-  return request.post('address/default/set',{id:id})
+export function setAddressDefault(id, status){
+  const data = { id: id, status: status !== undefined && status !== null && status !== '' ? status : 0 };
+  return request.post('address/default/set', data)
 }
 
 /**
@@ -364,8 +365,8 @@ export function alipayFull(data) {
  * 获取默认地址
  * 
 */
-export function getAddressDefault(){
-  return request.get('address/default');
+export function getAddressDefault(data){
+  return request.get('address/default', Object.assign({ status: 0 }, data || {}));
 }
 
 /**

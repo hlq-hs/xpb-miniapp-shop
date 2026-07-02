@@ -7,7 +7,8 @@
 					<view class="foot-item" v-for="(item,index) in bottomNavigationList" :key="index"
 						@click="goRouter(item)">
 						<block v-if="isActive(item)">
-							<view v-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon checked">
+							<view v-if="index === 2" class="nav-cost-icon checked"><text>透明</text><text>修车</text></view>
+							<view v-else-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon checked">
 								<view></view><view></view><view></view><view></view>
 							</view>
 							<text v-else class="iconfont nav-icon checked" :class="fixedIcons[index] || fixedIcons[0]"></text>
@@ -15,7 +16,8 @@
 							<view v-else class="txt">{{item.name}}</view>
 						</block>
 						<block v-else>
-							<view v-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon">
+							<view v-if="index === 2" class="nav-cost-icon"><text>透明</text><text>修车</text></view>
+							<view v-else-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon">
 								<view></view><view></view><view></view><view></view>
 							</view>
 							<text v-else class="iconfont nav-icon" :class="fixedIcons[index] || fixedIcons[0]"></text>
@@ -202,10 +204,29 @@
 		height: calc(98rpx + env(safe-area-inset-bottom)); ///鍏煎 IOS>11.2/
 		box-sizing: border-box;
 		border-top: solid 1rpx #F3F3F3;
-		background-color: #fff;
+		background: radial-gradient(circle at 50% 13rpx,
+			transparent 0,
+			transparent 47rpx,
+			#fff 48rpx,
+			#fff 100%);
 		box-shadow: 0px 0px 17rpx 1rpx rgba(206, 206, 206, 0.32);
 		padding-bottom: constant(safe-area-inset-bottom); ///鍏煎 IOS<11.2/
 		padding-bottom: env(safe-area-inset-bottom); ///鍏煎 IOS>11.2/
+
+		&::before {
+			content: '';
+			position: absolute;
+			left: 50%;
+			top: -37rpx;
+			width: 100rpx;
+			height: 100rpx;
+			transform: translateX(-50%);
+			border: 3rpx solid #fff;
+			border-radius: 50%;
+			box-sizing: border-box;
+			background: transparent;
+			pointer-events: none;
+		}
 
 		.foot-item {
 			display: flex;
@@ -231,8 +252,14 @@
 				padding: 4rpx;
 			}
 		}
+
 		.bg-box{
 			height: 100%;
+			background: radial-gradient(circle at 50% 13rpx,
+				transparent 0,
+				transparent 47rpx,
+				#fff 48rpx,
+				#fff 100%) !important;
 		}
 		.foot-item image {
 			height: 50rpx;
@@ -253,6 +280,34 @@
 
 		.foot-item .nav-icon.checked {
 			@include main-color(theme);
+		}
+
+		.foot-item .nav-cost-icon {
+			width: 102rpx;
+			height: 102rpx;
+			font-size: 25rpx;
+			font-weight: 600;
+			text-align: center;
+			color: #29b6f6;
+			background: transparent;
+			border: 0;
+			border-radius: 50%;
+			box-sizing: border-box;
+			margin-bottom: -52rpx;
+			transform: translateY(-50rpx);
+			box-shadow: none;
+			position: relative;
+			z-index: 2;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			line-height: 28rpx;
+			letter-spacing: 4rpx;
+		}
+
+		.foot-item .nav-cost-icon.checked {
+			color: #29b6f6;
 		}
 
 		.foot-item .nav-category-icon {

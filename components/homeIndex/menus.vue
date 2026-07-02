@@ -11,7 +11,8 @@
 									v-for="(itemn,indexn) in item.list" :key="indexn"
 									@click="menusTap(itemn.info[1].value)">
 									<view class="pictrue skeleton-radius">
-										<easy-loadimage :image-src="itemn.img" :radius="dataConfig.contentStyle.val">
+										<view v-if="isCostInquiry(itemn)" class="cost-inquiry-menu-icon">询</view>
+										<easy-loadimage v-else :image-src="itemn.img" :radius="dataConfig.contentStyle.val">
 										</easy-loadimage>
 									</view>
 									<view class="menu-txt">{{ itemn.info[0].value }}</view>
@@ -31,7 +32,8 @@
 				<block v-for="(item, index) in menus" :key="index">
 					<view class="item" v-show="item.status" :style="[titleColor]" @click="menusTap(item.info[1].value)">
 						<view class="pictrue skeleton-radius">
-							<easy-loadimage :image-src="item.img" :radius="dataConfig.contentStyle.val">
+							<view v-if="isCostInquiry(item)" class="cost-inquiry-menu-icon">询</view>
+							<easy-loadimage v-else :image-src="item.img" :radius="dataConfig.contentStyle.val">
 							</easy-loadimage>
 						</view>
 						<view class="menu-txt">{{ item.info[0].value }}</view>
@@ -149,6 +151,9 @@
 			})
 		},
 		methods: {
+			isCostInquiry(item) {
+				return !!(item && item.info && item.info[0] && item.info[0].value === '成本询价');
+			},
 			bannerfun(e) {
 				this.active = e.detail.current;
 			},
@@ -173,7 +178,15 @@
 				this.$set(this, 'menuList', goodArray);
 			},
 			menusTap(url) {
-				this.$util.navigateTo(url);
+				if (!url || !String(url).trim()) {
+					uni.showToast({ title: '未配置跳转路由', icon: 'none' });
+					return;
+				}
+				let path = String(url).trim().replace(/\.vue(?=\?|$)/, '');
+				if (!/^https?:\/\//i.test(path) && path.charAt(0) !== '/') {
+					path = `/${path}`;
+				}
+				this.$util.navigateTo(path);
 			}
 		}
 	};
@@ -211,16 +224,32 @@
 	}
 
 	.nav {
+		.cost-inquiry-menu-icon {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #ff8e9a, #f45b6d);
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 52rpx;
+			font-weight: 600;
+		}
+
 		.item {
-			width: 160rpx;
+			width: 20%;
+			box-sizing: border-box;
 			text-align: center;
 			font-size: 24rpx;
 			display: inline-block;
 
 			.pictrue {
-				width: 90rpx;
-				height: 90rpx;
+				width: 110rpx;
+				height: 110rpx;
 				margin: 0 auto;
+				border-radius: 50%;
+				overflow: hidden;
 
 				image {
 					width: 100%;
@@ -242,6 +271,19 @@
 	}
 
 	.swiper {
+		.cost-inquiry-menu-icon {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #ff8e9a, #f45b6d);
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 52rpx;
+			font-weight: 600;
+		}
+
 		z-index: 20;
 		position: relative;
 		overflow: hidden;
@@ -254,9 +296,11 @@
 
 			.item {
 				.pictrue {
-					width: 90rpx;
-					height: 90rpx;
+					width: 110rpx;
+					height: 110rpx;
 					margin: 0 auto;
+					border-radius: 50%;
+					overflow: hidden;
 
 					image {
 						width: 100%;

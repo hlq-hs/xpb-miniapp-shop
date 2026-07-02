@@ -100,7 +100,7 @@
 					? this.$store.state.app.token
 					: "";
 				if (!token) return;
-				getAddressDefault().then((res) => {
+				getAddressDefault({ status: 0 }).then((res) => {
 					const address = (res && res.data) || {};
 					if (address.city) this.saveCity(address.province || "", address.city);
 				}).catch(() => {});

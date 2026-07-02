@@ -31,6 +31,10 @@
 					</view>
 				</view>
 
+				<view v-if="vinQueryText" class="vin-query-result">
+					{{ vinQueryText }}
+				</view>
+
 				<view v-if="recentInquiryList.length" class="recent-section">
 					<view class="recent-head">
 						<text class="recent-title">最近询价</text>
@@ -147,7 +151,11 @@ export default {
 			isViewReady: false,
 			pendingAssetCount: 3,
 			isSubmitting: false,
-			isRecognizingVin: false
+			isRecognizingVin: false,
+			vinQueryLoading: false,
+			vinQueryText: '',
+			vinQueryVin: '',
+			vinQueryTimer: null
 		};
 	},
 	computed: {
@@ -163,6 +171,11 @@ export default {
 		},
 		vinCodeLength() {
 			return (this.vinCode || '').length;
+		}
+	},
+	watch: {
+		vinCode(value) {
+			this.handleVinCodeChanged(value);
 		}
 	},
 	onLoad(options = {}) {
@@ -188,6 +201,12 @@ export default {
 	onReady() {
 		this.isViewReady = true;
 		this.tryHideLoading();
+	},
+	onUnload() {
+		if (this.vinQueryTimer) {
+			clearTimeout(this.vinQueryTimer);
+			this.vinQueryTimer = null;
+		}
 	},
 	methods: {
 		prefillVinFromSingleVehicle() {
@@ -492,6 +511,65 @@ export default {
 			return String(value || '')
 				.toUpperCase()
 				.replace(/[^A-Z0-9]/g, '');
+		},
+		handleVinCodeChanged(value) {
+			const normalizedVin = this.normalizeVinText(value).slice(0, 17);
+			if (value !== normalizedVin) {
+				this.vinCode = normalizedVin;
+				return;
+			}
+			if (this.vinQueryTimer) {
+				clearTimeout(this.vinQueryTimer);
+				this.vinQueryTimer = null;
+			}
+			if (normalizedVin.length !== 17) {
+				this.vinQueryText = '';
+				this.vinQueryVin = '';
+				return;
+			}
+			if (!VIN_REGEX.test(normalizedVin)) {
+				this.vinQueryText = '请输入正确的17位VIN码';
+				this.vinQueryVin = '';
+				return;
+			}
+			if (this.vinQueryVin === normalizedVin && this.vinQueryText) return;
+			this.vinQueryTimer = setTimeout(() => {
+				this.autoQueryVinInfo(normalizedVin);
+			}, 300);
+		},
+		formatVinQueryText(vehicleInfo, result = {}) {
+			const vehicleName = this.getVehicleName(vehicleInfo);
+			if (!vehicleName) return result.msgtext || '未查询到车型信息';
+			const extList = [
+				vehicleInfo.modelYear || vehicleInfo.year || vehicleInfo.marketYear,
+				vehicleInfo.displacement || vehicleInfo.engineDisplacement,
+				vehicleInfo.engineModel,
+				vehicleInfo.transmissionType
+			].filter(Boolean);
+			return `解析结果：${[vehicleName, ...extList].join(' ')}`;
+		},
+		async autoQueryVinInfo(vin) {
+			if (this.vinQueryLoading) return;
+			this.vinQueryLoading = true;
+			this.vinQueryVin = vin;
+			this.vinQueryText = 'VIN查询中...';
+			try {
+				const result = await this.queryVinInfo(vin);
+				const vehicleList = Array.isArray(result.data) ? result.data : (result.data ? [result.data] : []);
+				const rawVehicleInfo = vehicleList[0] || {};
+				const vehicleInfo = {
+					...rawVehicleInfo,
+					carBrandId: rawVehicleInfo.carBrandCode || rawVehicleInfo.carBrandId || rawVehicleInfo.brandId || ''
+				};
+				this.vinQueryText = this.formatVinQueryText(vehicleInfo, result);
+				if (this.getVehicleName(vehicleInfo)) {
+					uni.setStorageSync('inquiryVehicleInfo', vehicleInfo);
+				}
+			} catch (error) {
+				this.vinQueryText = 'VIN查询失败，请稍后重试';
+			} finally {
+				this.vinQueryLoading = false;
+			}
 		},
 		extractVinFromVinCodeResult(result) {
 			const firstWord = result && result.words_result && result.words_result[0] && result.words_result[0].words;
@@ -804,6 +882,15 @@ export default {
 
 .recent-section {
 	padding: 0 34rpx 12rpx;
+}
+
+.vin-query-result {
+	padding: 0 40rpx 16rpx;
+	font-size: 28rpx;
+	font-weight: 600;
+	line-height: 1.5;
+	color: #ef2323;
+	word-break: break-all;
 }
 
 .recent-head {

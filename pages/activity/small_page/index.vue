@@ -1,53 +1,53 @@
 ﻿<template>
 	<view id="home" :style="[pageStyle]" class="smallBox" :data-theme="theme">
-		<!-- 缁勫悎缁勪欢 -->
+		<!-- 组合组件 -->
 		<homeComb v-if="showHomeComb" :bgInfo="bgInfo" :dataConfig="homeCombData" @changeTab="changeTab" :isScrolled="isScrolled" :isSmallPage="isSmallPage"
 			:navIndex="navIndex"></homeComb>
-		<!-- 椤堕儴鎼滅储妗?-->
+		<!-- 顶部搜索框 -->
 		<headerSearch :isSmallPage="isSmallPage" v-if="showHeaderSerch" :dataConfig="headerSerchCombData"></headerSearch>
-		<!-- 鍒嗙被瀵艰埅 -->
+		<!-- 分类导航 -->
 		<cateNav v-if="showCateNav" :dataConfig="cateNavData" @changeTab="changeTab"></cateNav>
 		<view v-if="navIndex === 0">
 			<block v-for="(item, index) in styleConfig" :key="index">
-				<!-- 鏂伴椈绠€鎶?-->
+				<!-- 新闻简报 -->
 				<news v-if="item.name == 'news'&&!item.isHide" :dataConfig="item"></news>
 				<!-- menu -->
 				<menus v-if="item.name == 'menus'&&!item.isHide" :dataConfig="item"></menus>
-				<!-- 鏂囩珷鍒楄〃 -->
+				<!-- 文章列表 -->
 				<articleList v-if="item.name == 'homeArticle'&&!item.isHide" :dataConfig="item"></articleList>
-				<!-- 绉掓潃 -->
+				<!-- 秒杀 -->
 				<seckill-data v-if="item.name == 'seckill'&&!item.isHide" :dataConfig="item"></seckill-data>
-				<!-- 浼樻儬鍒?-->
+				<!-- 优惠券 -->
 				<coupon v-if="item.name == 'homeCoupons'&&!item.isHide" :dataConfig="item"></coupon>
-				<!-- 鍥剧墖榄旀柟 -->
+				<!-- 图片魔方 -->
 				<pictureCube v-if="item.name == 'pictureCube'&&!item.isHide" :dataConfig="item"></pictureCube>
-				<!-- 鐑尯 -->
+				<!-- 热区 -->
 				<hotSpot v-if="item.name == 'homeHotspot'&&!item.isHide" :dataConfig="item"></hotSpot>
-				<!-- 杞挱鍥?-->
+				<!-- 轮播图 -->
 				<swiperBg v-if="item.name == 'swiperBg'&&!item.isHide" :dataConfig="item"></swiperBg>
-				<!-- 瑙嗛 -->
+				<!-- 视频 -->
 				<shortVideo v-if="item.name == 'video'&&!item.isHide" :dataConfig="item"></shortVideo>
-				<!-- 杈呭姪绾?-->
+				<!-- 辅助线 -->
 				<guide v-if="item.name == 'guide'&&!item.isHide" :dataConfig="item"></guide>
-				<!-- 瀵屾枃鏈?-->
+				<!-- 富文本 -->
 				<rich-text-editor v-if="item.name == 'richTextEditor'&&!item.isHide" :dataConfig="item"></rich-text-editor>
-				<!-- 杈呭姪绌虹櫧-->
+				<!-- 辅助空白 -->
 				<blank-page v-if="item.name == 'blankPage'&&!item.isHide" :dataConfig="item"></blank-page>
-				<!-- 鏍囬 -->
+				<!-- 标题 -->
 				<home-title v-if="item.name == 'titles'&&!item.isHide" :dataConfig="item"></home-title>
-				<!-- 鎷煎洟 -->
+				<!-- 拼团 -->
 				<group v-if="item.name == 'group'&&!item.isHide" :dataConfig="item"></group>
-				<!-- 鐮嶄环 -->
+				<!-- 砍价 -->
 				<bargain v-if="item.name == 'bargain'&&!item.isHide" :dataConfig="item"></bargain>
-				<!-- 鍟嗗搧鍒楄〃 -->
+				<!-- 商品列表 -->
 				<goodList v-if="item.name == 'goodList'&&!item.isHide" :dataConfig="item" @detail="goDetail"></goodList>
-				<!-- 閫夐」鍗″晢鍝佸垪琛?-->
+				<!-- 选项卡商品列表 -->
 				<homeTab v-if="item.name == 'homeTab'&&!item.isHide" :dataConfig="item" @detail="goDetail"></homeTab>
-				<!-- 搴曢儴瀵艰埅-->
+				<!-- 底部导航 -->
 				<page-footer v-if="item.name == 'footer'&&!item.isHide" :dataConfig="item" :isSmallPage="isSmallPage"></page-footer>
 			</block>
 		</view>
-		<!-- 鍒嗙被椤?-->
+		<!-- 分类页 -->
 		<view class="productList" v-if="navIndex > 0 && sortList.length>0">
 			<view class="sort acea-row" :class="sortList.length ? '' : 'no_pad'"
 				:style="{ marginTop: sortMarTop + 'px' }">
@@ -69,14 +69,14 @@
 				</view>
 			</view>
 		</view>
-		<!-- 鎺ㄨ崘鍟嗗搧锛屽垎绫诲晢鍝佸垪琛?-->
+		<!-- 推荐商品、分类商品列表 -->
 		<recommend v-if="categoryId>0" ref="recommendIndex" :categoryId='categoryId' :isShowTitle="isShowTitle"
 			@getRecommendLength="getRecommendLength"></recommend>
 		<view class='noCommodity' v-if="isNoCommodity&& navIndex > 0">
 			<view class='pictrue'>
 				<image :src="urlDomain+'crmebimage/presets/noShopper.png'"></image>
 			</view>
-			<text class="text-ccc">鏆傛棤鍟嗗搧</text>
+			<text class="text-ccc">暂无商品</text>
 		</view>
 		<!-- <view v-if="bottomNavigationIsCustom" class="footerBottom"></view> -->
 	</view>
@@ -121,7 +121,7 @@
 			return {
 				urlDomain: this.$Cache.get("imgHost"),
 				theme: app.globalData.theme,
-				isSmallPage: true, //鏄惁鏄井椤甸潰锛宼rue鏄紝false涓嶆槸
+				isSmallPage: true, // 是否为微页面，true 是，false 不是
 				styleConfig: [],
 				bgColor: '',
 				bgPic: '',
@@ -133,13 +133,13 @@
 				headerSerchCombData: {},
 				sortList: [],
 				sortMarTop: 0,
-				showCateNav: false, //鏄惁鏄剧ず鍒嗙被瀵艰埅缁勪欢
-				cateNavData: {}, //鍒嗙被瀵艰埅缁勪欢鏁版嵁
+				showCateNav: false, // 是否显示分类导航组件
+				cateNavData: {}, // 分类导航组件数据
 				navIndex: 0,
 				pageStyle: null,
 				cateNavActive: 0,
-				categoryId: 0, //鍒嗙被id
-				diyId: 0, //diyid
+				categoryId: 0, // 分类 ID
+				diyId: 0, // DIY 页面 ID
 				isNoCommodity: false,
 				showHomeComb: false,
 				showHeaderSerch: false,
@@ -187,9 +187,9 @@
 			}
 			this.diyData(this.diyId)
 		},
-		// 婊氬姩鐩戝惉
+		// 滚动监听
 		onPageScroll(e) {
-			// 浼犲叆scrollTop鍊煎苟瑙﹀彂鎵€鏈塭asy-loadimage缁勪欢涓嬬殑婊氬姩鐩戝惉浜嬩欢
+			// 传入 scrollTop 值，并触发所有 easy-loadimage 组件的滚动监听事件
 			uni.$emit('scroll');
 			if (e.scrollTop > this.domOffsetTop) {
 				this.isScrolled = true;
@@ -205,14 +205,14 @@
 				let that = this;
 				that.styleConfig = [];
 				uni.showLoading({
-					title: '鍔犺浇涓?..'
+					title: '加载中...'
 				});
 				pagediyInfoApi(id).then(res => {
 					uni.setNavigationBarTitle({
 						title: res.data.title
 					});
 					uni.setNavigationBarColor({
-						//蹇呴』瑕?6杩涘埗灏忓啓
+						// 必须使用小写的十六进制颜色值
 						frontColor: res.data.titleColor,
 						backgroundColor: res.data.titleBgColor.toString().toLowerCase(),
 					})
@@ -254,9 +254,9 @@
 			getRecommendLength(e) {
 				this.isNoCommodity = e == 0 ? true : false;
 			},
-			// 鍒嗙被鍒囨崲鐐瑰嚮
+			// 分类切换点击事件
 			changeTab(index, item) {
-				//type=0寰〉闈紝1鍒嗙被锛?棣栭〉
+				// type=0：微页面，type=1：分类，其他：首页
 				this.cateNavActive = index;
 				if (item.type == 1) {
 					this.navIndex = 1;
@@ -296,7 +296,7 @@
 					this.diyData(this.diyId, false);
 				}
 			},
-			// 鍘诲晢鍝佽鎯呴〉
+			// 前往商品详情页
 			goDetail(item) {
 				goProductDetail(item.id, 0, '')
 			},
@@ -311,8 +311,8 @@
 
 <style lang="scss" scoped>
 	.smallBox {
-		padding-bottom: calc(130rpx+ constant(safe-area-inset-bottom)); ///鍏煎 IOS<11.2/
-		padding-bottom: calc(130rpx + env(safe-area-inset-bottom)); ///鍏煎 IOS>11.2/
+		padding-bottom: calc(130rpx+ constant(safe-area-inset-bottom)); // 兼容 iOS 11.2 以下版本
+		padding-bottom: calc(130rpx + env(safe-area-inset-bottom)); // 兼容 iOS 11.2 及以上版本
 	}
 
 	.productList {

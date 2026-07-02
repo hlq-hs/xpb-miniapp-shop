@@ -44,15 +44,15 @@
 					class='iconfont icon-tianjiadizhi'></text>添加新地址</view>
 			<!-- #endif -->
 			<!-- #ifdef MP-->
-			<view class='addressBnt bg_color' @click='addAddress'><text class='iconfont icon-tianjiadizhi'></text>添加新地址
+			<view class='addressBnt bg_color' :class="selectType === 'inquiry' ? 'on' : ''" @click='addAddress'><text class='iconfont icon-tianjiadizhi'></text>添加新地址
 			</view>
-			<view class='addressBnt wxbnt' @click='getWxAddress'><text class='iconfont icon-weixin2'></text>导入微信地址
+			<view v-if="selectType !== 'inquiry'" class='addressBnt wxbnt' @click='getWxAddress'><text class='iconfont icon-weixin2'></text>导入微信地址
 			</view>
 			<!-- #endif -->
 			<!-- #ifdef H5-->
-			<view class='addressBnt bg_color' :class="this.$wechat.isWeixin()?'':'on'" @click='addAddress'><text
+			<view class='addressBnt bg_color' :class="this.$wechat.isWeixin() && selectType !== 'inquiry' ? '' : 'on'" @click='addAddress'><text
 					class='iconfont icon-tianjiadizhi'></text>添加新地址</view>
-			<view v-if="this.$wechat.isWeixin()" class='addressBnt wxbnt' @click='getAddress'><text
+			<view v-if="this.$wechat.isWeixin() && selectType !== 'inquiry'" class='addressBnt wxbnt' @click='getAddress'><text
 					class='iconfont icon-weixin2'></text>导入微信地址</view>
 			<!-- #endif -->
 		</view>
@@ -169,7 +169,8 @@
 									postCode: res.postalCode,
 									phone: res.telNumber,
 									detail: res.detailInfo,
-									id: 0
+									id: 0,
+									status: that.selectType === 'inquiry' ? 1 : 0
 									//type: 1//区别城市id（导入微信地址无城市id需要后台自己查找）;
 								}).then(res => {
 									setTimeout(() => {
@@ -233,6 +234,7 @@
 							detail: userInfo.detailInfo,
 							postCode: userInfo.postalCode,
 							isDefault: false,
+							status: that.selectType === 'inquiry' ? 1 : 0
 						})
 						.then(() => {
 							setTimeout(() => {
@@ -272,7 +274,8 @@
 				that.loadTitle = '';
 				getAddressList({
 					page: that.page,
-					limit: that.limit
+					limit: that.limit,
+					status: that.selectType === 'inquiry' ? 1 : 0
 				}).then(res => {
 					let list = res.data.list;
 					let loadend = list.length < that.limit;
@@ -297,7 +300,7 @@
 				if (address == undefined) return that.$util.Tips({
 					title: '您设置的默认地址不存在!'
 				});
-				setAddressDefault(address.id).then(res => {
+				setAddressDefault(address.id, that.selectType === 'inquiry' ? 1 : 0).then(res => {
 					for (let i = 0, len = that.addressList.length; i < len; i++) {
 						if (i == index) that.addressList[i].isDefault = true;
 						else that.addressList[i].isDefault = false;
@@ -328,7 +331,7 @@
 					url: '/pages/users/user_address/index?id=' + id + '&cartId=' + cartId + '&pinkId=' +
 						pinkId + '&couponId=' +
 						couponId + '&secKill' + this.secKill + '&combination=' + this.combination +
-						'&bargain=' + this.bargain
+						'&bargain=' + this.bargain + '&selectType=' + this.selectType
 				})
 			},
 			/**
@@ -383,10 +386,6 @@
 			},
 			goOrder: function(item) {
 				if (this.selectType === 'inquiry') {
-					uni.setStorageSync('inquirySelectedAddress', item);
-					uni.navigateBack({
-						delta: 1
-					});
 					return;
 				}
 				if (this.preOrderNo) {

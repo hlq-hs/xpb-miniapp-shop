@@ -12,6 +12,7 @@
 
 <script>
 	import { getUserCarInfo, getUserCarList } from "@/api/userCar.js";
+	import { toLogin } from "@/libs/login.js";
 
 	export default {
 		name: "defaultVehicleBar",
@@ -39,14 +40,17 @@
 			}
 		},
 		methods: {
+			getToken() {
+				return this.$store && this.$store.state && this.$store.state.app
+					? this.$store.state.app.token
+					: "";
+			},
 			refresh() {
 				if (this.loading) {
 					this.refreshPending = true;
 					return;
 				}
-				const token = this.$store && this.$store.state && this.$store.state.app
-					? this.$store.state.app.token
-					: "";
+				const token = this.getToken();
 				if (!token) {
 					this.vehicle = null;
 					return;
@@ -78,6 +82,10 @@
 				});
 			},
 			openVehiclePage() {
+				if (!this.getToken()) {
+					toLogin();
+					return;
+				}
 				uni.navigateTo({
 					url: this.vehicle
 						? "/pages/users/vehicle_manage/index"

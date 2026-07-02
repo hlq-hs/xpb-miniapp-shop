@@ -146,7 +146,7 @@ import { getIndexData, getTheme, getCategoryTwo, pagediyInfoApi, getCoupons, set
 // #ifdef MP-WEIXIN || APP-PLUS
 import { getTemlIds } from '@/api/api.js';
 // #endif
-// #ifdef H5
+// #ifdef H5 || MP-WEIXIN
 import { getShare } from '@/api/public.js';
 // #endif
 import { mapGetters } from "vuex";
@@ -165,9 +165,56 @@ export default {
 	// #endif
   },
   data() { return { urlDomain: this.$Cache.get("imgHost"),isNoCommodity:false,isScrolled:false,homeHeaderHeight:0,categoryId:0,showSkeleton:true,isNodes:0,statusBarHeight:statusBarHeight,navIndex:0,ProductNavindex:0,sortProduct:[],site_name:'',configApi:{},listActive:0,theme:app.globalData.theme,imgHost:'',appUpdate:{},wxText:"鐐瑰嚮娣诲姞鍒版垜鐨勫皬绋嬪簭锛屽井淇￠椤典笅鎷夊嵆鍙闂晢鍩庛€?",locationContent:'授权位置信息，提供完整服务',sortMpTop:0,isFixed:true,domOffsetTop:50,prodeuctTop:30,sortList:[],sortMarTop:0,navHeight:38,domHeight:0,cateNavActive:0,couponModal:false,styleConfig:[],diyId:0,smallPage:false,isHeaderSerch:false,homeCombData:{},showCateNav:false,cateNavData:{},showHomeComb:false,showHeaderSerch:false,headerSerchCombData:{},isShowTitle:false,bgColor:'',bgPic:'',bgTabVal:'',windowHeight:0,pageStyle:{},isDefault:1,errorNetwork:false,bgInfo:{colorPicker:'#f5f5f5',isBgColor:1,},launchCoupon:null,launchCouponVisible:false,launchCouponLoading:false,launchCouponChecked:false,launchCouponLoginPending:false, } },
-  onLoad(options){ if(options.spread) this.$Cache.set('spread',options.spread); if(options.scene){ let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene)); let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue); app.globalData.spread = mapeMpQrCodeValue.spread; } let diyid = options.id ? options.id : 0; this.diyData(diyid,false); this.getIndexConfig(); let that = this; this.$nextTick(function(){ uni.getSystemInfo({ success:function(res){ that.windowHeight = res.windowHeight; } }); }) },
+  onLoad(options){
+    if(options.spread) this.$Cache.set('spread',options.spread);
+    if(options.scene){
+      let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene));
+      let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
+      app.globalData.spread = mapeMpQrCodeValue.spread;
+    }
+    let diyid = options.id ? options.id : 0;
+    this.diyData(diyid,false);
+    this.getIndexConfig();
+    // #ifdef MP-WEIXIN
+    this.getShareConfig();
+    wx.showShareMenu({ menus: ['shareAppMessage', 'shareTimeline'] });
+    // #endif
+    let that = this;
+    this.$nextTick(function(){
+      uni.getSystemInfo({ success:function(res){ that.windowHeight = res.windowHeight; } });
+    });
+  },
   onShow(){ !this.bottomNavigationIsCustom&&uni.showTabBar(); this.getTokenIsExist(); this.checkLaunchCoupon(); this.$nextTick(()=>{ if(this.$refs.homeHeader) this.$refs.homeHeader.refreshDefaultVehicle(); if(this.$refs.headerSearch) this.$refs.headerSearch.refreshDefaultVehicle(); }); },
+  // #ifdef MP-WEIXIN
+  onShareAppMessage(){
+    return {
+      title: '巧手名车透明修车AI商城',
+      path: this.getMiniSharePath()
+    };
+  },
+  onShareTimeline(){
+    return {
+      title: '巧手名车透明修车AI商城',
+      query: this.getMiniShareQuery()
+    };
+  },
+  // #endif
   methods:{
+		getShareConfig(){
+			getShare().then(res => {
+				this.configApi = res && res.data ? res.data : {};
+			}).catch(() => {});
+		},
+		getMiniShareQuery(){
+			const query = [];
+			if (this.diyId) query.push(`id=${this.diyId}`);
+			if (this.uid) query.push(`spread=${this.uid}`);
+			return query.join('&');
+		},
+		getMiniSharePath(){
+			const query = this.getMiniShareQuery();
+			return `/pages/index/index${query ? `?${query}` : ''}`;
+		},
 		checkLaunchCoupon(){
 			// #ifndef MP-WEIXIN
 			return;

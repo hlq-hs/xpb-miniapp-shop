@@ -551,7 +551,8 @@ export default {
 		loadDefaultAddress() {
 			getAddressList({
 				page: 1,
-				limit: 20
+				limit: 20,
+				status: 1
 			})
 				.then(res => {
 					const list = res && res.data && res.data.list ? res.data.list : [];
