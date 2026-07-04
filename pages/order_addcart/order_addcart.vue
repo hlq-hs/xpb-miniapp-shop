@@ -167,6 +167,7 @@
 		<productWindow v-if="isOpenAttr" :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
 			@ChangeCartNum="ChangeCartNum" @attrVal="attrVal" @iptCartNum="iptCartNum" @goCat="reGoCat" id='product-window'>
 		</productWindow>
+		<view class="cart-footer-gap" v-if="cartList.valid.length > 0 && bottomNavigationIsCustom"></view>
 		<view class="uni-p-b-96"></view>
 		<view class="uni-p-b-98"></view>
 		<pageFooter></pageFooter>
@@ -1624,6 +1625,23 @@
 		bottom: calc(98rpx+ constant(safe-area-inset-bottom)); ///兼容 IOS<11.2/
 		bottom: calc(98rpx + env(safe-area-inset-bottom)); ///兼容 IOS>11.2/
 	}
+	.bottom-custom {
+		bottom: calc(180rpx + constant(safe-area-inset-bottom));
+		bottom: calc(180rpx + env(safe-area-inset-bottom));
+	}
+
+	.cart-footer-gap {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: calc(98rpx + constant(safe-area-inset-bottom));
+		bottom: calc(98rpx + env(safe-area-inset-bottom));
+		height: 82rpx;
+		background: #fff;
+		z-index: 665;
+		pointer-events: none;
+	}
+
 	.p-30 {
 		padding: 0 30rpx;
 	}

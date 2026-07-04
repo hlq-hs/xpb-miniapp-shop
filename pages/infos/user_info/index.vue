@@ -34,17 +34,10 @@
 					</view>
 					<view class='item acea-row row-between-wrapper'>
 						<view>手机号码</view>
-						<navigator url="/pages/users/app_login/index" hover-class="none" class="input"
-							v-if="!userInfo.phone">
-							点击绑定手机号<text class="iconfont icon-xiangyou"></text>
-						</navigator>
-						<navigator url="/pages/infos/user_phone/index" hover-class="none" class="input" v-else>
-							<view class='input acea-row row-between-wrapper'>
-								<input  disabled='true' name='phone' :value='userInfo.phone'
-									class='id'></input>
-								<text class='iconfont icon-xiangyou'></text>
-							</view>
-						</navigator>
+						<view class="input">
+							<input type="number" name='phone' :value='userInfo.phone' maxlength="11" class='id'
+								placeholder="请输入手机号"></input>
+						</view>
 					</view>
 					<view class='item acea-row row-between-wrapper'>
 						<view>ID号</view>
@@ -453,6 +446,7 @@
 	.personal-data .modifyBnt {
 		font-size: 32rpx;
 		color: #fff;
+		background: #2f6df6 !important;
 		width: 690rpx;
 		height: 90rpx;
 		border-radius: 50rpx;
@@ -463,6 +457,11 @@
 
 	.bg_color {
 		@include main_bg_color(theme);
+	}
+
+	.personal-data .modifyBnt.bg_color {
+		background: #2f6df6 !important;
+		background-color: #2f6df6 !important;
 	}
 
 	.personal-data .logOut {

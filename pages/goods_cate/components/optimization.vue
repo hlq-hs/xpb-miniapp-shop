@@ -77,7 +77,7 @@
 					<view class="item acea-row row-between-wrapper" v-for="(item,index) in tempArr" :key='index'
 						@click="goDetail(item)">
 						<view class="pic">
-							<image :src="item.image" mode="aspectFill"></image>
+							<image :src="item.image" mode="aspectFit"></image>
 						</view>
 						<view class="pictxt">
 							<view class="text line2">{{item.storeName}}</view>
@@ -1029,6 +1029,8 @@
 					margin: auto;
 					border-radius: 16rpx;
 					position: relative;
+					background-color: #fff;
+					overflow: hidden;
 
 					image {
 						width: 100%;

@@ -256,6 +256,10 @@
 		font-weight: normal;
 	}
 
+	.coupon-list .item .money.main_bg {
+		background: #1677ff !important;
+	}
+
 	.main_bg {
 		@include main_bg_color(theme);
 	}

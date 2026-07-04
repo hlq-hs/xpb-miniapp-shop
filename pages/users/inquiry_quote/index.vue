@@ -118,6 +118,31 @@
 		<view class="submit-bar">
 			<view class="submit-btn" @click="submitQuote">询价</view>
 		</view>
+		<view v-if="inquiryAvailableModalVisible" class="available-modal-mask">
+			<view class="available-modal">
+				<text class="available-modal-title">未匹配到可以询价的车型</text>
+				<text class="available-modal-desc">{{ inquiryAvailableModalDesc }}</text>
+				<scroll-view
+					v-if="inquiryAvailableModels.length"
+					scroll-y
+					class="available-model-list"
+				>
+					<view
+						v-for="(item, index) in inquiryAvailableModels"
+						:key="`${item.brandName}-${item.seriesName}-${index}`"
+						class="available-model-card"
+					>
+						<text class="available-model-brand">{{ item.brandName }}</text>
+						<text class="available-model-series">{{ item.seriesName }}</text>
+					</view>
+				</scroll-view>
+				<view v-else class="available-empty">
+					<text class="available-empty-title">该品牌没有可匹配的车型</text>
+					<text class="available-empty-desc">{{ inquiryAvailableBrandName || '当前品牌' }}暂无可询价车型</text>
+				</view>
+				<view class="available-modal-btn" @click="closeAvailableModal">知道了</view>
+			</view>
+		</view>
 		<view v-if="isPageLoading" class="loading-mask">
 			<view class="loading-panel">
 				<view class="loading-spinner"></view>
@@ -129,7 +154,7 @@
 
 <script>
 import { pathToBase64 } from '@/plugin/image-tools/index.js';
-import { getUserCarInfo, getUserCarList } from '@/api/userCar.js';
+import { getUserCarInfo, getUserCarList, searchCarInfoByBrandSeries } from '@/api/userCar.js';
 
 const VIN_REGEX = /[A-HJ-NPR-Z0-9]{17}/;
 const BAIDU_TOKEN_BUFFER_SECONDS = 120;
@@ -155,7 +180,10 @@ export default {
 			vinQueryLoading: false,
 			vinQueryText: '',
 			vinQueryVin: '',
-			vinQueryTimer: null
+			vinQueryTimer: null,
+			inquiryAvailableModalVisible: false,
+			inquiryAvailableModels: [],
+			inquiryAvailableBrandName: ''
 		};
 	},
 	computed: {
@@ -171,6 +199,9 @@ export default {
 		},
 		vinCodeLength() {
 			return (this.vinCode || '').length;
+		},
+		inquiryAvailableModalDesc() {
+			return this.inquiryAvailableModels.length ? '以下车型可以询价' : '该品牌没有可匹配的车型';
 		}
 	},
 	watch: {
@@ -789,6 +820,63 @@ export default {
 					.join(' ')
 			);
 		},
+		getVehicleBrandName(vehicleInfo) {
+			if (!vehicleInfo) return '';
+			return vehicleInfo.carBrandName || vehicleInfo.brandName || vehicleInfo.cusCarOem || '';
+		},
+		getVehicleSeriesName(vehicleInfo) {
+			if (!vehicleInfo) return '';
+			return vehicleInfo.carModelName || vehicleInfo.seriesZh || vehicleInfo.seriesName || vehicleInfo.cusCarName || '';
+		},
+		async appendAdminCarInfo(vehicleInfo) {
+			const brandName = this.getVehicleBrandName(vehicleInfo);
+			const seriesName = this.getVehicleSeriesName(vehicleInfo);
+			if (!brandName || !seriesName) return vehicleInfo;
+
+			try {
+				const result = await searchCarInfoByBrandSeries({
+					brandName,
+					seriesName
+				});
+				const carInfoSearchResult = result && result.data ? result.data : {};
+				uni.setStorageSync('inquiryCarInfoSearchResult', carInfoSearchResult);
+				return {
+					...vehicleInfo,
+					brandName,
+					seriesName,
+					adminCarInfoFound: carInfoSearchResult.isFound,
+					carInfoSearchResult
+				};
+			} catch (error) {
+				return {
+					...vehicleInfo,
+					brandName,
+					seriesName
+				};
+			}
+		},
+		getAvailableInquiryModels(data, brandName, seriesName) {
+			const list = Array.isArray(data && data.list) ? data.list : [];
+			return list
+				.map(item => ({
+					brandName: item && item.brandName ? item.brandName : brandName,
+					seriesName: item && item.seriesName ? item.seriesName : seriesName
+				}))
+				.filter(item => item.brandName || item.seriesName);
+		},
+		showAdminCarInfoNotFoundModal(vehicleInfo) {
+			uni.hideLoading();
+			const data = vehicleInfo && vehicleInfo.carInfoSearchResult ? vehicleInfo.carInfoSearchResult : {};
+			const brandName = vehicleInfo && vehicleInfo.brandName ? vehicleInfo.brandName : '';
+			this.inquiryAvailableBrandName = brandName;
+			this.inquiryAvailableModels = this.getAvailableInquiryModels(data, brandName, vehicleInfo && vehicleInfo.seriesName);
+			this.inquiryAvailableModalVisible = true;
+		},
+		closeAvailableModal() {
+			this.inquiryAvailableModalVisible = false;
+			this.inquiryAvailableModels = [];
+			this.inquiryAvailableBrandName = '';
+		},
 		async proceedWithVin(vinCode, loadingTitle = '查询中') {
 			const normalizedVin = (vinCode || '').trim().toUpperCase();
 			if (normalizedVin.length !== 17) {
@@ -820,7 +908,12 @@ export default {
 					return false;
 				}
 
-				uni.setStorageSync('inquiryVehicleInfo', vehicleInfo);
+				const nextVehicleInfo = await this.appendAdminCarInfo(vehicleInfo);
+				uni.setStorageSync('inquiryVehicleInfo', nextVehicleInfo);
+				if (nextVehicleInfo.adminCarInfoFound === false) {
+					this.showAdminCarInfoNotFoundModal(nextVehicleInfo);
+					return false;
+				}
 				uni.navigateTo({
 					url: `/pages/users/inquiry_parts/index?vin=${encodeURIComponent(normalizedVin)}&vehicleName=${encodeURIComponent(vehicleName)}`
 				});
@@ -1539,6 +1632,122 @@ export default {
 	color: #ffffff;
 	background: linear-gradient(180deg, #2485f4 0%, #1975e5 100%);
 	box-shadow: 0 18rpx 32rpx rgba(29, 120, 232, 0.22);
+}
+
+.available-modal-mask {
+	position: fixed;
+	inset: 0;
+	z-index: 120;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 48rpx;
+	background: rgba(0, 0, 0, 0.55);
+	box-sizing: border-box;
+}
+
+.available-modal {
+	width: 100%;
+	max-width: 640rpx;
+	padding: 42rpx 34rpx 30rpx;
+	border-radius: 24rpx;
+	background: #ffffff;
+	box-sizing: border-box;
+	box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.18);
+}
+
+.available-modal-title {
+	display: block;
+	text-align: center;
+	font-size: 34rpx;
+	font-weight: 700;
+	line-height: 1.35;
+	color: #1f2633;
+}
+
+.available-modal-desc {
+	display: block;
+	margin-top: 18rpx;
+	padding: 14rpx 18rpx;
+	border-radius: 12rpx;
+	text-align: center;
+	font-size: 26rpx;
+	line-height: 1.4;
+	color: #1b73e1;
+	background: #eef6ff;
+}
+
+.available-model-list {
+	margin-top: 24rpx;
+	max-height: 258rpx;
+	overflow: hidden;
+}
+
+.available-model-card {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	column-gap: 18rpx;
+	min-height: 72rpx;
+	padding: 12rpx 20rpx;
+	border-radius: 14rpx;
+	border: 1rpx solid #e5ebf3;
+	background: #fafcff;
+	box-sizing: border-box;
+}
+
+.available-model-card + .available-model-card {
+	margin-top: 14rpx;
+}
+
+.available-model-brand,
+.available-model-series {
+	font-size: 30rpx;
+	font-weight: 600;
+	line-height: 1.35;
+	color: #2d3440;
+}
+
+.available-model-series {
+	color: #566273;
+}
+
+.available-empty {
+	margin-top: 24rpx;
+	padding: 30rpx 24rpx;
+	border-radius: 16rpx;
+	border: 1rpx dashed #d7e4f2;
+	background: #fafcff;
+	text-align: center;
+}
+
+.available-empty-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	line-height: 1.4;
+	color: #2d3440;
+}
+
+.available-empty-desc {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 26rpx;
+	line-height: 1.4;
+	color: #8a95a5;
+}
+
+.available-modal-btn {
+	margin-top: 30rpx;
+	height: 76rpx;
+	border-radius: 999rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #ffffff;
+	background: linear-gradient(180deg, #2485f4 0%, #1975e5 100%);
 }
 
 .loading-mask {

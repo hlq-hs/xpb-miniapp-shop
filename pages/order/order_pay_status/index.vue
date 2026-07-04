@@ -4,7 +4,7 @@
 			<!--失败时： 用icon-iconfontguanbi fail替换icon-duihao2 bg-color-->
 			<view class='iconfont icons icon-duihao2 bg_color'
 				v-if="order_pay_info.paid === 1"></view>
-			<view v-if="order_pay_info.paid === 2" class='iconfont icons icon-iconfontguanbi'></view>
+			<view v-else-if="order_pay_info.paid === 2 || status==2 || errMsg" class='icons pay-fail-icon'>×</view>
 			<!-- 失败时：订单支付失败 -->
 			<view class='status' v-if="order_pay_info.payType != 'offline'">{{status==2 ? '订单取消支付' : errMsg ? '订单支付异常':payResult }}</view>
 			<view class='status' v-else>订单创建成功</view>
@@ -117,12 +117,19 @@
 				.catch(err => {
 					this.order_pay_info.paid = 2;
 					this.errMsg = true;
-					this.msg = err;
+					this.msg = this.formatPayError(err);
 					uni.hideLoading();
-					this.$util.Tips({
-						title: err
-					});
 				});
+			},
+			formatPayError(err) {
+				const message = err && err.message ? err.message : String(err || '');
+				if (message.indexOf('NO TPAY') !== -1 || message.indexOf('支付失败') !== -1) {
+					return '支付未完成，请重新支付或查看订单状态';
+				}
+				if (message.indexOf('cancel') !== -1 || message.indexOf('取消') !== -1) {
+					return '已取消支付';
+				}
+				return message || '支付异常，请稍后查看订单状态';
 			},
 			onLoadFun: function() {
 				this.getOrderPayInfo();
@@ -139,7 +146,11 @@
 				});
 				getOrderDetail(that.orderId).then(res => {
 					that.$set(that, 'order_pay_info', res.data);
-					if (res.data.payType === 'weixin') {
+					if (that.status == 2) {
+						that.order_pay_info.paid = 2;
+						that.msg = '已取消支付';
+						uni.hideLoading();
+					} else if (res.data.payType === 'weixin') {
 						setTimeout(()=>{
 							that.wechatQueryPay();
 						},2000);
@@ -209,6 +220,16 @@
 	.icon-iconfontguanbi {
 		background-color: #999 !important;
 		text-shadow: none !important;
+	}
+	.pay-fail-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #e93323 !important;
+		text-shadow: none !important;
+		font-size: 90rpx !important;
+		font-weight: 300;
+		line-height: 1 !important;
 	}
 	.bg_color{
 		@include main_bg_color(theme);

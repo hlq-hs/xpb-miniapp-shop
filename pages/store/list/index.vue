@@ -7,7 +7,7 @@
 					v-model="keywords"
 					confirm-type="search"
 					maxlength="30"
-					placeholder="搜索门店名称/地址/电话/介绍"
+					placeholder="搜索门店名称/地址"
 					placeholder-class="placeholder"
 					@confirm="handleSearch"
 				/>

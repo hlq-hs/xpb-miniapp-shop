@@ -4,11 +4,8 @@
 		<view class="system-height" :style="{height:statusBarHeight}"></view>
 		<!-- #ifdef MP -->
 		<view class="title-bar" style="height: 43px;">
-			<view class="icon" @click="back" v-if="!isHome">
-				<image class="img" :src="urlDomain+'crmebimage/perset/usersImg/left.png'"></image>
-			</view>
-			<view class="icon" @click="home" v-else>
-				<image class="img" :src="urlDomain+'crmebimage/perset/usersImg/home.png'"></image>
+			<view class="icon" @click="home">
+				<view class="home-arrow"></view>
 			</view>
 			账户登录
 		</view>
@@ -92,7 +89,7 @@
 		methods: {
 			// 返回
 			back() {
-				uni.navigateBack();
+				this.home();
 			},
 			// 跳入首页
 			home() {
@@ -224,9 +221,12 @@
 		width: 86rpx;
 		height: 86rpx;
 
-		.img {
-			width: 50rpx;
-			height: 50rpx;
+		.home-arrow {
+			width: 24rpx;
+			height: 24rpx;
+			border-left: 5rpx solid #111;
+			border-bottom: 5rpx solid #111;
+			transform: rotate(45deg);
 		}
 	}
 

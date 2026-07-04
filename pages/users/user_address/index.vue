@@ -13,21 +13,23 @@
 						<input type='number' placeholder='请输入联系电话' placeholder-style="color:#ccc;" name="phone"
 							:value='userAddress.phone' placeholder-class='placeholder' maxlength="11"></input>
 					</view>
-					<view class='item acea-row row-between-wrapper relative' v-if="selectType === 'inquiry'">
-						<view class='name'>选择门店地址</view>
-						<view class="address" @tap="openStoreSelect">
-							<view class='acea-row'>
-								<view class="picker line1">{{ selectedStoreName || storeSelectPlaceholder }}</view>
-								<view class='iconfont icon-xiangyou abs_right'></view>
+					<view class='item store-address-item relative' v-if="selectType === 'inquiry'">
+						<view class="store-address-top acea-row row-between-wrapper">
+							<view class='name'>选择门店地址</view>
+							<view class="address" @tap="openStoreSelect">
+								<view class='acea-row'>
+									<view class="picker line1">{{ selectedStoreName || storeSelectPlaceholder }}</view>
+									<view class='iconfont icon-xiangyou abs_right'></view>
+								</view>
 							</view>
 						</view>
-					</view>
-					<view class="selected-store-card" v-if="selectType === 'inquiry' && selectedStoreName">
-						<view class="selected-store-head">
-							<text class="selected-store-name">{{ selectedStore.name || '门店' }}</text>
-							<text class="selected-store-distance">{{ formatStoreDistance(selectedStore) }}</text>
+						<view class="selected-store-card" v-if="selectedStoreName">
+							<view class="selected-store-head">
+								<text class="selected-store-name">{{ selectedStore.name || '门店' }}</text>
+								<text class="selected-store-distance">{{ formatStoreDistance(selectedStore) }}</text>
+							</view>
+							<view class="selected-store-address">{{ getStoreAddress(selectedStore) }}</view>
 						</view>
-						<view class="selected-store-address">{{ getStoreAddress(selectedStore) }}</view>
 					</view>
 					<view class='item acea-row row-between-wrapper relative'>
 						<view class='name'>所在地区</view>
@@ -78,7 +80,7 @@
 					/>
 					<text class="store-search-btn" @tap="searchStoreList">搜索</text>
 				</view>
-				<scroll-view class="store-select-list" scroll-y @tap="handleStoreListTap" @click="handleStoreListTap" @touchend="handleStoreListTap">
+				<scroll-view class="store-select-list" scroll-y>
 					<view class="store-select-loading" v-if="storeLoading">门店加载中...</view>
 					<view class="store-select-empty" v-else-if="!storeList.length">暂无门店，请先授权定位</view>
 					<view
@@ -87,6 +89,8 @@
 						v-for="(item, index) in storeList"
 						:key="getStoreKey(item, index)"
 						:data-index="index"
+						@tap="handleStoreListTap"
+						@click="handleStoreListTap"
 						hover-class="store-select-row-hover"
 					>
 						<view class="store-select-row-head" :data-index="index">
@@ -280,9 +284,9 @@
 				}, 500);
 			},
 			handleStoreListTap(e) {
-				const dataset = (e && e.target && e.target.dataset) || {};
 				const currentDataset = (e && e.currentTarget && e.currentTarget.dataset) || {};
-				const indexValue = dataset.index !== undefined ? dataset.index : currentDataset.index;
+				const dataset = (e && e.target && e.target.dataset) || {};
+				const indexValue = currentDataset.index !== undefined ? currentDataset.index : dataset.index;
 				if (indexValue === undefined || indexValue === null || indexValue === '') return;
 				const index = Number(indexValue);
 				if (Number.isNaN(index) || !this.storeList[index]) return;
@@ -294,11 +298,6 @@
 			selectStore(store, index) {
 				if (!store) return;
 				console.log('选择门店', index, store);
-				uni.showToast({
-					title: '已点击门店',
-					icon: 'none',
-					duration: 800
-				});
 				const selectedStore = Object.assign({}, store);
 				this.selectedStoreIndex = index;
 				this.selectedStore = selectedStore;
@@ -338,12 +337,16 @@
 				const storeAddress = this.getStoreAddress(store);
 				let matchedRegion = this.getStoreRegion(store);
 				try {
-					matchedRegion = matchedRegion || this.matchRegionByText(storeAddress) || this.parseRegionFromAddressText(storeAddress);
+					matchedRegion = this.isCompleteRegion(matchedRegion) ? matchedRegion : null;
+					const textRegion = this.matchRegionByText(storeAddress);
+					matchedRegion = matchedRegion || (this.isCompleteRegion(textRegion) ? textRegion : this.parseRegionFromAddressText(storeAddress));
 				} catch (e) {
 					matchedRegion = null;
 				}
+				const regionParts = this.isCompleteRegion(matchedRegion) ? matchedRegion.region : [];
+				const storeDetail = this.removeRegionPrefix(storeAddress, regionParts);
 				const nextAddress = Object.assign({}, this.userAddress, {
-					detail: storeAddress || store.detailedAddress || store.address || '',
+					detail: storeDetail || storeAddress || store.detailedAddress || store.address || '',
 					street: storeAddress,
 					latitude: store.dimensionY || store.latitude || '',
 					longitude: store.longitudeX || store.longitude || '',
@@ -365,6 +368,9 @@
 				}
 				this.userAddress = nextAddress;
 			},
+			isCompleteRegion(match = null) {
+				return !!(match && Array.isArray(match.region) && match.region.filter(Boolean).length === 3);
+			},
 			getStoreRegion(store = {}) {
 				const province = this.pickStoreField(store, ['province', 'provinceName', 'province_name']);
 				const city = this.pickStoreField(store, ['city', 'cityName', 'city_name']);
@@ -376,6 +382,18 @@
 					};
 				}
 				return null;
+			},
+			removeRegionPrefix(address = '', region = []) {
+				let detail = String(address || '').trim();
+				if (!detail || !Array.isArray(region) || !region.length) return detail;
+				region.filter(Boolean).forEach(item => {
+					const text = String(item || '').trim();
+					if (!text) return;
+					if (detail.indexOf(text) === 0) {
+						detail = detail.slice(text.length).trim();
+					}
+				});
+				return detail.replace(/^[\s,，、-]+/, '').trim();
 			},
 			pickStoreField(store = {}, keys = []) {
 				for (let i = 0; i < keys.length; i++) {
@@ -985,25 +1003,47 @@
 		line-height: 90rpx;
 	}
 
+	.addAddress .list .store-address-item {
+		height: auto;
+		line-height: normal;
+		display: block;
+		padding-bottom: 0;
+	}
+
+	.addAddress .list .store-address-top {
+		position: relative;
+		height: 90rpx;
+		line-height: 90rpx;
+	}
+
 	.addAddress .list .item .name {
-		// width: 195rpx;
+		width: 200rpx;
+		flex-shrink: 0;
 		font-size: 30rpx;
 		color: #333;
+		white-space: nowrap;
 	}
 
 	.addAddress .list .item .address {
 		flex: 1;
-		margin-left: 50rpx;
+		margin-left: 20rpx;
+		min-width: 0;
 	}
 
 	.addAddress .list .item input {
-		width: 475rpx;
+		flex: 1;
+		width: auto;
+		min-width: 0;
+		margin-left: 20rpx;
 		font-size: 30rpx;
 		font-weight: 400;
 	}
 
 	.addAddress .list .item .detail-text {
-		width: 475rpx;
+		flex: 1;
+		width: auto;
+		min-width: 0;
+		margin-left: 20rpx;
 		padding-right: 44rpx;
 		font-size: 30rpx;
 		font-weight: 400;

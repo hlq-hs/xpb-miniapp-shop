@@ -3,11 +3,8 @@
 		<view class="system-height" :style="{height:statusBarHeight}"></view>
 		<!-- #ifdef MP -->
 		<view class="title-bar" style="height: 43px;">
-			<view class="icon" @click="back" v-if="!isHome">
-				<image :src="urlDomain+'crmebimage/perset/usersImg/left.png'"></image>
-			</view>
-			<view class="icon" @click="home" v-else>
-				<image :src="urlDomain+'crmebimage/perset/usersImg/home.png'"></image>
+			<view class="icon" @click="home">
+				<view class="home-arrow"></view>
 			</view>
 			账户登录
 		</view>
@@ -177,7 +174,7 @@
 				this.isUp = true
 			},
 			back() {
-				uni.navigateBack();
+				this.home();
 			},
 			home() {
 				uni.switchTab({
@@ -429,6 +426,7 @@
 
 				&.btn1 {
 					color: #fff;
+					background: linear-gradient(180deg, #2485f4 0%, #1975e5 100%) !important;
 				}
 
 				&.btn2 {
@@ -457,9 +455,12 @@
 		width: 86rpx;
 		height: 86rpx;
 
-		image {
-			width: 50rpx;
-			height: 50rpx;
+		.home-arrow {
+			width: 24rpx;
+			height: 24rpx;
+			border-left: 5rpx solid #111;
+			border-bottom: 5rpx solid #111;
+			transform: rotate(45deg);
 		}
 	}
 </style>

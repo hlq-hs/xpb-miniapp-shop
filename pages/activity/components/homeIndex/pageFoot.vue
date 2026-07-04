@@ -4,10 +4,12 @@
 		<view v-if="bottomNavigationList.length">
 			<view class="page-footer" id="target" :style="[isSmallPage?boxStyle:'']">
 				<view :style="[bgColor]" class="acea-row row-middle row-around bg-box">
-					<view class="foot-item" v-for="(item,index) in bottomNavigationList" :key="index"
+					<view class="foot-item" :class="{'foot-item-center': index === 2}" v-for="(item,index) in bottomNavigationList" :key="index"
 						@click="goRouter(item)">
 						<block v-if="isActive(item)">
-							<view v-if="index === 2" class="nav-cost-icon checked"><text>透明</text><text>修车</text></view>
+							<view v-if="index === 2" class="nav-cost-icon checked">
+								<view class="nav-cost-text"><text>透明</text><text>修车</text></view>
+							</view>
 							<view v-else-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon checked">
 								<view></view><view></view><view></view><view></view>
 							</view>
@@ -16,7 +18,9 @@
 							<view v-else class="txt">{{item.name}}</view>
 						</block>
 						<block v-else>
-							<view v-if="index === 2" class="nav-cost-icon"><text>透明</text><text>修车</text></view>
+							<view v-if="index === 2" class="nav-cost-icon">
+								<view class="nav-cost-text"><text>透明</text><text>修车</text></view>
+							</view>
 							<view v-else-if="fixedIcons[index] && fixedIcons[index].type === 'category'" class="nav-category-icon">
 								<view></view><view></view><view></view><view></view>
 							</view>
@@ -38,6 +42,8 @@
 	import {
 		getBottomNavigationApi
 	} from '@/api/api.js';
+	import { toLogin } from '@/libs/login.js';
+	import { BACK_URL } from '@/config/cache';
 	let app = getApp();
 	export default {
 		name: 'pageFooter',
@@ -151,6 +157,15 @@
 					}
 				});
 			},
+			isStoreLink(link) {
+				return /^\/pages\/store\//.test(this.normalizeLink(link).split('?')[0]);
+			},
+			needLoginForStore(link) {
+				if (!this.isStoreLink(link) || this.$store.getters.isLogin) return false;
+				this.$Cache.set(BACK_URL, this.normalizeLink(link));
+				toLogin(false, '/pages/users/wechat_login/index');
+				return true;
+			},
 			navigationInfo() {
 				getBottomNavigationApi().then(res => {
 					let data = res.data;
@@ -168,6 +183,7 @@
 				var page = (pages[pages.length - 1]).$page.fullPath;
 				const link = this.normalizeLink(item.link);
 				if (link == page) return
+				if (this.needLoginForStore(link)) return;
 				if (['/pages/index/index', '/pages/order_addcart/order_addcart',
 						'/pages/user/index', '/pages/discover_index/index'
 					].indexOf(link) > -1) {
@@ -204,29 +220,10 @@
 		height: calc(98rpx + env(safe-area-inset-bottom)); ///鍏煎 IOS>11.2/
 		box-sizing: border-box;
 		border-top: solid 1rpx #F3F3F3;
-		background: radial-gradient(circle at 50% 13rpx,
-			transparent 0,
-			transparent 47rpx,
-			#fff 48rpx,
-			#fff 100%);
+		background: #fff;
 		box-shadow: 0px 0px 17rpx 1rpx rgba(206, 206, 206, 0.32);
 		padding-bottom: constant(safe-area-inset-bottom); ///鍏煎 IOS<11.2/
 		padding-bottom: env(safe-area-inset-bottom); ///鍏煎 IOS>11.2/
-
-		&::before {
-			content: '';
-			position: absolute;
-			left: 50%;
-			top: -37rpx;
-			width: 100rpx;
-			height: 100rpx;
-			transform: translateX(-50%);
-			border: 3rpx solid #fff;
-			border-radius: 50%;
-			box-sizing: border-box;
-			background: transparent;
-			pointer-events: none;
-		}
 
 		.foot-item {
 			display: flex;
@@ -255,11 +252,7 @@
 
 		.bg-box{
 			height: 100%;
-			background: radial-gradient(circle at 50% 13rpx,
-				transparent 0,
-				transparent 47rpx,
-				#fff 48rpx,
-				#fff 100%) !important;
+			background: #fff !important;
 		}
 		.foot-item image {
 			height: 50rpx;
@@ -279,35 +272,76 @@
 		}
 
 		.foot-item .nav-icon.checked {
-			@include main-color(theme);
+			color: #18b8ff;
 		}
 
 		.foot-item .nav-cost-icon {
-			width: 102rpx;
-			height: 102rpx;
-			font-size: 25rpx;
+			width: 126rpx;
+			height: 126rpx;
+			font-size: 24rpx;
 			font-weight: 600;
 			text-align: center;
-			color: #29b6f6;
-			background: transparent;
-			border: 0;
+			color: #fff;
+			background:
+				linear-gradient(180deg, #5e5b54 0%, #252525 100%) padding-box,
+				conic-gradient(from 210deg, #32d8ff 0deg, #0aa9ff 120deg, #1978ff 235deg, #78ecff 360deg) border-box;
+			border: 8rpx solid transparent;
 			border-radius: 50%;
 			box-sizing: border-box;
-			margin-bottom: -52rpx;
-			transform: translateY(-50rpx);
-			box-shadow: none;
+			margin-bottom: -50rpx;
+			transform: translateY(-84rpx);
+			box-shadow:
+				0 0 8rpx rgba(50, 216, 255, 0.95),
+				0 0 18rpx rgba(22, 183, 255, 0.68),
+				0 0 30rpx rgba(22, 183, 255, 0.36),
+				inset 0 0 8rpx rgba(50, 216, 255, 0.28);
 			position: relative;
 			z-index: 2;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
-			line-height: 28rpx;
-			letter-spacing: 4rpx;
+			line-height: 1;
+			letter-spacing: 0;
+			gap: 8rpx;
+			padding: 18rpx 10rpx 14rpx;
 		}
 
 		.foot-item .nav-cost-icon.checked {
-			color: #29b6f6;
+			color: #fff;
+		}
+
+		.foot-item .nav-cost-car {
+			width: 56rpx;
+			height: 48rpx;
+			flex-shrink: 0;
+			display: block;
+		}
+
+		.foot-item .nav-cost-text {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-width: 0;
+			color: #fff;
+		}
+
+		.foot-item .nav-cost-text text:first-child {
+			font-size: 28rpx;
+			line-height: 32rpx;
+			font-weight: 700;
+			color: #fff;
+			white-space: nowrap;
+		}
+
+		.foot-item .nav-cost-text text:last-child {
+			margin-top: 4rpx;
+			font-size: 28rpx;
+			line-height: 32rpx;
+			font-weight: 700;
+			color: #fff;
+			white-space: nowrap;
 		}
 
 		.foot-item .nav-category-icon {
@@ -332,16 +366,30 @@
 		}
 
 		.foot-item .nav-category-icon.checked {
-			color: #666;
+			color: #18b8ff;
 		}
 
 		.txtchecked {
 			font-size: 24rpx;
+			color: #18b8ff !important;
 		}
 
 		.foot-item .txt {
 			font-size: 24rpx;
-			@include main-color(theme);
+			color: #18b8ff;
+		}
+
+		.foot-item-center .txt,
+		.foot-item-center .unchecked,
+		.foot-item-center .txtchecked {
+			position: absolute;
+			top: 50rpx;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 120rpx;
+			text-align: center;
+			font-size: 24rpx;
+			line-height: 28rpx;
 		}
 	}
 </style>

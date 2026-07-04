@@ -5,7 +5,7 @@
 				<view class="listA" :style="[gridGap]">
 					<view class="item" v-for="(item, index) in tempArr" :key="index" @click="goDetail(item)">
 						<view class="pictrue">
-							<easy-loadimage :image-src="item.image" :radius="dataConfig.contentStyle.val">
+							<easy-loadimage :image-src="item.image" mode="aspectFill" :radius="dataConfig.contentStyle.val">
 							</easy-loadimage>
 							<view v-if="item.activityStyle" :style="{ backgroundImage: `url(${item.activityStyle})` }"
 								class="border-picture"></view>
@@ -38,7 +38,7 @@
 					<view class="item" :style="[contentStyle]" v-for="(item, index) in tempArr" :key="index"
 						@click="goDetail(item)">
 						<view class="pictrue">
-							<easy-loadimage :image-src="item.image" :radius="dataConfig.contentStyle.val">
+							<easy-loadimage :image-src="item.image" mode="aspectFill" :radius="dataConfig.contentStyle.val">
 							</easy-loadimage>
 							<view v-if="item.activityStyle" :style="{ backgroundImage: `url(${item.activityStyle})` }"
 								class="border-picture"></view>
@@ -68,7 +68,7 @@
 				<view class="listB" :style="[gridGap]">
 					<view class="item" v-for="(item, index) in tempArr" :key="index" @click="goDetail(item)">
 						<view class="pictrue">
-							<easy-loadimage :image-src="item.image" :radius="dataConfig.contentStyle.val">
+							<easy-loadimage :image-src="item.image" mode="aspectFill" :radius="dataConfig.contentStyle.val">
 							</easy-loadimage>
 							<view v-if="item.activityStyle" :style="{ backgroundImage: `url(${item.activityStyle})` }"
 								class="border-picture"></view>
@@ -98,7 +98,7 @@
 				<view class="listBig" :style="[gridGap]">
 					<view class="itemBig" v-for="(item,index) in tempArr" :key="index" @click="goDetail(item)">
 						<view class="img-box">
-							<easy-loadimage :image-src="item.image" :radius="dataConfig.contentStyle.val">
+							<easy-loadimage :image-src="item.image" mode="aspectFill" :radius="dataConfig.contentStyle.val">
 							</easy-loadimage>
 							<view v-if="item.activityStyle" :style="{ backgroundImage: `url(${item.activityStyle})` }"
 								class="border-picture"></view>

@@ -306,7 +306,7 @@
 			line-height: 86rpx;
 			color: #FFFFFF;
 			border-radius: 43rpx;
-			@include main_bg_color(theme);
+			background: #2f6df6;
 			font-size: 32rpx;
 		}
 	}

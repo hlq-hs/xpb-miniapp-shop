@@ -1,6 +1,6 @@
 <template>
 	<view class="easy-loadimage" :style="[boxStyle]" :id="uid">
-		<image class="origin-img" :style="[imageRadius]" :src="imageSrc" mode="scaleToFill" v-if="loadImg&&!isLoadError"
+		<image class="origin-img" :style="[imageRadius]" :src="imageSrc" :mode="imageMode" v-if="loadImg&&!isLoadError"
 			v-show="showImg" :class="{'no-transition':!openTransition,'show-transition':showTransition&&openTransition}"
 			@load="handleImgLoad" @error="handleImgError">
 		</image>
@@ -113,11 +113,21 @@
 				}
 			},
 			imageRadius() {
+				const style = {
+					'object-fit': this.imageObjectFit
+				};
 				if (this.radius && this.radius > 0) {
-					return {
-						'border-radius': this.radius * 2 + 'rpx'
-					}
+					style['border-radius'] = this.radius * 2 + 'rpx';
 				}
+				return style;
+			},
+			imageMode() {
+				return this.mode || 'scaleToFill';
+			},
+			imageObjectFit() {
+				if (this.imageMode === 'aspectFit') return 'contain';
+				if (this.imageMode === 'aspectFill') return 'cover';
+				return 'fill';
 			}
 		},
 		methods: {
