@@ -21,7 +21,7 @@
 					<view class='item acea-row row-middle' v-for="(item,indexw) in scoreList" :key="indexw">
 						<view>{{item.name}}</view>
 						<view class='starsList'>
-							<text @click="stars(indexn, indexw)" v-for="(itemn, indexn) in item.stars" :key="indexn" class='iconfont' :class="item.index >= indexn? 'icon-shitixing':'icon-kongxinxing'"></text>
+							<text @click="stars(indexn, indexw)" v-for="(itemn, indexn) in item.stars" :key="indexn" class='star' :class="{ active: item.index >= indexn }">★</text>
 						</view>
 						<text class='evaluate'>{{item.index === -1 ? "" : item.index + 1 + "分"}}</text>
 					</view>
@@ -30,10 +30,10 @@
 						<view class='list acea-row row-middle'>
 							<view class='pictrue' v-for="(item,index) in picsPath" :key="index">
 								<image :src='item'></image>
-								<text class='iconfont icon-guanbi1' @click='DelPic(index)'></text>
+								<text class='close' @click='DelPic(index)'>×</text>
 							</view>
 							<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic' v-if="picsPath.length < 8">
-								<text class='iconfont icon-icon25201'></text>
+								<text class='upload-icon'>+</text>
 								<view>上传图片</view>
 							</view>
 						</view>
@@ -162,8 +162,14 @@
 				let formId = e.detail.formId,
 					value = e.detail.value,
 					that = this,
-					product_score = that.scoreList[0].index + 1 === 0 ? "" : that.scoreList[0].index + 1,
-					service_score = that.scoreList[1].index + 1 === 0 ? "" : that.scoreList[1].index + 1;
+					product_score = that.scoreList[0].index + 1,
+					service_score = that.scoreList[1].index + 1;
+				if (product_score === 0) return that.$util.Tips({
+					title: '请选择商品质量评分'
+				});
+				if (service_score === 0) return that.$util.Tips({
+					title: '请选择服务态度评分'
+				});
 				if (!value.comment) return that.$util.Tips({
 					title: '请填写你对宝贝的心得！'
 				});
@@ -204,9 +210,6 @@
 		color: #999;
 		padding-top: 10rpx;
 	}
-	.icon-shitixing{
-		color: #FFBB00 !important;
-	}
 	.evaluate-con .score {
 		background-color: #fff;
 		// border-top: 1rpx solid #f5f5f5;
@@ -225,12 +228,16 @@
 		padding: 0 35rpx 0 40rpx;
 	}
 
-	.evaluate-con .score .item .starsList .iconfont {
+	.evaluate-con .score .item .starsList .star {
 		font-size: 40rpx;
 		color: #aaa;
 	}
 
-	.evaluate-con .score .item .starsList .iconfont~.iconfont {
+	.evaluate-con .score .item .starsList .star.active {
+		color: #FFBB00;
+	}
+
+	.evaluate-con .score .item .starsList .star~.star {
 		margin-left: 20rpx;
 	}
 
@@ -285,14 +292,14 @@
 		border-radius: 14rpx;
 	}
 
-	.evaluate-con .score .textarea .list .pictrue .icon-guanbi1 {
+	.evaluate-con .score .textarea .list .pictrue .close {
 		font-size: 45rpx;
 		position: absolute;
 		top: -20rpx;
 		right: -20rpx;
 	}
 
-	.evaluate-con .score .textarea .list .pictrue .icon-icon25201 {
+	.evaluate-con .score .textarea .list .pictrue .upload-icon {
 		color: #bfbfbf;
 		font-size: 50rpx;
 	}
