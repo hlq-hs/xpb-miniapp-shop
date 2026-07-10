@@ -32,11 +32,10 @@
 							<!-- #endif -->
 						</view>
 					</view>
-					<view class='item acea-row row-between-wrapper'>
+					<view class='item acea-row row-between-wrapper' @click="toPhone">
 						<view>手机号码</view>
 						<view class="input">
-							<input type="number" name='phone' :value='userInfo.phone' maxlength="11" class='id'
-								placeholder="请输入手机号"></input>
+							{{ userInfo.phone || '未绑定' }}<text class="iconfont icon-xiangyou"></text>
 						</view>
 					</view>
 					<view class='item acea-row row-between-wrapper'>
@@ -162,11 +161,24 @@
 					break;
 			}
 		},
+		onShow() {
+			if (this.isLogin) {
+				this.$store.dispatch('USERINFO').then(userInfo => {
+					this.newAvatar = userInfo.avatar || '';
+					this.nickname = userInfo.nickname ? userInfo.nickname : '-';
+				});
+			}
+		},
 		methods: {
 			//to地址
 			toAddress(){
 				uni.navigateTo({
 					url:'/pages/users/user_address_list/index'
+				})
+			},
+			toPhone(){
+				uni.navigateTo({
+					url:'/pages/infos/user_phone/index'
 				})
 			},
 			//to协议
@@ -264,6 +276,7 @@
 				if (!value.nickname) return that.$util.Tips({
 					title: '用户姓名不能为空'
 				});
+				delete value.phone;
 				value.avatar = that.newAvatar ? that.newAvatar : that.userInfo.avatar;
 				userEdit(value).then(res => {
 					that.$store.commit("changInfo", {

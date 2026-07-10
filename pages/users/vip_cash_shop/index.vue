@@ -129,6 +129,7 @@ const BALANCE_FIELDS = [
 ];
 const SHOP_NAME_FIELDS = ['shopName', 'shop_name', 'storeName', 'store_name', 'name'];
 const SHOP_ID_FIELDS = ['shopId', 'shopID', 'shopid', 'ShopId', 'SHOPID', 'shop_id', 'storeId', 'store_id'];
+const HIDDEN_DETAIL_FIELDS = ['saleNo', 'saleNO', 'sale_no', 'SaleNo', 'SALE_NO', 'shopId', 'shopID', 'shopid', 'ShopId', 'SHOPID', 'shop_id', 'storeId', 'store_id', '销售单号', '门店ID', '门店Id', '门店id'];
 
 export default {
 	data() {
@@ -150,7 +151,7 @@ export default {
 	computed: {
 		...mapGetters(['userInfo']),
 		currentPhone() {
-			return String(this.phone || (this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+			return String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || this.phone || '').trim();
 		},
 		fullShopList() {
 			return this.extractList(this.responseData);
@@ -394,7 +395,7 @@ export default {
 				return [];
 			}
 			return Object.keys(shop)
-				.filter(key => usedFields.indexOf(key) === -1)
+				.filter(key => usedFields.indexOf(key) === -1 && HIDDEN_DETAIL_FIELDS.indexOf(key) === -1)
 				.map(key => ({
 					key,
 					value: this.formatValue(shop[key])

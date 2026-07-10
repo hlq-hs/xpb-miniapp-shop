@@ -100,11 +100,15 @@
 				statistics:{},
 				vipCashAmount: null,
 				theme:app.globalData.theme,
+				userInfoPhoneRequested: false,
 				isNoCommodity: false // 是否显示缺省图
 			};
 		},
 		computed: {
 			...mapGetters(['isLogin', 'userInfo']),
+			currentPhone() {
+				return String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+			},
 			totalAssets() {
 				return this.formatMoney(this.toMoneyNumber(this.platformBalance) + this.toMoneyNumber(this.storeBalance));
 			},
@@ -198,13 +202,28 @@
 					this.statistics = res.data;
 				})
 			},
-			fetchVipCashAmount() {
-				const phone = String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+			async ensureCurrentPhone() {
+				if (this.currentPhone || !this.isLogin) {
+					return this.currentPhone;
+				}
+				if (this.userInfoPhoneRequested) {
+					return '';
+				}
+				this.userInfoPhoneRequested = true;
+				try {
+					const userInfo = await this.$store.dispatch('USERINFO');
+					return String((userInfo && (userInfo.phone || userInfo.mobile)) || '').trim();
+				} catch (error) {
+					return '';
+				}
+			},
+			async fetchVipCashAmount() {
+				const phone = await this.ensureCurrentPhone();
 				if (!phone) {
 					this.vipCashAmount = null;
-					return;
+					return Promise.resolve();
 				}
-				getVipCashAmount(phone).then(res => {
+				return getVipCashAmount(phone).then(res => {
 					this.vipCashAmount = this.formatVipCashAmount(res.data);
 				}).catch(() => {
 					this.vipCashAmount = null;
@@ -232,11 +251,12 @@
 				});
 			},
 			async openStoreBalance() {
-				const phone = String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+				const phone = await this.ensureCurrentPhone();
 				if (!phone) {
-					return this.$util.Tips({
+					this.$util.Tips({
 						title: '当前用户未绑定手机号'
 					});
+					return;
 				}
 				uni.showLoading({
 					title: '加载中...'

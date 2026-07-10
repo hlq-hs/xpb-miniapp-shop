@@ -66,6 +66,14 @@ export function getUserCoupons(data){
 }
 
 /**
+ * 外部优惠券列表
+ * @param object data
+*/
+export function getExternalVoucherInfoList(data){
+  return request.get('user/getVoucherInfoList', data)
+}
+
+/**
  * 文章分类列表
  * 
 */
@@ -128,7 +136,7 @@ export function verifyCode(){
  * @param object phone
 */
 export function registerVerify(phone){
-  return request.post('sendCode', { phone: phone },{noAuth:true},1)
+  return request.post('user/sendSmsCode', { phone: phone },{noAuth:true},1)
 }
 
 /**

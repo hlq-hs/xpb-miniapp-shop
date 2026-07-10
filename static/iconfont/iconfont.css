@@ -21,6 +21,10 @@
   content: "\ebb8";
 }
 
+.icon-ic_box:before {
+  content: "\ebb8";
+}
+
 .icon-daifahuo:before {
   content: "\e760";
 }
@@ -50,6 +54,10 @@
 }
 
 .icon-duihao2:before {
+  content: "\e64e";
+}
+
+.icon-huodong-shijian:before {
   content: "\e64e";
 }
 
@@ -104,6 +112,10 @@
 }
 
 .icon-quanbudingdan-xingerenzhongxin:before {
+  content: "\e784";
+}
+
+.icon-ic_notes:before {
   content: "\e784";
 }
 
@@ -172,6 +184,10 @@
   content: "\e605";
 }
 
+.icon-ic_returnmoney:before {
+  content: "\e605";
+}
+
 .icon-xuanzhong:before {
   content: "\e615";
 }
@@ -192,10 +208,18 @@
   content: "\e640";
 }
 
+.icon-dianpu2:before {
+  content: "\e640";
+}
+
 .icon-weixin2:before {
   content: "\e604";
 }
 
 .icon-dizhi:before {
   content: "\e608";
+}
+
+.icon-yingyeshijian1:before {
+  content: "\e674";
 }

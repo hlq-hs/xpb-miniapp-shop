@@ -32,7 +32,6 @@
 	} from '@/api/api.js';
 	import {toLogin} from '@/libs/login.js';
 	import {mapGetters} from "vuex";
-	import {setThemeColor} from '@/utils/setTheme.js'
 	const app = getApp();
 	export default {
 		mixins: [sendVerifyCode],
@@ -47,8 +46,7 @@
 				timer: '',
 				text: '获取验证码',
 				nums: 60,
-				theme:app.globalData.theme,
-				bgColor:''
+				theme:app.globalData.theme
 			};
 		},
 		mounted() {
@@ -56,11 +54,9 @@
 		},
 		computed: mapGetters(['isLogin','userInfo']),
 		onLoad() {
-			let that = this;
-			that.bgColor = setThemeColor();
 			uni.setNavigationBarColor({
-				frontColor: '#ffffff',
-				backgroundColor:that.bgColor,
+				frontColor: '#000000',
+				backgroundColor:'#ffffff',
 			});
 			if (this.isLogin) {
 				// verifyCode().then(res=>{
@@ -139,12 +135,17 @@
 								phone: that.phone,
 								captcha: that.captcha
 							}).then(res => {
+								that.$store.commit("changInfo", {
+									amount1: 'phone',
+									amount2: that.phone
+								});
+								that.$store.dispatch('USERINFO');
 								return that.$util.Tips({
 									title: res.message,
 									icon: 'success'
 								}, {
 									tab: 5,
-									url: '/pages/users/user_info/index'
+									url: '/pages/infos/user_info/index'
 								});
 							}).catch(err => {
 								return that.$util.Tips({
@@ -156,7 +157,7 @@
 								title: '您已取消更换绑定！'
 							}, {
 								tab: 5,
-								url: '/pages/users/user_info/index'
+								url: '/pages/infos/user_info/index'
 							});
 						}
 					}
@@ -240,7 +241,7 @@
 	.ChangePassword .list .item {
 		width: 100%;
 		height: 110rpx;
-		border-bottom: 2rpx solid #f0f0f0;
+		border-bottom: 2rpx solid #d8d8d8;
 	}
 
 	.ChangePassword .list .item input {
@@ -259,7 +260,7 @@
 
 	.ChangePassword .list .item .code {
 		font-size: 32rpx;
-		@include main_color(theme);
+		color: #2f6df6 !important;
 		background-color: #f5f5f5;
 	}
 
@@ -278,6 +279,7 @@
 		line-height: 90rpx;
 	}
 	.bg_color{
-		@include main_bg_color(theme);
+		background: #2f6df6 !important;
+		background-color: #2f6df6 !important;
 	}
 </style>

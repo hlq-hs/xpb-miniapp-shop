@@ -70,7 +70,7 @@ export function getCodeApi() {
  * @param data object 用户手机号
  */
 export function registerVerify(phone){
-  return request.post('sendCode', { phone: phone },{noAuth:true},1)
+  return request.post('user/sendSmsCode', { phone: phone },{noAuth:true},1)
 }
 
 /**

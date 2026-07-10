@@ -74,7 +74,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapGetters(['userInfo']),
+		...mapGetters(['userInfo', 'isLogin']),
 		currentPhone() {
 			return String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
 		},
@@ -111,8 +111,19 @@ export default {
 		this.loadMore();
 	},
 	methods: {
+		async ensureCurrentPhone() {
+			if (this.currentPhone || !this.isLogin) {
+				return this.currentPhone;
+			}
+			try {
+				const userInfo = await this.$store.dispatch('USERINFO');
+				return String((userInfo && (userInfo.phone || userInfo.mobile)) || '').trim();
+			} catch (error) {
+				return '';
+			}
+		},
 		async fetchPackageInfo() {
-			const phone = this.currentPhone;
+			const phone = await this.ensureCurrentPhone();
 			if (!phone) {
 				this.responseData = null;
 				this.errorMessage = '\u5f53\u524d\u7528\u6237\u672a\u7ed1\u5b9a\u624b\u673a\u53f7';

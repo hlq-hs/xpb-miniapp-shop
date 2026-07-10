@@ -795,8 +795,8 @@
 					"path": "user_phone/index",
 					"style": {
 						"navigationBarTitleText": "修改手机号",
-						"navigationBarBackgroundColor": "#e93323",
-						"navigationBarTextStyle": "#fff",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"app-plus": {
 							"titleNView": {
 								"type": "default"

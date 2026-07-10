@@ -30,7 +30,7 @@
 							<view class="stat-icon-wrap">
 								<text class="iconfont stat-icon icon-gouwuche8"></text>
 							</view>
-							<text class="stat-label">购买</text>
+							<text class="stat-label">总数</text>
 							<text class="stat-value">{{ item.buyCount }}</text>
 						</view>
 
@@ -136,8 +136,8 @@ export default {
 		},
 		createRenderPlan(item, index) {
 			const title = this.formatValue(item && item.jobName);
-			const buyCount = this.formatCount(this.getNumericValue(item, 'beginNum'));
-			const remainCount = this.formatCount(this.getNumericValue(item, 'packNum'));
+			const buyCount = this.formatCount(this.getTotalCount(item));
+			const remainCount = this.formatCount(this.getRemainCount(item));
 			const usedCount = this.formatCount(this.getUsedCount(item));
 			const sceneClass = this.getSceneClassByName(title);
 			return {
@@ -151,13 +151,19 @@ export default {
 				sceneCaption: this.getSceneCaptionByClass(sceneClass)
 			};
 		},
+		getTotalCount(item) {
+			return this.getFirstNumericValue(item, ['beginNum', 'totalNum', 'totalCount', 'count', 'num']);
+		},
+		getRemainCount(item) {
+			return this.getFirstNumericValue(item, ['packNum', 'remainNum', 'remainCount', 'surplusNum', 'leftNum']);
+		},
 		getUsedCount(item) {
-			const buyCount = this.getNumericValue(item, 'beginNum');
-			const remainCount = this.getNumericValue(item, 'packNum');
+			const buyCount = this.getTotalCount(item);
+			const remainCount = this.getRemainCount(item);
 			if (buyCount === null || remainCount === null) {
 				return '-';
 			}
-			return Math.max(buyCount - remainCount, 0);
+			return buyCount - remainCount;
 		},
 		getSceneClassByName(name) {
 			if (name.includes('检测') || name.includes('安全') || name.includes('匹配')) {
@@ -205,6 +211,15 @@ export default {
 			}
 			const num = Number(value);
 			return Number.isNaN(num) ? null : num;
+		},
+		getFirstNumericValue(item, keys) {
+			for (let i = 0; i < keys.length; i += 1) {
+				const value = this.getNumericValue(item, keys[i]);
+				if (value !== null) {
+					return value;
+				}
+			}
+			return null;
 		},
 		formatCount(value) {
 			if (value === null || value === undefined || value === '') {
