@@ -232,6 +232,11 @@
 		isDefault: 0
 	});
 
+	const PLATE_PROVINCES = "京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领学警港澳";
+	const PLATE_LETTER_REG = /^[A-HJ-NP-Z]$/;
+	const PLATE_LETTER_NUMBER_REG = /^[A-HJ-NP-Z0-9]$/;
+	const PLATE_SPECIAL_SUFFIXES = "学警港澳挂使领";
+
 	export default {
 		data() {
 			return {
@@ -372,6 +377,66 @@
 			normalizeCarNo(value) {
 				return String(value || "").replace(/\s+/g, "").toUpperCase();
 			},
+			getPlateLengthByValue(value) {
+				return this.normalizeCarNo(value).length >= 8 ? 8 : 7;
+			},
+			getPlateCharError(char, index) {
+				const value = String(char || "").trim().toUpperCase();
+				if (!value) return `请输入第${index + 1}位车牌号`;
+				if (value.length !== 1) return `第${index + 1}位只能输入1个字符`;
+				if (index === 0) {
+					return PLATE_PROVINCES.indexOf(value) === -1 ? "第一位只能输入省份简称" : "";
+				}
+				if (index === 1) {
+					return PLATE_LETTER_REG.test(value) ? "" : "第二位只能输入字母";
+				}
+				const isLastPlateChar = index === this.maxPlateLength() - 1;
+				const allowSpecialSuffix = isLastPlateChar && PLATE_SPECIAL_SUFFIXES.indexOf(value) !== -1;
+				if (PLATE_LETTER_NUMBER_REG.test(value) || allowSpecialSuffix) return "";
+				return isLastPlateChar
+					? `第${index + 1}位只能输入字母、数字或特殊车牌字`
+					: `第${index + 1}位只能输入字母或数字`;
+			},
+			validatePlateChar(char, index) {
+				const message = this.getPlateCharError(char, index);
+				if (message) {
+					uni.showToast({
+						title: message,
+						icon: "none"
+					});
+					return false;
+				}
+				return true;
+			},
+			validateCarNo(carNo) {
+				const value = this.normalizeCarNo(carNo);
+				const length = this.getPlateLengthByValue(value);
+				if (!value) {
+					uni.showToast({
+						title: "请输入车牌号",
+						icon: "none"
+					});
+					return false;
+				}
+				if (value.length !== length) {
+					uni.showToast({
+						title: length === 8 ? "新能源车牌请输入8位" : "普通车牌请输入7位",
+						icon: "none"
+					});
+					return false;
+				}
+				for (let i = 0; i < length; i += 1) {
+					const message = this.getPlateCharError(value[i], i);
+					if (message) {
+						uni.showToast({
+							title: message,
+							icon: "none"
+						});
+						return false;
+					}
+				}
+				return true;
+			},
 			async handleLicenseRecognition() {
 				if (this.isRecognizingVin) return;
 				try {
@@ -436,14 +501,8 @@
 					return "";
 				};
 				const carYear = getField(["listingYear", "ListingYear", "carYear"]);
-				const carNo = String(getField(["cusCarNo", "CusCarNo", "carNo"]) || this.form.carNo || "").trim();
-				if (!carNo) {
-					uni.showToast({
-						title: "请输入车牌号",
-						icon: "none"
-					});
-					return;
-				}
+				const carNo = this.normalizeCarNo(getField(["cusCarNo", "CusCarNo", "carNo"]) || this.form.carNo || "");
+				if (!this.validateCarNo(carNo)) return;
 				const normalizedCarNo = this.normalizeCarNo(carNo);
 				const carAlreadyExists = this.vehicleList.some((item) => (
 					this.normalizeCarNo(item && item.carNo) === normalizedCarNo
@@ -704,8 +763,10 @@
 				this.plateKeyboardVisible = false;
 			},
 			inputPlateKey(key) {
+				const value = String(key || "").trim().toUpperCase();
+				if (!this.validatePlateChar(value, this.activePlateIndex)) return;
 				const chars = this.plateChars.slice();
-				chars[this.activePlateIndex] = String(key);
+				chars[this.activePlateIndex] = value;
 				this.plateChars = chars;
 				this.form.carNo = chars.slice(0, this.maxPlateLength()).join("");
 				if (this.recognitionMode === "license" && this.recognitionResult) {
@@ -744,15 +805,9 @@
 			},
 			recognizeVehicle() {
 				if (this.recognizing) return;
-				const carNo = this.plateChars.slice(0, this.maxPlateLength()).join("");
+				const carNo = this.normalizeCarNo(this.plateChars.slice(0, this.maxPlateLength()).join(""));
 				this.form.carNo = carNo;
-				if (!carNo) {
-					uni.showToast({
-						title: "请输入车牌号",
-						icon: "none"
-					});
-					return;
-				}
+				if (!this.validateCarNo(carNo)) return;
 				this.recognizing = true;
 				this.recognitionResult = null;
 				this.recognitionMileage = "";
@@ -780,15 +835,11 @@
 			},
 			submitVehicle() {
 				if (this.addPageVisible) {
-					this.form.carNo = this.plateChars.slice(0, this.maxPlateLength()).join("");
+					this.form.carNo = this.normalizeCarNo(this.plateChars.slice(0, this.maxPlateLength()).join(""));
+				} else {
+					this.form.carNo = this.normalizeCarNo(this.form.carNo);
 				}
-				if (!this.form.carNo) {
-					uni.showToast({
-						title: "请输入车牌号",
-						icon: "none"
-					});
-					return;
-				}
+				if (!this.validateCarNo(this.form.carNo)) return;
 				if (this.form.id && !this.form.brandName && !this.form.seriesName && !this.form.modelName) {
 					uni.showToast({
 						title: "请输入车辆信息",

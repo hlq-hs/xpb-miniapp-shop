@@ -305,11 +305,18 @@
 						if (i == index) that.addressList[i].isDefault = true;
 						else that.addressList[i].isDefault = false;
 					}
+					if (that.selectType === 'inquiry') {
+						that.addressList[index].isDefault = true;
+						uni.setStorageSync('inquirySelectedAddress', that.addressList[index]);
+					}
 					that.$util.Tips({
 						title: '设置成功',
 						icon: 'success'
 					}, function() {
 						that.$set(that, 'addressList', that.addressList);
+						if (that.selectType === 'inquiry') {
+							uni.navigateBack();
+						}
 					});
 				}).catch(err => {
 					return that.$util.Tips({
@@ -386,6 +393,8 @@
 			},
 			goOrder: function(item) {
 				if (this.selectType === 'inquiry') {
+					uni.setStorageSync('inquirySelectedAddress', item);
+					uni.navigateBack();
 					return;
 				}
 				if (this.preOrderNo) {
