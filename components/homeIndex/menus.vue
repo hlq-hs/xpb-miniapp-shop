@@ -1,5 +1,5 @@
 <template>
-	<view v-show="menus.length" :style="[boxStyle]">
+	<view v-show="visibleMenus.length" :style="[boxStyle]">
 		<view v-if="isMany === 1">
 			<view class="swiper">
 				<swiper :interval="interval" :duration="duration" :style="'height:'+ navHigh +'px;'"
@@ -29,8 +29,8 @@
 		</view>
 		<view class="nav oneNav" v-else>
 			<scroll-view scroll-x="true" style="white-space: nowrap; display: flex" show-scrollbar="false">
-				<block v-for="(item, index) in menus" :key="index">
-					<view class="item" v-show="item.status" :style="[titleColor]" @click="menusTap(item.info[1].value)">
+				<block v-for="(item, index) in visibleMenus" :key="index">
+					<view class="item" v-show="item.status" :style="[titleColor, navItemStyle]" @click="menusTap(item.info[1].value)">
 						<view class="pictrue skeleton-radius">
 							<view v-if="isCostInquiry(item)" class="cost-inquiry-menu-icon">询</view>
 							<easy-loadimage v-else :image-src="item.img" :radius="dataConfig.contentStyle.val">
@@ -82,21 +82,9 @@
 				}
 			},
 			gridColumns() {
-				if (this.dataConfig.number.tabVal == 0) {
-					return {
-						gridRowGap: this.dataConfig.contentConfig.val * 2 + 'rpx',
-						gridTemplateColumns: 'repeat(3, 1fr)'
-					}
-				} else if (this.dataConfig.number.tabVal == 1) {
-					return {
-						gridRowGap: this.dataConfig.contentConfig.val * 2 + 'rpx',
-						gridTemplateColumns: 'repeat(4, 1fr)'
-					}
-				} else {
-					return {
-						gridRowGap: this.dataConfig.contentConfig.val * 2 + 'rpx',
-						gridTemplateColumns: 'repeat(5, 1fr)'
-					}
+				return {
+					gridRowGap: this.dataConfig.contentConfig.val * 2 + 'rpx',
+					gridTemplateColumns: `repeat(${this.menuColumnCount}, 1fr)`
 				}
 			},
 			titleColor() {
@@ -108,6 +96,19 @@
 				return {
 					'border-radius': this.dataConfig.contentStyle.val + 'px'
 				}
+			},
+			navItemStyle() {
+				return {
+					width: (100 / this.menuColumnCount) + '%'
+				};
+			},
+			menuColumnCount() {
+				const configCount = this.dataConfig.number.tabVal == 0 ? 3 : (this.dataConfig.number.tabVal == 1 ? 4 : 5);
+				const visibleCount = this.visibleMenus.length;
+				return visibleCount > 0 && visibleCount < configCount ? visibleCount : configCount;
+			},
+			visibleMenus() {
+				return this.menus.filter(item => item.status && !this.isCostInquiry(item));
 			}
 		},
 		mounted() {
@@ -165,7 +166,7 @@
 				}).exec();
 			},
 			pageNum(num) {
-				let menus = this.menus.filter(item=>item.status);
+				let menus = this.visibleMenus;
 				let count = Math.ceil(menus.length / num);
 				let goodArray = new Array();
 				for (let i = 0; i < count; i++) {

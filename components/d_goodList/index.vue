@@ -1,6 +1,6 @@
-<template>
+﻿<template>
 	<view class="goodsList">
-		<view class="item" v-for="(item,index) in tempArr" :key='index' @click="goDetail(item)">
+		<view class="item" v-for="(item,index) in tempArr" :key="index" @click="goDetail(item)">
 			<view class="pictrue">
 				<image :src="item.recommend_image" mode="aspectFill" v-if="item.recommend_image"></image>
 				<image :src="item.image" mode="aspectFill" v-else></image>
@@ -8,11 +8,13 @@
 			<view class="text line2">{{item.storeName}}</view>
 			<view class="bottom acea-row row-between-wrapper">
 				<view class="sales acea-row row-middle">
-					<view class="money" :class="item.price.length>8?'lengthStr':''"><text>￥</text>{{item.price}} <text class="item_sales">已售 {{item.sales}}</text> </view>
-					<!-- <view></view> -->
+					<view class="money" :class="String(item.price).length>8?'lengthStr':''">
+						<text>￥</text>{{item.price}}
+						<text class="item_sales">已售 {{item.sales || 0}}</text>
+					</view>
 				</view>
 				<view v-if="item.stock>0">
-				    <view class="bnt" v-if="item.activity && (item.activity.type === '1' || item.activity.type === '2' || item.activity.type === '3')">立即购买</view>
+					<view class="bnt" v-if="item.activity && (item.activity.type === '1' || item.activity.type === '2' || item.activity.type === '3')">立即购买</view>
 					<view v-else>
 						<view class="bnt" @click.stop="goCartDuo(item)">
 							加入购物车
@@ -34,94 +36,100 @@
 				type: Object,
 				default: () => {}
 			},
-			tempArr:{
+			tempArr: {
 				type: Array,
-				default:[]
+				default: () => []
 			},
-			isLogin:{
+			isLogin: {
 				type: Boolean,
-				default:false
+				default: false
 			}
 		},
-		data() {
-			return {
-			};
-		},
-		created() {},
-		mounted() {},
 		methods: {
-			goDetail(item){
-				this.$emit('detail',item);
+			goDetail(item) {
+				this.$emit('detail', item);
 			},
-			goCartDuo(item){
-				this.$emit('gocartduo',item);
+			goCartDuo(item) {
+				this.$emit('gocartduo', item);
 			}
 		}
 	};
 </script>
 
-<style lang="scss">
-	.goodsList{
+<style scoped lang="scss">
+	.goodsList {
 		padding: 12rpx 30rpx 0;
-		.item{
+
+		.item {
 			width: 100%;
 			box-sizing: border-box;
 			margin-bottom: 63rpx;
-			.pictrue{
+
+			.pictrue {
 				width: 100%;
 				height: 216rpx;
 				border-radius: 16rpx;
 				position: relative;
-				image{
+
+				image {
 					width: 100%;
 					height: 100%;
 					border-radius: 16rpx;
 				}
 			}
-			.text{
-				font-size:30rpx;
-				font-family:PingFang SC;
-				font-weight:bold;
+
+			.text {
+				font-size: 30rpx;
+				font-family: PingFang SC;
+				font-weight: bold;
 				color: #282828;
 				margin: 20rpx 0;
 			}
-			.bottom{
-				.sales{
+
+			.bottom {
+				.sales {
 					font-size: 22rpx;
 					color: #8E8E8E;
-					.money{
+
+					.money {
 						font-size: 42rpx;
 						font-weight: bold;
 						margin-right: 18rpx;
 						@include price_color(theme);
-						.item_sales{
+
+						.item_sales {
 							font-size: 24rpx;
 							font-family: PingFang SC;
 							font-weight: 400;
 							padding-left: 17rpx;
 							color: #8e8e8e;
 						}
-						text{
+
+						text {
 							font-size: 28rpx;
 						}
 					}
 				}
-				.cart{
+
+				.cart {
 					height: 56rpx;
-					.pictrue{
+
+					.pictrue {
 						color: #2563eb;
-						font-size:46rpx;
+						font-size: 46rpx;
 						width: 50rpx;
 						height: 50rpx;
 						text-align: center;
 						line-height: 50rpx;
-						&.icon-jiahao{
-							 background:linear-gradient(140deg, #3b82f6 0%, #2563eb 100%);
-							-webkit-background-clip:text;
-							-webkit-text-fill-color:transparent;
+
+						&.icon-jiahao {
+							background: linear-gradient(140deg, #3b82f6 0%, #2563eb 100%);
+							-webkit-background-clip: text;
+							-webkit-text-fill-color: transparent;
 						}
 					}
-					.num{
+
+					.num {
 						font-size: 30rpx;
 						color: #282828;
 						font-weight: bold;
@@ -129,16 +137,18 @@
 						text-align: center;
 					}
 				}
-				.bnt{
+
+				.bnt {
 					padding: 0 30rpx;
 					height: 56rpx;
 					line-height: 56rpx;
 					background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-					border-radius:42rpx;
+					border-radius: 42rpx;
 					font-size: 26rpx;
 					color: #fff;
 					position: relative;
-					.num{
+
+					.num {
 						@include main_color(theme);
 						@include coupons_border_color(theme);
 						background: #fff;
@@ -153,20 +163,22 @@
 						line-height: 34rpx;
 					}
 				}
-				.end{
+
+				.end {
 					padding: 0 30rpx;
 					height: 56rpx;
 					line-height: 56rpx;
-					border-radius:42rpx;
+					border-radius: 42rpx;
 					font-size: 26rpx;
 					color: #fff;
 					position: relative;
-					background:rgba(203,203,203,1);
+					background: rgba(203, 203, 203, 1);
 				}
 			}
 		}
 	}
-	.lengthStr{
+
+	.lengthStr {
 		font-size: 36rpx !important;
 	}
 </style>

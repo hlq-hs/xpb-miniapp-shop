@@ -207,17 +207,6 @@
 					}
 				},
 				{
-					"path": "user_cash/index",
-					"style": {
-						"navigationBarTitleText": "提现",
-						"app-plus": {
-							"titleNView": {
-								"type": "default"
-							}
-						}
-					}
-				},
-				{
 					"path": "user_address_list/index",
 					"style": {
 						"navigationBarTitleText": "地址管理",

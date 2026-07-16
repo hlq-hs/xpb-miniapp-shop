@@ -7,19 +7,23 @@
 				<view class="plate-row">
 					<view
 						class="plate-box"
-						:class="{ active: activePlateIndex === index }"
+						:class="{ active: activePlateIndex === index, special: isSpecialPlateChar(plateChars[index]) }"
 						v-for="index in plateIndexes"
 						:key="`${plateResetKey}-${index}`"
 						:data-index="index"
 						@tap.stop="setActivePlate"
-					>{{ plateChars[index] || "" }}</view>
+					>
+						<text>{{ plateChars[index] || "" }}</text>
+						<text v-if="isSpecialPlateChar(plateChars[index])" class="plate-special-mark">特</text>
+					</view>
 					<view
 						class="new-energy"
-						:class="{ active: activePlateIndex === 7 }"
+						:class="{ active: activePlateIndex === 7, special: isSpecialPlateChar(plateChars[7]) }"
 						@tap.stop="setNewEnergyPlate"
 					>
 						<block v-if="plateChars[7]">
 							<view class="new-energy-value">{{ plateChars[7] }}</view>
+							<text v-if="isSpecialPlateChar(plateChars[7])" class="plate-special-mark">特</text>
 						</block>
 						<block v-else>
 							<view class="new-energy-plus">+</view>
@@ -365,6 +369,10 @@
 			return false;
 		},
 		methods: {
+			isSpecialPlateChar(char) {
+				const value = String(char || "").trim();
+				return !!value && PLATE_SPECIAL_SUFFIXES.indexOf(value) !== -1;
+			},
 			redirectToInquiryAfterSave() {
 				if (this.sourceFrom !== "inquiry") return false;
 				setTimeout(() => {
@@ -959,6 +967,7 @@
 	}
 
 	.plate-box {
+		position: relative;
 		width: 68rpx;
 		height: 96rpx;
 		background: #f7f7f7;
@@ -976,7 +985,31 @@
 		border-color: #ef3330;
 	}
 
+	.plate-box.special {
+		color: #ef3330;
+		background: #fff7f7;
+		border-color: rgba(239, 51, 48, 0.55);
+	}
+
+	.plate-special-mark {
+		position: absolute;
+		right: 4rpx;
+		top: 4rpx;
+		min-width: 22rpx;
+		height: 22rpx;
+		padding: 0 4rpx;
+		border-radius: 999rpx;
+		background: #ef3330;
+		color: #ffffff;
+		font-size: 16rpx;
+		font-weight: 500;
+		line-height: 22rpx;
+		text-align: center;
+		box-sizing: border-box;
+	}
+
 	.new-energy {
+		position: relative;
 		width: 96rpx;
 		height: 96rpx;
 		border: 2rpx dashed #e9b9bf;
@@ -996,6 +1029,13 @@
 		background: #fff1f2;
 		border-style: solid;
 		border-color: #ef3330;
+		color: #ef3330;
+	}
+
+	.new-energy.special {
+		background: #fff7f7;
+		border-style: solid;
+		border-color: rgba(239, 51, 48, 0.55);
 		color: #ef3330;
 	}
 

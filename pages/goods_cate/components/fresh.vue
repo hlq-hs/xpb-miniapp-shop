@@ -1,4 +1,4 @@
-<template :data-theme="theme">
+﻿<template :data-theme="theme">
 	<view class="goodCate1">
 		<view class="header acea-row row-center-wrapper" :style="{top: iStatusBarHeight + 'px'}">
 			<navigator url="/pages/goods/goods_search/index" class="search acea-row row-middle" hover-class="none">
@@ -39,8 +39,7 @@
 					</view>
 					<view class="mask" @click="closeTap"></view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" @gocartduo="goCartDuo" @ChangeCartNumDan="ChangeCartList"
-				 @detail="goDetail"></goodList>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
@@ -73,35 +72,7 @@
 					</view>
 					<view class="mask" @click="closeTap"></view>
 				</view>
-				<view class="list_prod">
-					<view class="item acea-row row-between-wrapper" v-for="(item,index) in tempArr" :key='index' @click="goDetail(item)">
-						<view class="pic">
-							<image :src="item.image" mode=""></image>
-							<view :style="{ backgroundImage: `url(${item.activityStyle})` }" class="border-picture"></view>
-						</view>
-						<view class="pictxt">
-							<view class="text line2">{{item.storeName}}</view>
-							<view class="bottom acea-row row-between-wrapper">
-								<view class="money">
-									<text class="sign">￥</text>{{item.price}}
-								</view>
-								<view v-if="item.stock>0">
-									<view>
-										<!-- 多规格 -->
-										<view class="bnt" @click.stop="goCartDuo(item)">
-											选规格
-											<view class="num" v-if="item.cartNum">{{item.cartNum}}</view>
-										</view>
-									</view>
-								</view>
-								<view class="bnt end" v-else>已售罄</view>
-							</view>
-							<view>
-								<text class="otPrice" v-if="item.sales">已售{{item.sales}}</text>
-							</view>
-						</view>
-					</view>
-				</view>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
@@ -117,7 +88,7 @@
 			</view>
 			<view class="money acea-row row-middle">
 				<view>￥<text class="num">{{totalPrice}}</text></view>
-				<view class="bnt gray_bg" :class="{ 'main_bg': cartCount > 0}"  @click="subOrder">去结算</view>
+				<view class="bnt gray_bg" :class="{ 'main_bg': cartCount > 0}" @click="subOrder">去结算</view>
 			</view>
 		</view>
 		<cartList :cartData="cartData" @closeList="closeList" @ChangeCartNumDan="ChangeCartList" @ChangeSubDel="ChangeSubDel"
@@ -167,8 +138,8 @@
 				categoryTitle: '',
 				categoryErList: [],
 				tabLeft: 0,
-				isWidth: 0, //每个导航栏占位
-				tabClick: 0, //导航栏被点击
+				isWidth: 0, //姣忎釜瀵艰埅鏍忓崰浣?
+				tabClick: 0, //瀵艰埅鏍忚鐐瑰嚮
 				iSlong: true,
 				tempArr: [],
 				loading: false,
@@ -176,18 +147,19 @@
 				loadTitle: '加载更多',
 				page: 1,
 				limit: 999,
-				cid: 0, //一级分类
-				sid: 0, //二级分类
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
+				cid: 0, //涓€绾у垎绫?
+				sid: 0, //浜岀骇鍒嗙被
+				isAuto: false, //娌℃湁鎺堟潈鐨勪笉浼氳嚜鍔ㄦ巿鏉?
+				isShowAuth: false, //鏄惁闅愯棌鎺堟潈
 				attr: {
 					cartAttr: false,
 					productAttr: [],
 					productSelect: {}
 				},
 				productValue: [],
-				attrValue: '', //已选属性
-				storeName: '', //多属性产品名称
+				attrValue: '', //宸查€夊睘鎬?
+				storeName: '', //澶氬睘鎬т骇鍝佸悕绉?
+				storeInfo: {},
 				id: 0,
 				cartData: {
 					cartList: [],
@@ -197,7 +169,7 @@
 				totalPrice: 0.00,
 				lengthCart: 0,
 				theme:'theme1',
-				iStatusBarHeight: 0, // 状态栏高度
+				iStatusBarHeight: 0, // 鐘舵€佹爮楂樺害
 			}
 		},
 		created(){
@@ -211,7 +183,7 @@
 			this.getAllCategory();
 			let that = this;
 			that.lengthCart = that.cartData.cartList;
-			// 获取设备宽度
+			// 鑾峰彇璁惧瀹藉害
 			uni.getSystemInfo({
 				success(e) {
 					that.isWidth = e.windowWidth / 5
@@ -219,7 +191,7 @@
 			});
 		},
 		methods: {
-			// 生成订单；
+			// 鐢熸垚璁㈠崟锛?
 			subOrder: function() {
 				let that = this,list = that.cartData.cartList,ids = [];
 				if(list.length){
@@ -236,7 +208,7 @@
 					});
 				}
 			},
-			// 计算总价；
+			// 璁＄畻鎬讳环锛?
 			getTotalPrice: function(){
 				let that = this,list = that.cartData.cartList,totalPrice = 0.00;
 				list.forEach(item=>{
@@ -312,20 +284,20 @@
 				this.$set(this.attr, 'cartAttr', false);
 			},
 			/**
-			 * 默认选中属性
+			 * 榛樿閫変腑灞炴€?
 			 * 
 			 */
 			DefaultSelect: function() {
 				let productAttr = this.attr.productAttr;
 				let value = [];
-				// 按 id 升序排序
+				// 鎸?id 鍗囧簭鎺掑簭
 				const sortedArray = Object.entries(this.productValue)
 					.sort(([, a], [, b]) => a.id - b.id)
 					.map(([key, value]) => ({
 						key,
 						...value
 					}));
-				// 默认规格设置
+				// 榛樿瑙勬牸璁剧疆
 				for (let i=0; i<sortedArray.length; i++) {
 					const attrItem = sortedArray[i]
 					if (attrItem.stock > 0 && attrItem.isShow) {
@@ -347,7 +319,7 @@
 				for (let i = 0; i < productAttr.length; i++) {
 					this.$set(productAttr[i], "index", value[i]);
 				}
-				//sort();排序函数:数字-英文-汉字；
+				//sort();鎺掑簭鍑芥暟:鏁板瓧-鑻辨枃-姹夊瓧锛?
 				let productSelect = this.productValue[value.join(",")];
 				
 				if (productSelect && productAttr.length) {
@@ -356,7 +328,7 @@
 					this.$set(this.attr.productSelect, "price", productSelect.price);
 					this.$set(this.attr.productSelect, "stock", productSelect.stock);
 					this.$set(this.attr.productSelect, "unique", productSelect.id);
-					this.$set(this.attr.productSelect, "vipPrice", productSelect.vipPrice);
+					this.$set(this.attr.productSelect, "vipPrice", this.getVipPrice(productSelect));
 					this.$set(this.attr.productSelect, "cart_num", 1);
 					this.$set(this, "attrValue", value.join(","));
 				} else if (!productSelect && productAttr.length) {
@@ -365,6 +337,7 @@
 					this.$set(this.attr.productSelect, "price", this.storeInfo.price);
 					this.$set(this.attr.productSelect, "stock", 0);
 					this.$set(this.attr.productSelect, "unique", "");
+					this.$set(this.attr.productSelect, "vipPrice", this.getVipPrice(this.storeInfo));
 					this.$set(this.attr.productSelect, "cart_num", 0);
 					this.$set(this, "attrValue", "");
 				} else if (!productSelect && !productAttr.length) {
@@ -373,12 +346,13 @@
 					this.$set(this.attr.productSelect, "price", this.storeInfo.price);
 					this.$set(this.attr.productSelect, "stock", this.storeInfo.stock);
 					this.$set(this.attr.productSelect,"unique",this.storeInfo.unique || "");
+					this.$set(this.attr.productSelect, "vipPrice", this.getVipPrice(this.storeInfo));
 					this.$set(this.attr.productSelect, "cart_num", 1);
 					this.$set(this, "attrValue", "");
 				}
 			},
 			/**
-			 * 属性变动赋值
+			 * 灞炴€у彉鍔ㄨ祴鍊?
 			 * 
 			 */
 			ChangeAttr: function(res) {
@@ -389,9 +363,9 @@
 					this.$set(this.attr.productSelect, "stock", productSelect.stock);
 					this.$set(this.attr.productSelect, "unique", productSelect.id);
 					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this.attr.productSelect, "vipPrice", productSelect.vipPrice);
+					this.$set(this.attr.productSelect, "vipPrice", this.getVipPrice(productSelect));
 					this.$set(this.attr.productSelect, 'isShow', productSelect.isShow);
-					// 后台传入的规格不展示时视为库存为0
+					// 鍚庡彴浼犲叆鐨勮鏍间笉灞曠ず鏃惰涓哄簱瀛樹负0
 					if (!this.attr.productSelect.isShow) {
 						this.$set(this.attr.productSelect, "stock", 0);
 						this.$util.Tips({
@@ -412,18 +386,22 @@
 				this.$set(this.attr.productAttr[val.indexw], 'index', this.attr.productAttr[val.indexw].attrValues[val
 					.indexn]);
 			},
+			getVipPrice(item) {
+				item = item || {};
+				return item.vipPrice || item.vip_price || this.storeInfo.vipPrice || this.storeInfo.vip_price || 0;
+			},
 			/**
-			 * 购物车手动填写
+			 * 璐墿杞︽墜鍔ㄥ～鍐?
 			 * 
 			 */
 			iptCartNum: function(e) {
 				this.$set(this.attr.productSelect, 'cart_num', e);
 			},
 			onLoadFun() {},
-			// 产品列表
+			// 浜у搧鍒楄〃
 			productslist: function() {
 				let that = this;
-				if (that.loadend) return; //如果返回列表长度小于请求分页长度，就让他为true,就不继续请求了
+				if (that.loadend) return; //濡傛灉杩斿洖鍒楄〃闀垮害灏忎簬璇锋眰鍒嗛〉闀垮害锛屽氨璁╀粬涓簍rue,灏变笉缁х画璇锋眰浜?
 				if (that.loading) return;
 				that.loading = true;
 				that.loadTitle = '';
@@ -433,28 +411,29 @@
 					type: 1,
 					cid: that.sid,
 				}).then(res => {
-					let list = res.data.list,
-						loadend = list.length < that.limit;
-					that.tempArr = that.$util.SplitArray(list, that.tempArr);
-					that.$set(that, 'tempArr', that.tempArr);
+					let data = res.data || res;
+					let list = Array.isArray(data.list) ? data.list : [];
+					let loadend = list.length < that.limit;
+					let tempArr = that.page === 1 ? list : that.tempArr.concat(list);
+					that.$set(that, 'tempArr', tempArr);
 					that.loading = false;
 					that.loadend = loadend;
-					that.loadTitle = loadend ? "😕人家是有底线的~~" : "加载更多";
+					that.loadTitle = loadend ? "人家是有底线的~" : "加载更多";
 					that.page = that.page + 1;
 				}).catch(err => {
 					that.loading = false,
 						that.loadTitle = '加载更多'
 				});
 			},
-			// 改变多属性购物车
+			// 鏀瑰彉澶氬睘鎬ц喘鐗╄溅
 			ChangeCartNumDuo(changeValue) {
-				//changeValue:是否 加|减
-				//获取当前变动属性
+				//changeValue:鏄惁 鍔爘鍑?
+				//鑾峰彇褰撳墠鍙樺姩灞炴€?
 				let productSelect = this.productValue[this.attrValue];
-				//如果没有属性,赋值给商品默认库存
+				//濡傛灉娌℃湁灞炴€?璧嬪€肩粰鍟嗗搧榛樿搴撳瓨
 				if (productSelect === undefined && !this.attr.productAttr.length)
 					productSelect = this.attr.productSelect;
-				//无属性值即库存为0；不存在加减；
+				//鏃犲睘鎬у€煎嵆搴撳瓨涓?锛涗笉瀛樺湪鍔犲噺锛?
 				if (productSelect === undefined) return;
 				let stock = productSelect.stock || 0;
 				let num = this.attr.productSelect;
@@ -473,7 +452,7 @@
 				}
 				
 			},
-			// 已经加入购物车时的购物加减；
+			// 宸茬粡鍔犲叆璐墿杞︽椂鐨勮喘鐗╁姞鍑忥紱
 			ChangeCartList(changeValue, index) {
 				let list = this.cartData.cartList;
 				let num = list[index];
@@ -487,7 +466,7 @@
 					this.productslist();
 				}
 			},
-			// 购物车加减计算函数
+			// 璐墿杞﹀姞鍑忚绠楀嚱鏁?
 			ChangeCartNum: function(changeValue,index) {
 				if (changeValue) {
 					if (index.cartNum >= index.stock) {
@@ -530,33 +509,33 @@
 					});
 				}
 			},
-			// 多规格加入购物车；
+			// 澶氳鏍煎姞鍏ヨ喘鐗╄溅锛?
 			goCatNum() {
 				this.goCat(1);
 			},
 			/*
-			 * 加入购物车
+			 * 鍔犲叆璐墿杞?
 			 */
 			goCat: function(num) {
 				let that = this,
 					productSelect = that.productValue[this.attrValue];
-				//打开属性
+				//鎵撳紑灞炴€?
 				if (that.attrValue) {
-					//默认选中了属性，但是没有打开过属性弹窗还是自动打开让用户查看默认选中的属性
+					//榛樿閫変腑浜嗗睘鎬э紝浣嗘槸娌℃湁鎵撳紑杩囧睘鎬у脊绐楄繕鏄嚜鍔ㄦ墦寮€璁╃敤鎴锋煡鐪嬮粯璁ら€変腑鐨勫睘鎬?
 					that.attr.cartAttr = !that.isOpen ? true : false;
 				} else {
 					if (that.isOpen) that.attr.cartAttr = true;
 					else that.attr.cartAttr = !that.attr.cartAttr;
 				}
-				//只有关闭属性弹窗时进行加入购物车
-				//如果有属性,没有选择,提示用户选择
+				//鍙湁鍏抽棴灞炴€у脊绐楁椂杩涜鍔犲叆璐墿杞?
+				//濡傛灉鏈夊睘鎬?娌℃湁閫夋嫨,鎻愮ず鐢ㄦ埛閫夋嫨
 				if (
 					that.attr.productAttr.length &&
 					productSelect.stock === 0 &&
 					that.isOpen === true
 				)
 					return that.$util.Tips({
-						title: "产品库存不足，请选择其它"
+						title: "产品库存不足，请选择其它规格"
 					});
 				if (num === 1) {
 					let q = {
@@ -604,11 +583,12 @@
 			getIsLogin() {
 				toLogin();
 			},
-			// 商品详情接口；
+			// 鍟嗗搧璇︽儏鎺ュ彛锛?
 			getAttrs(id) {
 				let that = this;
 				getAttr(id).then(res => {
 					uni.hideLoading();
+					that.$set(that, 'storeInfo', res.data.productInfo || {});
 					that.$set(that.attr, 'productAttr', res.data.productAttr);
 					that.$set(that, 'productValue', res.data.productValue);
 					let productAttr = that.attr.productAttr.map(item => {
@@ -628,18 +608,15 @@
 					that.DefaultSelect();
 				})
 			},
-			// 去详情页
+			// 鍘昏鎯呴〉
 			goDetail(item) {
-				if (!this.isLogin) {
-					toLogin();
-				} else {
-					goShopDetail(item, this.uid).then(res => {
-						uni.navigateTo({
-							animationType: animationType.type,							animationDuration: animationType.duration,
-							url: `/pages/goods/goods_details/index?id=${item.id}`
-						});
+				goShopDetail(item, this.uid).then(res => {
+					uni.navigateTo({
+						animationType: animationType.type,
+						animationDuration: animationType.duration,
+						url: `/pages/goods/goods_details/index?id=${item.id}`
 					});
-				}
+				});
 			},
 
 
@@ -692,12 +669,12 @@
 				this.tempArr = [];
 				this.productslist();
 			},
-			// 导航栏点击
+			// 瀵艰埅鏍忕偣鍑?
 			longClick(index,item) {
 				if (this.productList.length > 3) {
-					this.tabLeft = (index - 1) * (this.isWidth + 6) //设置下划线位置
+					this.tabLeft = (index - 1) * (this.isWidth + 6) //璁剧疆涓嬪垝绾夸綅缃?
 				};
-				this.tabClick = index; //设置导航点击了哪一个
+				this.tabClick = index; //璁剧疆瀵艰埅鐐瑰嚮浜嗗摢涓€涓?
 				this.iSlong = true;
 				this.sid = item.id;
 				this.page = 1;
@@ -707,9 +684,9 @@
 			},
 			navSwitch(index,item){
 				if (this.productList.length > 3) {
-					this.tabLeft = (index - 1) * (this.isWidth + 6) //设置下划线位置
+					this.tabLeft = (index - 1) * (this.isWidth + 6) //璁剧疆涓嬪垝绾夸綅缃?
 				};
-				this.tabClick = index; //设置导航点击了哪一个
+				this.tabClick = index; //璁剧疆瀵艰埅鐐瑰嚮浜嗗摢涓€涓?
 				this.iSlong = true;
 				this.sid = item.id;
 				this.page = 1;
@@ -1130,7 +1107,7 @@
 			height: 100rpx;
 			&:after{
 				content:'';
-				height:env(safe-area-inset-bottom); // 这里是重点
+				height:env(safe-area-inset-bottom); // 杩欓噷鏄噸鐐?
 				position: absolute;
 				top:100%;
 				left: 0;
@@ -1196,3 +1173,4 @@
 		}
 	}
 </style>
+

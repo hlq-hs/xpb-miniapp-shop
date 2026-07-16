@@ -34,8 +34,6 @@
 <script>
 	let app = getApp();
 	import {getBottomNavigationApi} from '@/api/api.js'
-	import { toLogin } from '@/libs/login.js';
-	import { BACK_URL } from '@/config/cache';
 	export default {
 		props:{
 			arr: {
@@ -104,15 +102,6 @@
 					}
 				});
 			},
-			isStoreLink(link) {
-				return /^\/pages\/store\//.test(this.normalizeLink(link).split('?')[0]);
-			},
-			needLoginForStore(link) {
-				if (!this.isStoreLink(link) || this.$store.getters.isLogin) return false;
-				this.$Cache.set(BACK_URL, this.normalizeLink(link));
-				toLogin(false, '/pages/users/wechat_login/index');
-				return true;
-			},
 			getInit() {
 				getBottomNavigationApi().then((res)=>{
 					this.obj=res.data
@@ -129,7 +118,6 @@
 				var page = (pages[pages.length - 1]).$page.fullPath;
 				const link = this.normalizeLink(item.link);
 				if (link == page) return
-				if (this.needLoginForStore(link)) return;
 				if (['/pages/index/index', '/pages/order_addcart/order_addcart', '/pages/user/index'
 					].indexOf(link) > -1) {
 					this.openLink(link, true);

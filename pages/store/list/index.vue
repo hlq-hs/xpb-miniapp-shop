@@ -48,6 +48,8 @@
 	import Loading from "@/pages/store/components/Loading";
 	import emptyPage from "@/components/emptyPage.vue";
 	import { adminStoreListApi } from "@/api/store.js";
+	import { toLogin } from "@/libs/login.js";
+	import { BACK_URL } from "@/config/cache";
 
 	export default {
 		components: {
@@ -228,9 +230,15 @@
 				return "";
 			},
 			goDetail(item) {
+				const detailUrl = `/pages/store/detail/index?id=${item.id || ""}`;
 				uni.setStorageSync("store_detail", item || {});
+				if (!this.$store.getters.isLogin) {
+					this.$Cache.set(BACK_URL, detailUrl);
+					toLogin(false, "/pages/users/wechat_login/index");
+					return;
+				}
 				uni.navigateTo({
-					url: `/pages/store/detail/index?id=${item.id || ""}`
+					url: detailUrl
 				});
 			},
 			handleSearch() {

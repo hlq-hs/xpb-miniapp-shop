@@ -125,15 +125,16 @@
 				<scroll-view
 					v-if="inquiryAvailableModels.length"
 					scroll-y
-					class="available-model-list"
+					class="available-model-tag-scroll"
 				>
-					<view
-						v-for="(item, index) in inquiryAvailableModels"
-						:key="`${item.brandName}-${item.seriesName}-${index}`"
-						class="available-model-card"
-					>
-						<text class="available-model-brand">{{ item.brandName }}</text>
-						<text class="available-model-series">{{ item.seriesName }}</text>
+					<view class="available-model-tags">
+						<view
+							v-for="(item, index) in inquiryAvailableModels"
+							:key="`${item.brandName}-${index}`"
+							class="available-model-tag"
+						>
+							<text class="available-model-tag-text">{{ item.brandName }}</text>
+						</view>
 					</view>
 				</scroll-view>
 				<view v-else class="available-empty">
@@ -710,12 +711,15 @@ export default {
 			});
 		},
 		chooseAndRecognizeVin(sourceType) {
+			console.log('[VIN图片选择] 开始选择图片', { sourceType });
 			uni.chooseImage({
 				count: 1,
 				sizeType: ['original', 'compressed'],
 				sourceType: [sourceType],
 				success: async (res) => {
+					console.log('[VIN图片选择] chooseImage success', res);
 					const imagePath = res.tempFilePaths && res.tempFilePaths[0];
+					console.log('[VIN图片选择] 临时图片路径', imagePath);
 					if (!imagePath) {
 						this.showNoneToast('未获取到图片，请重试');
 						return;
@@ -740,6 +744,10 @@ export default {
 					}
 				},
 				fail: (error) => {
+					console.log('[VIN图片选择] chooseImage fail', {
+						sourceType,
+						error
+					});
 					const errorMessage = error && error.errMsg ? error.errMsg : '';
 					if (errorMessage.includes('cancel')) return;
 
@@ -831,12 +839,11 @@ export default {
 		async appendAdminCarInfo(vehicleInfo) {
 			const brandName = this.getVehicleBrandName(vehicleInfo);
 			const seriesName = this.getVehicleSeriesName(vehicleInfo);
-			if (!brandName || !seriesName) return vehicleInfo;
+			if (!brandName) return vehicleInfo;
 
 			try {
 				const result = await searchCarInfoByBrandSeries({
-					brandName,
-					seriesName
+					brandName
 				});
 				const carInfoSearchResult = result && result.data ? result.data : {};
 				uni.setStorageSync('inquiryCarInfoSearchResult', carInfoSearchResult);
@@ -855,21 +862,27 @@ export default {
 				};
 			}
 		},
-		getAvailableInquiryModels(data, brandName, seriesName) {
+		getAvailableInquiryModels(data, brandName) {
 			const list = Array.isArray(data && data.list) ? data.list : [];
-			return list
+			const brands = list
 				.map(item => ({
-					brandName: item && item.brandName ? item.brandName : brandName,
-					seriesName: item && item.seriesName ? item.seriesName : seriesName
+					brandName: item && item.brandName ? item.brandName : brandName
 				}))
-				.filter(item => item.brandName || item.seriesName);
+				.filter(item => item.brandName);
+			const brandMap = new Map();
+			brands.forEach(item => {
+				if (!brandMap.has(item.brandName)) {
+					brandMap.set(item.brandName, item);
+				}
+			});
+			return Array.from(brandMap.values());
 		},
 		showAdminCarInfoNotFoundModal(vehicleInfo) {
 			uni.hideLoading();
 			const data = vehicleInfo && vehicleInfo.carInfoSearchResult ? vehicleInfo.carInfoSearchResult : {};
 			const brandName = vehicleInfo && vehicleInfo.brandName ? vehicleInfo.brandName : '';
 			this.inquiryAvailableBrandName = brandName;
-			this.inquiryAvailableModels = this.getAvailableInquiryModels(data, brandName, vehicleInfo && vehicleInfo.seriesName);
+			this.inquiryAvailableModels = this.getAvailableInquiryModels(data, brandName);
 			this.inquiryAvailableModalVisible = true;
 		},
 		closeAvailableModal() {
@@ -1677,39 +1690,43 @@ export default {
 	background: #eef6ff;
 }
 
-.available-model-list {
+.available-model-tag-scroll {
 	margin-top: 24rpx;
-	max-height: 258rpx;
+	max-height: 232rpx;
 	overflow: hidden;
 }
 
-.available-model-card {
+.available-model-tags {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin: -8rpx;
+	padding: 2rpx 0;
+}
+
+.available-model-tag {
+	max-width: calc(100% - 16rpx);
+	min-height: 62rpx;
+	margin: 8rpx;
+	padding: 14rpx 28rpx;
+	border-radius: 999rpx;
+	border: 1rpx solid #cfe2fb;
+	background: #f4f9ff;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	column-gap: 18rpx;
-	min-height: 72rpx;
-	padding: 12rpx 20rpx;
-	border-radius: 14rpx;
-	border: 1rpx solid #e5ebf3;
-	background: #fafcff;
-	box-sizing: border-box;
 }
 
-.available-model-card + .available-model-card {
-	margin-top: 14rpx;
-}
-
-.available-model-brand,
-.available-model-series {
-	font-size: 30rpx;
+.available-model-tag-text {
+	max-width: 100%;
+	font-size: 28rpx;
 	font-weight: 600;
 	line-height: 1.35;
-	color: #2d3440;
-}
-
-.available-model-series {
-	color: #566273;
+	color: #1d73d8;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .available-empty {

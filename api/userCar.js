@@ -43,7 +43,9 @@ export function getUserCarInfo(id) {
 }
 
 export function searchCarInfoByBrandSeries(data) {
-	return userCarRequest("/api/admin/car/info/search", "GET", data);
+	return userCarRequest("/api/admin/car/info/search", "GET", {
+		brandName: data && data.brandName ? data.brandName : ""
+	});
 }
 
 export function saveUserCar(data) {

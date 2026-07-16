@@ -109,7 +109,7 @@
 							<view class="list-box section-body">
 								<block v-for="(item,index) in MyMenus" :key="index">
 									<view class="item" @click="handleUserMenuTap(item)"
-										v-if="!(item.url =='/pages/service/index' || (item.url =='/pages/promoter/user_spread_user/index' && !userInfo.isPromoter))">
+										v-if="!isHiddenUserMenu(item)">
 										<image :src="item.pic"></image>
 										<text>{{item.name}}</text>
 									</view>
@@ -149,6 +149,10 @@
 	import animationType from '@/utils/animationType.js'
 	const app = getApp();
 	const settlementRepairInfoUrl = '/pages/store/settlement_repair_info/index';
+	const disabledUserMenuUrls = [
+		'/pages/promoter/user_spread_user/index'
+	];
+	const disabledUserMenuUrlParts = ['user_' + 'cash'];
 	export default {
 		components:{
 			pageFooter
@@ -404,8 +408,19 @@
 				}
 			},
 			handleUserMenuTap(item) {
+				if (this.isDisabledUserMenu(item)) return;
 				const targetUrl = this.resolveUserMenuUrl(item);
 				this.menusTap(targetUrl);
+			},
+			isHiddenUserMenu(item) {
+				if (!item || typeof item !== 'object') return true;
+				if (item.url === '/pages/service/index') return true;
+				return this.isDisabledUserMenu(item);
+			},
+			isDisabledUserMenu(item) {
+				if (!item || !item.url) return false;
+				return disabledUserMenuUrls.indexOf(item.url) !== -1 ||
+					disabledUserMenuUrlParts.some(part => item.url.indexOf(part) !== -1);
 			},
 			resolveUserMenuUrl(item) {
 				if (!item || typeof item !== 'object') {
@@ -604,7 +619,9 @@
 				});
 			},
 			normalizeMyMenus(menus = []) {
-				return menus.map((item) => {
+				return menus.filter((item) => {
+					return !this.isDisabledUserMenu(item);
+				}).map((item) => {
 					if (!item || typeof item !== 'object') {
 						return item;
 					}

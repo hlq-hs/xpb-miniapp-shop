@@ -525,6 +525,7 @@
 				return null;
 			},
 			applyLocationResult(locationRes = {}) {
+				console.log('[添加地址-地图] applyLocationResult', locationRes);
 				const latitude = locationRes.latitude || '';
 				const longitude = locationRes.longitude || '';
 				const name = String(locationRes.name || '').trim();
@@ -660,20 +661,42 @@
 			},
 			//閫夋嫨鍦颁綅鍦板潃
 			chooseLocation: function() {
+				console.log('[添加地址-地图] 点击地图选择', {
+					selectType: this.selectType,
+					id: this.id,
+					cachedLatitude: uni.getStorageSync('user_latitude'),
+					cachedLongitude: uni.getStorageSync('user_longitude')
+				});
 				this.$util.$L.getLocation().then(res=>{
+					console.log('[添加地址-地图] getLocation success', {
+						res,
+						cachedLatitude: uni.getStorageSync('user_latitude'),
+						cachedLongitude: uni.getStorageSync('user_longitude')
+					});
 					const locationOptions = {
 						latitude: uni.getStorageSync('user_latitude'),
 						longitude: uni.getStorageSync('user_longitude'),
 						success: (res) => {
+							console.log('[添加地址-地图] chooseLocation success', res);
 							this.applyLocationResult(res);
+						},
+						fail: (err) => {
+							console.log('[添加地址-地图] chooseLocation fail', err);
+						},
+						complete: (res) => {
+							console.log('[添加地址-地图] chooseLocation complete', res);
 						}
 					};
 					// #ifdef MP-WEIXIN
+					console.log('[添加地址-地图] 调用 wx.chooseLocation', locationOptions);
 					wx.chooseLocation(locationOptions);
 					// #endif
 					// #ifndef MP-WEIXIN
+					console.log('[添加地址-地图] 调用 uni.chooseLocation', locationOptions);
 					uni.chooseLocation(locationOptions);
 					// #endif
+				}).catch(err => {
+					console.log('[添加地址-地图] getLocation fail', err);
 				})
 			},
 			// 瀵煎叆鍏变韩鍦板潃锛堝皬绋嬪簭锛?

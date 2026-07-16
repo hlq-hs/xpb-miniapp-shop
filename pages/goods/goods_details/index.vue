@@ -136,6 +136,14 @@
 									<view class="iconfont icon-jiantou"></view>
 								</view>
 							</view>
+							<view v-if="shoppingStoreList.length" class="store-scope-card mb30 borRadius14 acea-row row-between-wrapper p-24"
+								@click="handleStoreToggle(true)">
+								<view class="store-scope-title">适用门店</view>
+								<view class="store-scope-more acea-row row-middle">
+									<text>查看{{ shoppingStoreList.length }}家</text>
+									<text class="iconfont icon-jiantou"></text>
+								</view>
+							</view>
 							<view class='userEvaluation' id="past1">
 								<view class='title acea-row row-between-wrapper'
 									:style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
@@ -362,6 +370,28 @@
 					</view>
 				</uni-popup>
 			</view>
+			<!-- 适用门店弹窗 -->
+			<view class="store-pop-box">
+				<uni-popup ref="storePopup" :safe-area="false" type="bottom" borderRadius="20px 20px 0 0">
+					<view class="ensure store-popup">
+						<view class="title">
+							适用门店
+							<view class="close-box" @click="handleStoreToggle(false)">
+								<view class="iconfont icon-guanbi f-s-24"></view>
+							</view>
+						</view>
+						<scroll-view scroll-y="true" class="store-popup-list">
+							<view class="store-popup-item" v-for="(item, index) in sortedShoppingStoreList" :key="item.id || index">
+								<text class="store-popup-name">{{ item.name }}</text>
+								<text class="store-popup-distance" v-if="formatStoreDistance(item)">{{ formatStoreDistance(item) }}</text>
+							</view>
+						</scroll-view>
+						<view class="activityBtn bnt" @click="handleStoreToggle(false)">
+							确定
+						</view>
+					</view>
+				</uni-popup>
+			</view>
 		</view>
 	</view>
 </template>
@@ -447,6 +477,8 @@
 			let that = this;
 			return {
 				urlDomain: this.$Cache.get("imgHost"),
+				userLatitude: '',
+				userLongitude: '',
 				showSkeleton: true, //骨架屏显示隐藏
 				isNodes: 0, //控制什么时候开始抓取元素节点,只要数值改变就重新抓取
 				//属性是否打开
@@ -465,6 +497,7 @@
 				productInfo: {}, //商品详情
 				productValue: [], //系统属性
 				guaranteeList: [], // 保障服务列表
+				shoppingStoreList: [], // 适用门店列表
 				couponList: [], //优惠券
 				cart_num: 1, //购买数量
 				isAuto: false, //没有授权的不会自动授权
@@ -588,6 +621,21 @@
 		},
 		computed: {
 			...mapGetters(['isLogin', 'uid', 'chatUrl', 'productType']),
+			sortedShoppingStoreList() {
+				return (this.shoppingStoreList || [])
+					.map((item, index) => ({
+						item,
+						index,
+						distance: this.getStoreDistanceKm(item)
+					}))
+					.sort((a, b) => {
+						const aDistance = a.distance === null ? Number.MAX_SAFE_INTEGER : a.distance;
+						const bDistance = b.distance === null ? Number.MAX_SAFE_INTEGER : b.distance;
+						if (aDistance === bDistance) return a.index - b.index;
+						return aDistance - bDistance;
+					})
+					.map(({ item }) => item);
+			}
 		},
 		watch: {
 			productInfo: {
@@ -1034,6 +1082,7 @@
 					that.$set(that.attr, 'productAttr', res.data.productAttr);
 					that.$set(that, 'productValue', res.data.productValue);
 					that.$set(that, 'guaranteeList', res.data.guaranteeList || []);
+					that.$set(that, 'shoppingStoreList', res.data.shoppingStoreList || []);
 					for (let key in res.data.productValue) {
 						let obj = res.data.productValue[key];
 						that.skuArr.push(obj)
@@ -1768,7 +1817,80 @@
 					this.$refs.guaranteePopup.close()
 				}
 			},
+			handleStoreToggle(type) {
+				if (type) {
+					this.ensureStoreDistanceLocation();
+					this.$refs.storePopup.open()
+				} else {
+					this.$refs.storePopup.close()
+				}
+			},
 			// 获取suk小图
+			ensureStoreDistanceLocation() {
+				const cachedLatitude = uni.getStorageSync('user_latitude');
+				const cachedLongitude = uni.getStorageSync('user_longitude');
+				if (this.isValidCoordinate(cachedLatitude, cachedLongitude)) {
+					this.userLatitude = cachedLatitude;
+					this.userLongitude = cachedLongitude;
+					return;
+				}
+				uni.getLocation({
+					type: 'gcj02',
+					success: (res) => {
+						this.userLatitude = res.latitude || '';
+						this.userLongitude = res.longitude || '';
+						uni.setStorageSync('user_latitude', this.userLatitude);
+						uni.setStorageSync('user_longitude', this.userLongitude);
+					},
+					fail: () => {}
+				});
+			},
+			isValidCoordinate(latitude, longitude) {
+				const lat = Number(latitude);
+				const lng = Number(longitude);
+				if (Number.isNaN(lat) || Number.isNaN(lng)) return false;
+				return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0);
+			},
+			toRadians(value) {
+				return Number(value) * Math.PI / 180;
+			},
+			getDistanceKm(lat1, lng1, lat2, lng2) {
+				const earthRadius = 6371;
+				const dLat = this.toRadians(lat2 - lat1);
+				const dLng = this.toRadians(lng2 - lng1);
+				const a =
+					Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+					Math.cos(this.toRadians(lat1)) *
+						Math.cos(this.toRadians(lat2)) *
+						Math.sin(dLng / 2) *
+						Math.sin(dLng / 2);
+				const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+				return earthRadius * c;
+			},
+			getStoreDistanceKm(store = {}) {
+				const storeLatitude = Number(store.dimensionY || store.latitude || store.lat);
+				const storeLongitude = Number(store.longitudeX || store.longitude || store.lng || store.dimensionX);
+				const userLatitude = Number(this.userLatitude || uni.getStorageSync('user_latitude'));
+				const userLongitude = Number(this.userLongitude || uni.getStorageSync('user_longitude'));
+				if (
+					this.isValidCoordinate(storeLatitude, storeLongitude) &&
+					this.isValidCoordinate(userLatitude, userLongitude)
+				) {
+					const km = this.getDistanceKm(userLatitude, userLongitude, storeLatitude, storeLongitude);
+					if (!Number.isNaN(km) && km >= 0) return km;
+				}
+				const distanceKm = Number(store.distanceKm || store.distance_km);
+				if (!Number.isNaN(distanceKm) && distanceKm > 0) return distanceKm;
+				const distance = Number(store.distance);
+				if (!Number.isNaN(distance) && distance > 0) return distance > 100 ? distance / 1000 : distance;
+				return null;
+			},
+			formatStoreDistance(store = {}) {
+				const km = this.getStoreDistanceKm(store);
+				if (km === null) return '';
+				if (km < 1) return `距离${Math.round(km * 1000)}m`;
+				return `距离${km.toFixed(2)}km`;
+			},
 			getSkuImage() {
 				let sku = []
 				let skuTable = []
@@ -2083,6 +2205,29 @@
 
 		.line1 {
 			width: 600rpx;
+		}
+	}
+
+	.store-scope-card {
+		background-color: #fff;
+		font-size: 28rpx;
+		color: #282828;
+		min-height: 96rpx;
+		padding: 28rpx 24rpx !important;
+		box-sizing: border-box;
+		line-height: 40rpx;
+
+		.store-scope-title {
+			font-weight: 500;
+		}
+
+		.store-scope-more {
+			color: #999;
+
+			.iconfont {
+				margin-left: 8rpx;
+				font-size: 24rpx;
+			}
 		}
 	}
 
@@ -2753,10 +2898,52 @@
 		}
 	}
 
-	.guarantee-pop-box {
+	.guarantee-pop-box,
+	.store-pop-box {
 		position: fixed;
 		bottom: 0;
 		z-index: 999;
+	}
+
+	.store-popup {
+		height: 665rpx;
+		max-height: 665rpx;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+
+		.store-popup-list {
+			flex: 1;
+			min-height: 0;
+			padding: 0 30rpx 20rpx;
+			box-sizing: border-box;
+		}
+
+		.store-popup-item {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 28rpx 0;
+			border-bottom: 1px solid #f2f2f2;
+			color: #333;
+			font-size: 28rpx;
+			line-height: 40rpx;
+		}
+
+		.store-popup-name {
+			flex: 1;
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.store-popup-distance {
+			flex-shrink: 0;
+			margin-left: 24rpx;
+			color: #999;
+			font-size: 24rpx;
+		}
 	}
 
 	.ensure.on {

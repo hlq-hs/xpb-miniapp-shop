@@ -36,16 +36,6 @@ export function openOrderSubscribe() {
 }
 
 /**
- * 提现消息订阅
- * 成功 和 失败 消息
- */
-// export function openExtrctSubscribe() {
-// 	let tmplIds = uni.getStorageSync('tempID' + arrTemp[2]);
-// 	return subscribe(tmplIds);
-// }
-
-
-/**
  * 砍价成功
  */
 export function openBargainSubscribe() {
@@ -61,14 +51,6 @@ export function openPinkSubscribe() {
 	let tmplIds = uni.getStorageSync('tempID' + arrTemp[3]);
 	return subscribe(tmplIds);
 }
-// /**
-//  * 提现
-//  */
-// export function openEextractSubscribe() {
-// 	let tmplIds = JSON.parse(uni.getStorageSync('tempID' + paySubscribe));
-// 	return subscribe(tmplIds);
-// }
-
 /**
  * 调起订阅界面
  * array tmplIds 模板id

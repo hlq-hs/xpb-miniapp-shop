@@ -1,6 +1,6 @@
 <template>
 	<view class="goodsList">
-		<view class="item acea-row row-between-wrapper" v-for="(item,index) in tempArr" :key='index' @click="goDetail(item)">
+		<view class="item acea-row row-between-wrapper" v-for="(item,index) in tempArr" :key="index" @click="goDetail(item)">
 			<view class="pic">
 				<image :src="item.image" mode=""></image>
 				<view :style="{ backgroundImage: `url(${item.activityStyle})` }" class="border-picture"></view>
@@ -9,13 +9,14 @@
 				<view class="text line2">{{item.storeName}}</view>
 				<view class="bottom acea-row row-between-wrapper">
 					<view class="money">
-						<text class="sign">￥</text>{{item.price}} 
+						<text class="sign">￥</text>{{item.price}}
+						<text class="otPrice" v-if="item.sales">已售 {{item.sales}}</text>
 					</view>
 					<view v-if="item.stock>0">
 						<view>
 							<!-- 多规格 -->
 							<view class="bnt" @click.stop="goCartDuo(item)">
-								选规格
+								加入购物车
 								<view class="num" v-if="item.cartNum">{{item.cartNum}}</view>
 							</view>
 						</view>
@@ -29,98 +30,90 @@
 
 <script>
 	export default {
-		name: 'd_goodList',
+		name: 'f_goodList',
 		props: {
 			dataConfig: {
 				type: Object,
 				default: () => {}
 			},
-			tempArr:{
+			tempArr: {
 				type: Array,
-				default:[]
+				default: () => []
 			},
-			isLogin:{
+			isLogin: {
 				type: Boolean,
-				default:false
+				default: false
 			}
 		},
-		data() {
-			return {
-				
-			};
-		},
-		created() {},
-		mounted() {},
 		methods: {
-			goDetail(item){
-				this.$emit('detail',item);
+			goDetail(item) {
+				this.$emit('detail', item);
 			},
-			goCartDuo(item){
-				this.$emit('gocartduo',item);
+			goCartDuo(item) {
+				this.$emit('gocartduo', item);
 			},
-			goCartDan(item,index){
-				this.$emit('gocartdan',item,index);
+			goCartDan(item, index) {
+				this.$emit('gocartdan', item, index);
 			},
-			CartNumDes(index,item){
-				this.$emit('ChangeCartNumDan', false,index,item);
+			CartNumDes(index, item) {
+				this.$emit('ChangeCartNumDan', false, index, item);
 			},
-			CartNumAdd(index,item){
-				this.$emit('ChangeCartNumDan', true,index,item);
+			CartNumAdd(index, item) {
+				this.$emit('ChangeCartNumDan', true, index, item);
 			}
 		}
 	};
 </script>
 
-<style lang="scss">
-	.goodsList{
+<style scoped lang="scss">
+	.goodsList {
 		padding: 0 30rpx;
-		.item{
+		.item {
 			width: 100%;
 			box-sizing: border-box;
 			margin-bottom: 63rpx;
 			align-items: flex-start;
-			.pic{
+			.pic {
 				width: 140rpx;
 				height: 140rpx;
 				flex: 0 0 140rpx;
-				border-radius: 10rpx;
-				position: relative;
 				border-radius: 22rpx;
-				image{
+				position: relative;
+				image {
 					width: 100%;
 					height: 100%;
 					border-radius: 22rpx;
 				}
 			}
-			.pictxt{
+			.pictxt {
 				flex: 1;
 				min-width: 0;
 				margin-left: 20rpx;
-				.text{
-					font-size:26rpx;
-					font-family:PingFang SC;
-					font-weight:500;
+				.text {
+					font-size: 26rpx;
+					font-family: PingFang SC;
+					font-weight: 500;
 					color: $crmeb-font-color;
 					width: 100%;
 				}
-				.bottom{
+				.bottom {
 					margin-top: 22rpx;
 					width: 100%;
 					min-width: 0;
 					> view:not(.money) {
 						flex-shrink: 0;
 					}
-					.money{
+					.money {
 						font-size: 34rpx;
 						font-weight: 800;
 						flex: 1;
 						min-width: 0;
 						@include price_color(theme);
-						.sign{
+						.sign {
 							font-size: 24rpx;
 						}
 					}
-					.otPrice{
+					.otPrice {
 						font-size: 20rpx;
 						font-family: PingFang SC;
 						font-weight: 400;
@@ -128,20 +121,20 @@
 						padding-left: 14rpx;
 						color: #999999;
 					}
-					.cart{
+					.cart {
 						height: 46rpx;
-						.pictrue{
+						.pictrue {
 							color: $crmeb-theme-color;
-							font-size:46rpx;
+							font-size: 46rpx;
 							width: 46rpx;
 							height: 46rpx;
 							text-align: center;
 							line-height: 46rpx;
-							&.icon-jiahao{
-								 color: $crmeb-theme-color;
+							&.icon-jiahao {
+								color: $crmeb-theme-color;
 							}
 						}
-						.num{
+						.num {
 							font-size: 30rpx;
 							color: $crmeb-font-color;
 							font-weight: bold;
@@ -149,7 +142,7 @@
 							text-align: center;
 						}
 					}
-					.icon-gouwuche6{
+					.icon-gouwuche6 {
 						width: 46rpx;
 						height: 46rpx;
 						background-color: $crmeb-theme-color;
@@ -157,7 +150,7 @@
 						color: $crmeb-font-color-white;
 						font-size: 30rpx;
 					}
-					.bnt{
+					.bnt {
 						padding: 0 20rpx;
 						height: 46rpx;
 						line-height: 46rpx;
@@ -166,14 +159,14 @@
 						text-align: center;
 						flex-shrink: 0;
 						@include main_bg_color(theme);
-						border-radius:23rpx;
+						border-radius: 23rpx;
 						font-size: 22rpx;
 						color: $crmeb-font-color-white;
 						position: relative;
-						&.end{
-							background:$crmeb-font-color-disable;
+						&.end {
+							background: $crmeb-font-color-disable;
 						}
-						.num{
+						.num {
 							min-width: 12rpx;
 							@include main_color(theme);
 							@include coupons_border_color(theme);

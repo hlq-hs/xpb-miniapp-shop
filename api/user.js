@@ -1,4 +1,4 @@
-// +----------------------------------------------------------------------
+﻿// +----------------------------------------------------------------------
 // | CRMEB [ CRMEB赋能开发者，助力企业发展 ]
 // +----------------------------------------------------------------------
 // | Copyright (c) 2016~2025 https://www.crmeb.com All rights reserved.
@@ -152,20 +152,6 @@ export function getCommissionInfo(data) {
 }
 
 /*
- * 提现记录 getCountApi
- * */
-export function getRecordApi(q) {
-  return request.get("extract/record", q);
-}
-
-/*
- * 提现总金额 
- * */
-export function getCountApi() {
-  return request.get("extract/totalMoney");
-}
-
-/*
  * 积分记录
  * */
 export function getIntegralList(q) {
@@ -191,7 +177,7 @@ export function spreadPeople(data){
 
 /**
  * 
- * 推广佣金/提现总和
+ * 推广佣金
  * @param int type
 */
 export function spreadCount(type){
@@ -199,7 +185,7 @@ export function spreadCount(type){
 }
 
 /*
- * 推广数据 当前佣金 提现总金额
+ * 推广数据 当前佣金
  * */
 export function getSpreadInfo() {
   return request.get("commission");
@@ -227,22 +213,6 @@ export function getRankList(q) {
  * */
 export function getBrokerageRank(q) {
   return request.get("brokerage_rank", q);
-}
-
-/**
- * 提现申请
- * @param object data
-*/
-export function extractCash(data){
-  return request.post('extract/cash',data)
-}
-
-/**
- * 提现银行/提现最低金额
- * 
-*/
-export function extractBank(){
-  return request.get('extract/bank');
 }
 
 /**
@@ -476,14 +446,6 @@ export function getBillList(data)
 export function postIntegralUser() {
   return request.get("integral/user");
 }
-
-/*
- * 立即提现 冻结期、冻结佣金、可提现佣金、最低可提现金额
- * */
-export function extractUser() {
-  return request.get("extract/user");
-}
-
 /*
  * 推广人统计页 推广人数（一级+二级）、一级人数、二级人数
  * */

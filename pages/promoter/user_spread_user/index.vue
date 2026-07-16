@@ -1,9 +1,8 @@
-<template>
+﻿<template>
 	<view :data-theme="theme">
 		<view class='my-promotion'>
 			<view class="header">
 				<image class="head_img" :src="urlDomain+'crmebimage/maintain/2021/07/13/48e81e3e2e374d48820b7a9a56905365k2qa9yj8n5.png'"></image>
-				<navigator :url="'/pages/promoter/user_spread_money/index?type=1&extractCount='+spreadInfo.extractCount"  hover-class="none" class='record'>提现记录<text class='iconfont icon-xiangyou'></text></navigator>
 				<view class="head_box">
 					<view class='name acea-row row-center-wrapper'>
 						<view>当前佣金</view>
@@ -14,19 +13,9 @@
 							<view>昨日收益</view>
 							<view class='money'>{{spreadInfo.lastDayCount ? Number(spreadInfo.lastDayCount).toFixed(2) : 0}}</view>
 						</view>
-						<view class='item'>
-							<view>累积已提</view>
-							<view class='money'>{{spreadInfo.extractCount ? Number(spreadInfo.extractCount).toFixed(2) : 0}}</view>
-						</view>
 					</view>
 				</view>
 			</view>
-			<!-- #ifdef APP-PLUS || H5 -->
-			<navigator url="/pages/users/user_cash/index" hover-class="none" class='bnt bg_color'>立即提现</navigator>
-			<!-- #endif -->
-			<!-- #ifdef MP -->
-			<view @click="openSubscribe('/pages/users/user_cash/index')" class='bnt bg_color'>立即提现</view>
-			<!-- #endif -->
 			<view class='list acea-row row-between-wrapper'>
 				<navigator url='/pages/promoter/user_spread_code/index' hover-class="none" class='item acea-row row-center-wrapper row-column'>
 					<text class='iconfont icon-erweima'></text>
@@ -59,11 +48,21 @@
 
 <script>
 	import { getSpreadInfo } from '@/api/user.js';
-	import { openExtrctSubscribe } from '@/utils/SubscribeMessage.js';
 	import {toLogin} from '@/libs/login.js';
 	import {mapGetters} from "vuex";
 	import {setThemeColor} from '@/utils/setTheme.js'
 	const app = getApp();
+	function redirectDisabledPage() {
+		uni.showToast({
+			title: '该功能已关闭',
+			icon: 'none'
+		});
+		setTimeout(() => {
+			uni.switchTab({
+				url: '/pages/user/index'
+			});
+		}, 500);
+	}
 	export default {
 		data() {
 			return {
@@ -85,6 +84,8 @@
 			}
 		},
 		onShow() {
+			redirectDisabledPage();
+			return;
 			let that = this;
 			that.bgColor = setThemeColor();
 			uni.setNavigationBarColor({
@@ -99,11 +100,6 @@
 			}
 		},
 		methods: {
-			openSubscribe: function(page) {
-				uni.navigateTo({
-					url: page,
-				});
-			},
 			/**
 			 * 获取个人用户信息
 			 */
