@@ -12,10 +12,12 @@
 									@click="menusTap(itemn.info[1].value)">
 									<view class="pictrue skeleton-radius">
 										<view v-if="isCostInquiry(itemn)" class="cost-inquiry-menu-icon">询</view>
-										<easy-loadimage v-else :image-src="itemn.img" :radius="dataConfig.contentStyle.val">
-										</easy-loadimage>
+										<view v-else class="fixed-menu-icon" :class="getMenuIconConfig(itemn).bgClass">
+											<text class="iconfont" :class="getMenuIconConfig(itemn).icon"></text>
+										</view>
 									</view>
 									<view class="menu-txt">{{ itemn.info[0].value }}</view>
+									<view class="menu-subtxt">{{ getMenuSubtitle(itemn) }}</view>
 								</view>
 							</view>
 						</swiper-item>
@@ -33,10 +35,12 @@
 					<view class="item" v-show="item.status" :style="[titleColor, navItemStyle]" @click="menusTap(item.info[1].value)">
 						<view class="pictrue skeleton-radius">
 							<view v-if="isCostInquiry(item)" class="cost-inquiry-menu-icon">询</view>
-							<easy-loadimage v-else :image-src="item.img" :radius="dataConfig.contentStyle.val">
-							</easy-loadimage>
+							<view v-else class="fixed-menu-icon" :class="getMenuIconConfig(item).bgClass">
+								<text class="iconfont" :class="getMenuIconConfig(item).icon"></text>
+							</view>
 						</view>
 						<view class="menu-txt">{{ item.info[0].value }}</view>
+						<view class="menu-subtxt">{{ getMenuSubtitle(item) }}</view>
 					</view>
 				</block>
 			</scroll-view>
@@ -155,6 +159,48 @@
 			isCostInquiry(item) {
 				return !!(item && item.info && item.info[0] && item.info[0].value === '成本询价');
 			},
+			getMenuTitle(item) {
+				return String(item && item.info && item.info[0] ? item.info[0].value : '').trim();
+			},
+			getMenuIconConfig(item) {
+				const title = this.getMenuTitle(item);
+				if (title.indexOf('充值') > -1) {
+					return {
+						icon: 'icon-menu-yuan',
+						bgClass: 'menu-icon-recharge'
+					};
+				}
+				if (title.indexOf('精品') > -1 || title.indexOf('推荐') > -1) {
+					return {
+						icon: 'icon-shoucang3',
+						bgClass: 'menu-icon-recommend'
+					};
+				}
+				if (title.indexOf('会员') > -1) {
+					return {
+						icon: 'icon-gerenzhongxin1',
+						bgClass: 'menu-icon-member'
+					};
+				}
+				if (title.indexOf('商城') > -1) {
+					return {
+						icon: 'icon-ic_box',
+						bgClass: 'menu-icon-shop'
+					};
+				}
+				return {
+					icon: 'icon-gengduo2',
+					bgClass: 'menu-icon-default'
+				};
+			},
+			getMenuSubtitle(item) {
+				const title = this.getMenuTitle(item);
+				if (title.indexOf('充值') > -1) return '快速充值';
+				if (title.indexOf('精品') > -1 || title.indexOf('推荐') > -1) return '优质好物';
+				if (title.indexOf('会员') > -1) return '专属权益';
+				if (title.indexOf('商城') > -1) return '正品保障';
+				return '';
+			},
 			bannerfun(e) {
 				this.active = e.detail.current;
 			},
@@ -238,6 +284,47 @@
 			font-weight: 600;
 		}
 
+		.fixed-menu-icon {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 12rpx 22rpx rgba(34, 107, 255, 0.22);
+
+			.iconfont {
+				color: #fff;
+				font-size: 58rpx;
+				font-weight: 700;
+				line-height: 1;
+			}
+
+			.icon-menu-yuan {
+				font-size: 64rpx;
+			}
+		}
+
+		.menu-icon-recharge {
+			background: linear-gradient(135deg, #1bc8f4 0%, #1c91ff 100%);
+		}
+
+		.menu-icon-recommend {
+			background: linear-gradient(135deg, #ff8b8b 0%, #ff6464 100%);
+		}
+
+		.menu-icon-member {
+			background: linear-gradient(135deg, #ffb12c 0%, #ff8a18 100%);
+		}
+
+		.menu-icon-shop {
+			background: linear-gradient(135deg, #9b72ff 0%, #7657f4 100%);
+		}
+
+		.menu-icon-default {
+			background: linear-gradient(135deg, #7fa7ff 0%, #2f73ff 100%);
+		}
+
 		.item {
 			width: 20%;
 			box-sizing: border-box;
@@ -268,6 +355,13 @@
 			.menu-txt {
 				margin-top: 15rpx;
 			}
+
+			.menu-subtxt {
+				margin-top: 4rpx;
+				color: #9aa3b1;
+				font-size: 20rpx;
+				line-height: 26rpx;
+			}
 		}
 	}
 
@@ -283,6 +377,47 @@
 			justify-content: center;
 			font-size: 52rpx;
 			font-weight: 600;
+		}
+
+		.fixed-menu-icon {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 12rpx 22rpx rgba(34, 107, 255, 0.22);
+
+			.iconfont {
+				color: #fff;
+				font-size: 58rpx;
+				font-weight: 700;
+				line-height: 1;
+			}
+
+			.icon-menu-yuan {
+				font-size: 64rpx;
+			}
+		}
+
+		.menu-icon-recharge {
+			background: linear-gradient(135deg, #1bc8f4 0%, #1c91ff 100%);
+		}
+
+		.menu-icon-recommend {
+			background: linear-gradient(135deg, #ff8b8b 0%, #ff6464 100%);
+		}
+
+		.menu-icon-member {
+			background: linear-gradient(135deg, #ffb12c 0%, #ff8a18 100%);
+		}
+
+		.menu-icon-shop {
+			background: linear-gradient(135deg, #9b72ff 0%, #7657f4 100%);
+		}
+
+		.menu-icon-default {
+			background: linear-gradient(135deg, #7fa7ff 0%, #2f73ff 100%);
 		}
 
 		z-index: 20;
@@ -320,6 +455,14 @@
 					text-align: center;
 					font-size: 12px;
 					margin-top: 14rpx;
+				}
+
+				.menu-subtxt {
+					text-align: center;
+					margin-top: 4rpx;
+					color: #9aa3b1;
+					font-size: 20rpx;
+					line-height: 26rpx;
 				}
 			}
 		}

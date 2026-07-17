@@ -3,18 +3,24 @@
 		<view class="header acea-row row-center-wrapper" :style="{top: iStatusBarHeight + 'px'}">
 			<navigator url="/pages/goods/goods_search/index" class="search acea-row row-center-wrapper" hover-class="none">
 				<text class="iconfont icon-xiazai5"></text>
-				搜索商品</navigator>
+				<text class="search-placeholder">搜索商品名称</text>
+				<text class="search-btn">搜索</text>
+			</navigator>
 		</view>
 		<view class="conter" v-if="showSlide">
 			<view class='aside' :style="{top: iStatusBarHeight + 'px'}">
 				<view class='item acea-row row-center-wrapper' :class='index==navActive?"on":""'
 					v-for="(item,index) in productList" :key="index" @click="tapNav(index,item)">
+					<view class="category-icon">{{ item.name ? item.name.slice(0, 1) : '' }}</view>
 					<text>{{item.name}}</text>
 				</view>
 			</view>
 			<view class="wrapper" :style="{top: iStatusBarHeight + 'px'}">
-				<view class="bgcolor" v-if="iSlong">
-					<view class="longTab acea-row row-middle" :style="{top: iStatusBarHeight + 'px'}">
+				<view class="bgcolor" :class="{ expanded: filterExpanded }" v-if="iSlong">
+					<view class="filter-title acea-row row-between-wrapper">
+						<view>{{categoryTitle}}</view>
+					</view>
+					<view class="longTab acea-row row-middle filter-tags" :class="{ collapsed: !filterExpanded }" :style="{top: iStatusBarHeight + 'px'}">
 						<scroll-view scroll-x="true" style="white-space: nowrap; display: flex;height:44rpx;" scroll-with-animation
 							:scroll-left="tabLeft" show-scrollbar="true">
 							<!-- <view class="longItem" :style='"width:"+isWidth+"px"'>全部</view> -->
@@ -22,14 +28,16 @@
 								v-for="(item,index) in categoryErList" :key="index" @click="longClick(index,item)">{{item.name}}</view>
 						</scroll-view>
 					</view>
-					<view class="openList" @click="openTap" :style="{top: iStatusBarHeight + 'px'}"><text
-							class="iconfont icon-xiala"></text></view>
+					<view class="filter-more" v-if="categoryErList.length > 4" @click="toggleFilter">
+						<text>{{ filterExpanded ? '收起' : '更多' }}</text>
+						<text class="iconfont icon-xiala" :class="{ up: filterExpanded }"></text>
+					</view>
 				</view>
 				<view v-else>
 					<view class="downTab" :style="{top: iStatusBarHeight + 'px'}">
 						<view class="title acea-row row-between-wrapper">
 							<view>{{categoryTitle}}</view>
-							<view class="closeList" @click="closeTap"><text class="iconfont icon-xiala"></text></view>
+							<view class="closeList" @click="closeTap"><text>收起</text><text class="iconfont icon-xiala"></text></view>
 						</view>
 						<view class="children">
 							<view class="acea-row row-middle">
@@ -48,21 +56,27 @@
 		</view>
 		<view class="conter" v-else>
 			<view class="hide_slide">
-				<view class="bgcolor" v-if="iSlong">
-					<view class="hongTab acea-row row-middle" :style="{top: iStatusBarHeight + 'px'}">
+				<view class="bgcolor" :class="{ expanded: filterExpanded }" v-if="iSlong">
+					<view class="filter-title acea-row row-between-wrapper">
+						<view>{{categoryTitle}}</view>
+					</view>
+					<view class="hongTab acea-row row-middle filter-tags" :class="{ collapsed: !filterExpanded }" :style="{top: iStatusBarHeight + 'px'}">
 						<scroll-view scroll-x="true" style="white-space: nowrap; display: flex;height:44rpx;" scroll-with-animation
 							:scroll-left="tabLeft" show-scrollbar="true">
 							<view class="longItem" :style='"width:"+isWidth+"px"' :class="index===tabClick?'click':''"
 								v-for="(item,index) in productList" :key="index" @click="navSwitch(index,item)">{{item.name}}</view>
 						</scroll-view>
 					</view>
-					<view class="openList" :style="{top: iStatusBarHeight + 'px'}" @click="openTap"><text class="iconfont icon-xiangxia"></text></view>
+					<view class="filter-more" v-if="productList.length > 4" @click="toggleFilter">
+						<text>{{ filterExpanded ? '收起' : '更多' }}</text>
+						<text class="iconfont icon-xiala" :class="{ up: filterExpanded }"></text>
+					</view>
 				</view>
 				<view v-else>
 					<view class="hownTab" :style="{top: iStatusBarHeight + 'px'}">
 						<view class="title acea-row row-between-wrapper">
 							<view>{{categoryTitle}}</view>
-							<view class="closeList" @click="closeTap"><text class="iconfont icon-xiangxia"></text></view>
+							<view class="closeList" @click="closeTap"><text>收起</text><text class="iconfont icon-xiangxia"></text></view>
 						</view>
 						<view class="children">
 							<view class="acea-row row-middle">
@@ -82,7 +96,7 @@
 		<view class="footer acea-row row-between-wrapper">
 			<view class="cartIcon acea-row row-center-wrapper" @click="getCartLists(0)" v-if="cartData.cartList.length">
 				<text class="iconfont icon-gouwuche-yangshi1"></text>
-				<view class="num">{{cartCount}}</view>
+				<view class="num"><text>{{cartCount || cartData.cartList.length}}</text></view>
 			</view>
 			<view class="cartIcon acea-row row-center-wrapper noCart" v-else>
 				<text class="iconfont icon-gouwuche-yangshi1"></text>
@@ -151,6 +165,7 @@
 				isWidth: 0, //姣忎釜瀵艰埅鏍忓崰浣?
 				tabClick: 0, //瀵艰埅鏍忚鐐瑰嚮
 				iSlong: true,
+				filterExpanded: false,
 				tempArr: [],
 				loading: false,
 				loadend: false,
@@ -643,6 +658,9 @@
 			closeTap() {
 				this.iSlong = true
 			},
+			toggleFilter() {
+				this.filterExpanded = !this.filterExpanded;
+			},
 			getAllCategory: function() {
 				let that = this;
 				getCategoryList().then(res => {
@@ -679,6 +697,7 @@
 				this.categoryErList = item.child ? item.child : [];
 				this.tabClick = 0;
 				this.tabLeft = 0;
+				this.filterExpanded = false;
 				// this.cid = list.id;
 				this.sid = item.id;
 				this.page = 1;
@@ -692,6 +711,7 @@
 				};
 				this.tabClick = index; //璁剧疆瀵艰埅鐐瑰嚮浜嗗摢涓€涓?
 				this.iSlong = true;
+				this.filterExpanded = false;
 				this.sid = item.id;
 				this.page = 1;
 				this.loadend = false;
@@ -705,6 +725,7 @@
 				};
 				this.tabClick = index; //璁剧疆瀵艰埅鐐瑰嚮浜嗗摢涓€涓?
 				this.iSlong = true;
+				this.filterExpanded = false;
 				this.sid = item.id;
 				this.page = 1;
 				this.loadend = false;
@@ -1200,6 +1221,416 @@
 					background-color: #B3B3B4;
 				}
 
+			}
+		}
+
+		.header {
+			height: 142rpx;
+			border-bottom: 0;
+			box-shadow: none;
+			z-index: 200;
+
+			.search {
+				justify-content: flex-start;
+				width: 690rpx;
+				height: 70rpx;
+				margin-left: 0;
+				padding-left: 28rpx;
+				padding-right: 8rpx;
+				box-sizing: border-box;
+				border-radius: 40rpx;
+				background: #f5f7fb;
+				color: #9aa3af;
+				font-size: 28rpx;
+
+				.iconfont {
+					margin: 0 18rpx 0 0;
+					color: #9aa3af;
+				}
+
+				.search-placeholder {
+					flex: 1;
+				}
+
+				.search-btn {
+					width: 112rpx;
+					height: 58rpx;
+					border-radius: 32rpx;
+					line-height: 58rpx;
+					text-align: center;
+					color: #fff;
+					font-size: 28rpx;
+					font-weight: 700;
+					background: linear-gradient(90deg, #3d82ff 0%, #2563eb 100%);
+				}
+			}
+		}
+
+		.conter {
+			min-height: 100vh;
+			padding-top: 142rpx;
+			background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+
+			.aside {
+				width: 27%;
+				margin-top: 142rpx;
+				padding: 22rpx 10rpx 180rpx 6rpx;
+				box-sizing: border-box;
+				background: rgba(248, 251, 255, 0.92);
+
+				.item {
+					justify-content: flex-start;
+					height: 86rpx;
+					margin-bottom: 18rpx;
+					padding: 0 10rpx 0 18rpx;
+					box-sizing: border-box;
+					border-radius: 0 22rpx 22rpx 0;
+					color: #606875;
+					font-size: 25rpx;
+					overflow: visible;
+
+					text {
+						flex: 1;
+						min-width: 0;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+					}
+
+					.category-icon {
+						width: 42rpx;
+						height: 42rpx;
+						margin-right: 12rpx;
+						border-radius: 50%;
+						line-height: 42rpx;
+						text-align: center;
+						color: #9aa3af;
+						font-size: 22rpx;
+						background: #fff;
+						box-shadow: 0 8rpx 20rpx rgba(45, 101, 202, 0.08);
+					}
+
+					&.on {
+						width: 100%;
+						background: linear-gradient(90deg, #3d82ff 0%, #2563eb 100%);
+						color: #fff;
+						font-weight: 700;
+						box-shadow: 0 14rpx 30rpx rgba(37, 99, 235, 0.22);
+
+						.category-icon {
+							color: #2563eb;
+							background: rgba(255, 255, 255, 0.96);
+						}
+
+						&::after {
+							display: none;
+						}
+					}
+				}
+			}
+		}
+
+		.wrapper {
+			width: 73%;
+			min-height: calc(100vh - 142rpx);
+			background: transparent;
+			padding-bottom: 180rpx;
+		}
+
+		.wrapper > .loadingicon {
+			display: none;
+		}
+
+		.bgcolor {
+			height: auto;
+			margin: 0 20rpx 18rpx;
+			padding: 18rpx 18rpx 8rpx;
+			box-sizing: border-box;
+			border-radius: 8rpx;
+			overflow: visible;
+			background: #fff;
+			box-shadow: 0 8rpx 24rpx rgba(34, 89, 173, 0.06);
+			display: block;
+			align-items: initial;
+			z-index: 2;
+		}
+
+		.filter-title {
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			height: 40rpx;
+			margin-bottom: 18rpx;
+			font-size: 24rpx;
+			font-weight: 600;
+			color: #1f2937;
+		}
+
+		.filter-toggle {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			height: 40rpx;
+			line-height: 40rpx;
+			font-size: 22rpx;
+			font-weight: 400;
+			color: #4b5563;
+
+			.iconfont {
+				margin-left: 8rpx;
+				font-size: 20rpx;
+				color: #4b5563;
+				transform: rotate(180deg);
+			}
+		}
+
+		.longTab {
+			display: block;
+			width: 100%;
+			height: auto;
+			background: transparent;
+		}
+
+		.hongTab {
+			display: block;
+			width: 100%;
+			height: auto;
+			background: transparent;
+		}
+
+		.longTab scroll-view,
+		.hongTab scroll-view {
+			height: auto !important;
+			white-space: normal !important;
+		}
+
+		.filter-tags {
+			overflow: hidden;
+		}
+
+		.filter-tags.collapsed {
+			max-height: 110rpx;
+		}
+
+		.bgcolor.expanded .filter-tags {
+			max-height: 220rpx;
+			overflow-y: auto;
+		}
+
+		.filter-more {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			height: 38rpx;
+			margin-top: -2rpx;
+			font-size: 22rpx;
+			color: #4b5563;
+
+			.iconfont {
+				margin-left: 8rpx;
+				font-size: 18rpx;
+				color: #4b5563;
+			}
+
+			.iconfont.up {
+				transform: rotate(180deg);
+			}
+		}
+
+		.longItem {
+			width: auto !important;
+			min-width: 76rpx;
+			height: 42rpx;
+			line-height: 42rpx;
+			margin: 0 12rpx 10rpx 0;
+			padding: 0 20rpx;
+			box-sizing: border-box;
+			border-radius: 21rpx;
+			background: #f5f7fb;
+			color: #4b5563;
+			font-size: 22rpx;
+			font-weight: 500;
+
+			&.click {
+				background: linear-gradient(90deg, #3d82ff 0%, #2563eb 100%);
+				color: #fff;
+				font-weight: 700;
+			}
+		}
+
+		.openList {
+			position: absolute;
+			right: 12rpx;
+			top: 12rpx;
+			width: 40rpx;
+			height: 40rpx;
+			line-height: 40rpx;
+			background: transparent;
+		}
+
+		.downTab,
+		.hownTab {
+			position: relative;
+			right: auto;
+			top: auto;
+			width: auto;
+			margin: 0 20rpx 18rpx;
+			padding: 18rpx 18rpx 8rpx;
+			box-sizing: border-box;
+			border-radius: 8rpx;
+			background: #fff;
+			box-shadow: 0 8rpx 24rpx rgba(34, 89, 173, 0.06);
+			z-index: 101;
+
+			.title {
+				height: 40rpx;
+				margin-bottom: 18rpx;
+				font-size: 24rpx;
+				font-weight: 600;
+				color: #1f2937;
+
+				.closeList {
+					display: flex;
+					align-items: center;
+					justify-content: flex-end;
+					width: 96rpx;
+					height: 40rpx;
+					line-height: 40rpx;
+					padding-left: 0;
+					transform: none;
+					font-size: 22rpx;
+					font-weight: 400;
+					color: #4b5563;
+
+					.iconfont {
+						margin-left: 8rpx;
+						font-size: 20rpx;
+						color: #4b5563;
+						transform: rotate(180deg);
+					}
+				}
+			}
+
+			.children {
+				max-height: 172rpx;
+				padding-bottom: 0;
+				overflow-x: hidden;
+				overflow-y: auto;
+
+				.item {
+					width: auto;
+					min-width: 76rpx;
+					height: 42rpx;
+					line-height: 42rpx;
+					margin: 0 12rpx 12rpx 0;
+					padding: 0 20rpx;
+					box-sizing: border-box;
+					border-radius: 21rpx;
+					background: #f5f7fb;
+					color: #4b5563;
+					font-size: 22rpx;
+					font-weight: 500;
+					text-align: center;
+
+					&.click {
+						background: linear-gradient(90deg, #3d82ff 0%, #2563eb 100%);
+						color: #fff;
+						font-weight: 700;
+					}
+				}
+			}
+		}
+
+		.hownTab {
+			left: auto;
+			right: auto;
+			width: auto;
+		}
+
+		.mask {
+			background: transparent !important;
+		}
+
+		.footer {
+			left: 0;
+			right: 0;
+			bottom: 0;
+			width: 100%;
+			height: 128rpx;
+			padding: 0 30rpx;
+			border-radius: 0;
+			background: #fff;
+			box-shadow: 0 -3rpx 16rpx rgba(36, 12, 12, 0.05);
+
+			&:after {
+				display: none;
+			}
+
+			.cartIcon {
+				width: 72rpx;
+				height: 72rpx;
+				margin-top: 0;
+				background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+				box-shadow: none;
+
+				&.noCart {
+					background: #cbcbcb !important;
+					box-shadow: none;
+				}
+
+				.iconfont {
+					font-size: 44rpx;
+				}
+
+				.num {
+					right: -8rpx;
+					top: -10rpx;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					min-width: 34rpx;
+					height: 34rpx;
+					padding: 0 8rpx;
+					box-sizing: border-box;
+					border-radius: 18rpx;
+					line-height: 34rpx;
+					font-size: 22rpx;
+					font-weight: 700;
+					color: #fff;
+					border: 0;
+					background: #f21f22;
+					text-align: center;
+					z-index: 3;
+
+					text {
+						display: block;
+						color: #fff;
+						font-size: 22rpx;
+						font-weight: 700;
+						line-height: 34rpx;
+					}
+				}
+			}
+
+			.money {
+				font-size: 28rpx;
+
+				.num {
+					font-size: 42rpx;
+				}
+
+				.bnt {
+					width: 190rpx;
+					height: 64rpx;
+					line-height: 64rpx;
+					font-size: 28rpx;
+					font-weight: 700;
+					border-radius: 36rpx;
+				}
+
+				.main_bg {
+					background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+				}
 			}
 		}
 	}

@@ -106,54 +106,56 @@
 									</view>
 								</view>
 							</view>
-							<view class='attribute mb30 borRadius14'>
-								<!-- 规格选择 -->
-								<view class="p-24" @click="selecAttr">
-									<view class="acea-row row-between-wrapper">
+							<view class="detail-service-card mb30 borRadius14" id="past1">
+								<view class="detail-service-row" @click="selecAttr">
+									<view class="detail-service-main">
+										<text class="iconfont icon-xuanzhong detail-service-icon"></text>
 										<view class="line1 skeleton-rect">{{attrTxt}}：
 											<text class='atterTxt'>{{attrValue}}</text>
 										</view>
-										<view class='iconfont icon-jiantou'></view>
 									</view>
-									<view class="acea-row row-between-wrapper" style="margin-top:7px;padding-left:55px;"
-										v-if="skuImage.length > 1">
-										<view class="flex">
-											<image :src="item" v-for="(item,index) in skuImage.slice(0,4)" :key="index" class="attrImg">
-											</image>
+									<view class='iconfont icon-xiangyou detail-service-arrow'></view>
+								</view>
+								<view class="detail-sku-row acea-row row-between-wrapper" v-if="skuImage.length > 1">
+									<view class="flex">
+										<image :src="item" v-for="(item,index) in skuImage.slice(0,4)" :key="index" class="attrImg">
+										</image>
+									</view>
+									<view class="switchTxt">共{{skuArr.length}}种规格可选</view>
+								</view>
+								<view v-if="guaranteeList.length > 0" class="detail-service-row" @click="handleToGgle(true)">
+									<view class="detail-service-main">
+										<text class="iconfont icon-xuanzhong detail-service-icon"></text>
+										<view class="line1 skeleton-fillet">
+											<text class="">保&nbsp;&nbsp;&nbsp;障：</text>
+											<text class="atterTxt skeleton-fillet" v-for="(item, index) in guaranteeList"
+												:key="index">{{ item.name }} ·
+											</text>
 										</view>
-										<view class="switchTxt">共{{skuArr.length}}种规格可选</view>
+									</view>
+									<view class="iconfont icon-xiangyou detail-service-arrow"></view>
+								</view>
+								<view v-if="shoppingStoreList.length" class="detail-service-row" @click="handleStoreToggle(true)">
+									<view class="detail-service-main">
+										<text class="iconfont icon-dianpu2 detail-service-icon"></text>
+										<view class="store-scope-title">适用门店</view>
+									</view>
+									<view class="store-scope-more acea-row row-middle">
+										<text>查看{{ shoppingStoreList.length }}家</text>
+										<text class="iconfont icon-xiangyou detail-service-arrow"></text>
 									</view>
 								</view>
-								<!-- 服务保障 -->
-								<view v-if="guaranteeList.length > 0" class="acea-row row-between-wrapper p-24"
-									@click="handleToGgle(true)">
-									<view class="line1 skeleton-fillet">
-										<text class="">保&nbsp;&nbsp;&nbsp;障：</text>
-										<text class="atterTxt skeleton-fillet" v-for="(item, index) in guaranteeList"
-											:key="index">{{ item.name }} ·
-										</text>
+								<navigator class="detail-service-row detail-review-row" hover-class="none"
+									:url='"/pages/goods/goods_comment_list/index?productId="+id'>
+									<view class="detail-service-main">
+										<text class="iconfont icon-daipingjia detail-service-icon"></text>
+										<text class="detail-service-label">用户评价({{replyCount}})</text>
 									</view>
-									<view class="iconfont icon-jiantou"></view>
-								</view>
-							</view>
-							<view v-if="shoppingStoreList.length" class="store-scope-card mb30 borRadius14 acea-row row-between-wrapper p-24"
-								@click="handleStoreToggle(true)">
-								<view class="store-scope-title">适用门店</view>
-								<view class="store-scope-more acea-row row-middle">
-									<text>查看{{ shoppingStoreList.length }}家</text>
-									<text class="iconfont icon-jiantou"></text>
-								</view>
-							</view>
-							<view class='userEvaluation' id="past1">
-								<view class='title acea-row row-between-wrapper'
-									:style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
-									<view>用户评价<i>({{replyCount}})</i></view>
-									<navigator class='praise' hover-class='none'
-										:url='"/pages/goods/goods_comment_list/index?productId="+id'>
-										<i>好评</i>&nbsp;<text class='font_color px-12'>{{replyChance || 0}}%</text>
-										<text class='iconfont icon-jiantou'></text>
-									</navigator>
-								</view>
+									<view class='praise'>
+										<text>好评</text><text class='font_color px-12'>{{replyChance || 0}}%</text>
+										<text class='iconfont icon-xiangyou detail-service-arrow'></text>
+									</view>
+								</navigator>
 								<block v-if="replyCount">
 									<userEvaluation :reply="reply"></userEvaluation>
 								</block>
@@ -382,8 +384,11 @@
 						</view>
 						<scroll-view scroll-y="true" class="store-popup-list">
 							<view class="store-popup-item" v-for="(item, index) in sortedShoppingStoreList" :key="item.id || index">
-								<text class="store-popup-name">{{ item.name }}</text>
-								<text class="store-popup-distance" v-if="formatStoreDistance(item)">{{ formatStoreDistance(item) }}</text>
+								<text class="store-popup-name" @click.stop="goStoreDetail(index)">{{ item.name }}</text>
+								<view class="store-popup-distance-wrap" v-if="formatStoreDistance(item)" @click.stop="openStoreLocation(item, index)">
+									<text class="iconfont icon-dizhi store-popup-nav-icon"></text>
+									<text class="store-popup-distance">{{ formatStoreDistance(item) }}</text>
+								</view>
 							</view>
 						</scroll-view>
 						<view class="activityBtn bnt" @click="handleStoreToggle(false)">
@@ -415,7 +420,9 @@
 		getReplyList,
 		getReplyConfig,
 		getProductGood,
-		getReplyProduct
+		getReplyProduct,
+		adminStoreListApi,
+		adminStoreInfoApi
 	} from '@/api/store.js';
 	import {
 		getCoupons,
@@ -1082,7 +1089,10 @@
 					that.$set(that.attr, 'productAttr', res.data.productAttr);
 					that.$set(that, 'productValue', res.data.productValue);
 					that.$set(that, 'guaranteeList', res.data.guaranteeList || []);
-					that.$set(that, 'shoppingStoreList', res.data.shoppingStoreList || []);
+					const shoppingStoreList = res.data.shoppingStoreList || [];
+					console.log('[适用门店] 商品详情返回 shoppingStoreList:', shoppingStoreList);
+					that.$set(that, 'shoppingStoreList', shoppingStoreList);
+					that.mergeShoppingStoreIdsFromAdmin(shoppingStoreList);
 					for (let key in res.data.productValue) {
 						let obj = res.data.productValue[key];
 						that.skuArr.push(obj)
@@ -1867,16 +1877,47 @@
 				const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 				return earthRadius * c;
 			},
+			getStoreCoordinate(store = {}) {
+				const latitude = Number(
+					store.dimensionY ||
+					store.dimension_y ||
+					store.dimensionLatitude ||
+					store.latitudeY ||
+					store.latitude ||
+					store.shopLatitude ||
+					store.storeLatitude ||
+					store.mapLatitude ||
+					store.lat ||
+					store.latY
+				);
+				const longitude = Number(
+					store.longitudeX ||
+					store.longitude_x ||
+					store.dimensionX ||
+					store.dimensionLongitude ||
+					store.longitudeY ||
+					store.longitude ||
+					store.shopLongitude ||
+					store.storeLongitude ||
+					store.mapLongitude ||
+					store.lng ||
+					store.lngX
+				);
+				return {
+					latitude,
+					longitude,
+					valid: this.isValidCoordinate(latitude, longitude)
+				};
+			},
 			getStoreDistanceKm(store = {}) {
-				const storeLatitude = Number(store.dimensionY || store.latitude || store.lat);
-				const storeLongitude = Number(store.longitudeX || store.longitude || store.lng || store.dimensionX);
+				const storeCoordinate = this.getStoreCoordinate(store);
 				const userLatitude = Number(this.userLatitude || uni.getStorageSync('user_latitude'));
 				const userLongitude = Number(this.userLongitude || uni.getStorageSync('user_longitude'));
 				if (
-					this.isValidCoordinate(storeLatitude, storeLongitude) &&
+					storeCoordinate.valid &&
 					this.isValidCoordinate(userLatitude, userLongitude)
 				) {
-					const km = this.getDistanceKm(userLatitude, userLongitude, storeLatitude, storeLongitude);
+					const km = this.getDistanceKm(userLatitude, userLongitude, storeCoordinate.latitude, storeCoordinate.longitude);
 					if (!Number.isNaN(km) && km >= 0) return km;
 				}
 				const distanceKm = Number(store.distanceKm || store.distance_km);
@@ -1890,6 +1931,176 @@
 				if (km === null) return '';
 				if (km < 1) return `距离${Math.round(km * 1000)}m`;
 				return `距离${km.toFixed(2)}km`;
+			},
+			openStoreLocation(store = {}, index) {
+				let currentStore = store && Object.keys(store).length
+					? store
+					: (this.sortedShoppingStoreList[index] || {});
+				let storeCoordinate = this.getStoreCoordinate(currentStore);
+				if (!storeCoordinate.valid && index !== undefined) {
+					currentStore = this.sortedShoppingStoreList[index] || currentStore;
+					storeCoordinate = this.getStoreCoordinate(currentStore);
+				}
+				if (!storeCoordinate.valid) {
+					uni.showToast({
+						title: '暂无定位信息',
+						icon: 'none'
+					});
+					return;
+				}
+				uni.openLocation({
+					latitude: storeCoordinate.latitude,
+					longitude: storeCoordinate.longitude,
+					name: currentStore.name || '门店位置',
+					address: currentStore.address || currentStore.detailedAddress || ''
+				});
+			},
+			getStoreId(store = {}) {
+				const keys = [
+					'id',
+					'storeId',
+					'storeID',
+					'storeid',
+					'store_id',
+					'shopId',
+					'shopID',
+					'shopid',
+					'shop_id',
+					'shoppingStoreId',
+					'shoppingStoreID',
+					'shopping_store_id',
+					'shoppingId',
+					'shopping_id',
+					'sid'
+				];
+				for (let i = 0; i < keys.length; i++) {
+					const value = store[keys[i]];
+					if (value !== undefined && value !== null && String(value).trim() !== '') {
+						console.log('[适用门店] 取到门店ID:', {
+							field: keys[i],
+							value,
+							store
+						});
+						return value;
+					}
+				}
+				const idKey = Object.keys(store).find(key => {
+					const value = store[key];
+					return /id$/i.test(key) && value !== undefined && value !== null && String(value).trim() !== '';
+				});
+				if (idKey) {
+					console.log('[适用门店] 兜底取到门店ID:', {
+						field: idKey,
+						value: store[idKey],
+						store
+					});
+					return store[idKey];
+				}
+				console.log('[适用门店] 当前门店未找到ID字段:', store);
+				return '';
+			},
+			getStoreName(store = {}) {
+				return String(store.name || store.storeName || store.shopName || store.title || '').trim();
+			},
+			isSameStoreByCoordinate(store = {}, target = {}) {
+				const storeCoordinate = this.getStoreCoordinate(store);
+				const targetCoordinate = this.getStoreCoordinate(target);
+				if (!storeCoordinate.valid || !targetCoordinate.valid) return true;
+				return Math.abs(storeCoordinate.latitude - targetCoordinate.latitude) < 0.0001 &&
+					Math.abs(storeCoordinate.longitude - targetCoordinate.longitude) < 0.0001;
+			},
+			findMatchedAdminStore(store = {}, list = []) {
+				const name = this.getStoreName(store);
+				if (!name) return null;
+				return list.find(item => {
+					return this.getStoreName(item) === name && this.isSameStoreByCoordinate(item, store);
+				}) || list.find(item => this.getStoreName(item) === name) || null;
+			},
+			mergeShoppingStoreIdsFromAdmin(list = []) {
+				if (!Array.isArray(list) || !list.length) return;
+				adminStoreListApi({
+					isDelete: 0,
+					keywords: '',
+					limit: 10000,
+					page: 1
+				}).then(res => {
+					const data = res.data || {};
+					const adminList = Array.isArray(data.list) ? data.list : (Array.isArray(data) ? data : []);
+					console.log('[适用门店] 后台完整门店列表:', adminList);
+					if (!adminList.length) return;
+					const mergedList = list.map(store => {
+						const currentId = this.getStoreId(store);
+						if (currentId) return store;
+						const matchedStore = this.findMatchedAdminStore(store, adminList);
+						const matchedId = matchedStore ? this.getStoreId(matchedStore) : '';
+						console.log('[适用门店] 合并门店ID匹配结果:', {
+							sourceStore: store,
+							matchedStore,
+							matchedId
+						});
+						return matchedId ? Object.assign({}, matchedStore, store, {
+							id: matchedId
+						}) : store;
+					});
+					console.log('[适用门店] 合并ID后的 shoppingStoreList:', mergedList);
+					this.$set(this, 'shoppingStoreList', mergedList);
+				}).catch(() => {});
+			},
+			resolveStoreId(store = {}) {
+				const storeId = this.getStoreId(store);
+				if (storeId) return Promise.resolve(storeId);
+				const name = this.getStoreName(store);
+				if (!name) return Promise.resolve('');
+				return adminStoreListApi({
+					isDelete: 0,
+					keywords: name,
+					limit: 10000,
+					page: 1
+				}).then(res => {
+					const data = res.data || {};
+					const list = Array.isArray(data.list) ? data.list : (Array.isArray(data) ? data : []);
+					const matchedStore = this.findMatchedAdminStore(store, list);
+					return matchedStore ? this.getStoreId(matchedStore) : '';
+				});
+			},
+			goStoreDetail(storeOrIndex = {}) {
+				const store = typeof storeOrIndex === 'number'
+					? (this.sortedShoppingStoreList[storeOrIndex] || {})
+					: storeOrIndex;
+				console.log('[适用门店] 点击门店:', {
+					index: storeOrIndex,
+					store
+				});
+				uni.showLoading({
+					title: '加载中'
+				});
+				this.resolveStoreId(store).then(storeId => {
+					console.log('[适用门店] 最终用于详情接口的门店ID:', storeId);
+					if (!storeId) {
+						return Promise.reject('门店ID不存在');
+					}
+					return adminStoreInfoApi(storeId).then(res => ({
+						res,
+						storeId
+					}));
+				}).then(({ res, storeId }) => {
+					const result = res.data || {};
+					const detail = result.info || result.detail || result.store || result;
+					const fullStore = Object.assign({}, store, detail);
+					const detailUrl = `/pages/store/detail/index?id=${fullStore.id || storeId}`;
+					this.handleStoreToggle(false);
+					uni.setStorageSync('store_detail', fullStore);
+					uni.navigateTo({
+						url: detailUrl
+					});
+				}).catch((err) => {
+					uni.showToast({
+						title: (typeof err === 'string' && err) || '门店详情获取失败',
+						icon: 'none'
+					});
+				}).finally(() => {
+					uni.hideLoading();
+				});
 			},
 			getSkuImage() {
 				let sku = []
@@ -2228,6 +2439,95 @@
 				margin-left: 8rpx;
 				font-size: 24rpx;
 			}
+		}
+	}
+
+	.detail-service-card {
+		overflow: hidden;
+		background: #fff;
+		box-shadow: 0 8rpx 24rpx rgba(20, 62, 126, 0.05);
+
+		.detail-service-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			min-height: 82rpx;
+			padding: 0 24rpx;
+			box-sizing: border-box;
+			border-bottom: 1rpx solid #f1f3f7;
+			color: #333;
+			font-size: 28rpx;
+			line-height: 40rpx;
+
+			&:last-child {
+				border-bottom: 0;
+			}
+		}
+
+		.detail-service-main {
+			display: flex;
+			align-items: center;
+			flex: 1;
+			min-width: 0;
+		}
+
+		.detail-service-label {
+			display: inline-block;
+			white-space: nowrap;
+		}
+
+		.detail-service-icon {
+			flex-shrink: 0;
+			width: 34rpx;
+			margin-right: 18rpx;
+			color: #2f73ff;
+			font-size: 32rpx;
+			line-height: 40rpx;
+			text-align: center;
+		}
+
+		.detail-service-arrow {
+			flex-shrink: 0;
+			margin-left: 12rpx;
+			color: #c7cbd3;
+			font-size: 26rpx;
+			line-height: 40rpx;
+		}
+
+		.detail-sku-row {
+			min-height: 72rpx;
+			padding: 0 24rpx 16rpx 76rpx;
+			box-sizing: border-box;
+			border-bottom: 1rpx solid #f1f3f7;
+		}
+
+		.atterTxt,
+		.store-scope-more,
+		.praise {
+			color: #999;
+			font-size: 26rpx;
+		}
+
+		.praise {
+			display: flex;
+			align-items: center;
+			flex-shrink: 0;
+		}
+
+		.detail-review-row {
+			.detail-service-main {
+				flex: 0 0 auto;
+				max-width: 300rpx;
+			}
+
+			.praise {
+				margin-left: auto;
+			}
+		}
+
+		i {
+			font-style: normal;
+			color: #999;
 		}
 	}
 
@@ -2936,13 +3236,27 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
+			color: #333;
 		}
 
 		.store-popup-distance {
-			flex-shrink: 0;
-			margin-left: 24rpx;
 			color: #999;
 			font-size: 24rpx;
+		}
+
+		.store-popup-distance-wrap {
+			display: flex;
+			align-items: center;
+			flex-shrink: 0;
+			margin-left: 24rpx;
+			padding: 8rpx 0 8rpx 16rpx;
+		}
+
+		.store-popup-nav-icon {
+			margin-right: 8rpx;
+			color: #2f73ff;
+			font-size: 28rpx;
+			line-height: 34rpx;
 		}
 	}
 

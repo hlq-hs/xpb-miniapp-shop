@@ -188,6 +188,10 @@
   content: "\e605";
 }
 
+.icon-menu-yuan:before {
+  content: "\00a5";
+}
+
 .icon-xuanzhong:before {
   content: "\e615";
 }

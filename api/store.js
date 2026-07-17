@@ -229,6 +229,40 @@ export function adminStoreListApi(data) {
 
 
 /**
+ * 后台门店详情
+ * @param {Number|String} id
+ */
+export function adminStoreInfoApi(id) {
+	const header = {
+		...HEADER
+	};
+	if (store.state.app.token) {
+		header[TOKENNAME] = store.state.app.token;
+	}
+	return new Promise((resolve, reject) => {
+		uni.request({
+			url: "https://tmxcscadmin.kbiso.com/api/admin/shopping/store/info",
+			method: "GET",
+			header,
+			data: {
+				id
+			},
+			success: (res) => {
+				const result = res.data || {};
+				if (res.statusCode === 200 && Number(result.code) === 200) {
+					resolve(result);
+				} else {
+					reject(result.message || "门店详情获取失败");
+				}
+			},
+			fail: () => {
+				reject("请求失败");
+			}
+		});
+	});
+}
+
+/**
  * 优品推荐
  * @param object data
  */
