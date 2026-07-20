@@ -26,7 +26,10 @@
 		globalData: {
 			statusBarHeight: statusBarHeight, //手机端头部手机时间位置高度
 			spread: 0, //推广人id
+			spread: 0,
 			code: 0,
+			storeId: '',
+			shopId: '',
 			isLogin: false,
 			userInfo: {},
 			MyMenus: [],
@@ -108,7 +111,7 @@
 			}
 			//小程序扫码进入场景
 			if (option.query.hasOwnProperty('scene')) {
-				switch (option.scene) {
+				switch (Number(option.scene)) {
 					case 1047: //扫描小程序码
 					case 1048: //长按图片识别小程序码
 					case 1049: //手机相册选取小程序码
@@ -119,6 +122,8 @@
 					// that.globalData = mapeMpQrCodeValue;
 					that.globalData = Object.assign(that.globalData,mapeMpQrCodeValue);
 					that.globalData.spread = mapeMpQrCodeValue.spread ? mapeMpQrCodeValue.spread : '';
+					that.globalData.storeId = mapeMpQrCodeValue.storeId ? mapeMpQrCodeValue.storeId : '';
+					that.globalData.shopId = mapeMpQrCodeValue.shopId ? mapeMpQrCodeValue.shopId : '';
                     break;
 				}
 			}
@@ -240,7 +245,19 @@
 				})
 			}
 		},
-		onShow: function() {
+		onShow: function(option = {}) {
+			// #ifdef MP
+			const query = option.query || {};
+			const qrScenes = [1047, 1048, 1049, 1001];
+			if (query.hasOwnProperty('scene') && qrScenes.indexOf(Number(option.scene)) !== -1) {
+				const value = this.$util.getUrlParams(decodeURIComponent(query.scene));
+				const mapeMpQrCodeValue = this.$util.formatMpQrCodeData(value);
+				this.globalData = Object.assign(this.globalData, mapeMpQrCodeValue);
+				this.globalData.spread = mapeMpQrCodeValue.spread ? mapeMpQrCodeValue.spread : '';
+				this.globalData.storeId = mapeMpQrCodeValue.storeId ? mapeMpQrCodeValue.storeId : '';
+				this.globalData.shopId = mapeMpQrCodeValue.shopId ? mapeMpQrCodeValue.shopId : '';
+			}
+			// #endif
 			// #ifdef H5
 			uni.getSystemInfo({
 				success(e) {

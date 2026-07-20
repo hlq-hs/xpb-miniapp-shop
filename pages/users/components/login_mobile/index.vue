@@ -104,6 +104,12 @@
 			getRoutinePhoneCode() {
 				return Routine.getCode();
 			},
+			getRegisterSceneParams() {
+				const params = {};
+				if (app.globalData.storeId) params.storeId = app.globalData.storeId;
+				if (app.globalData.shopId) params.shopId = app.globalData.shopId;
+				return params;
+			},
 			submitUserPhone(payload, retried = false) {
 				return getUserPhone(payload).catch((error) => {
 					// #ifdef MP
@@ -186,6 +192,7 @@
 					const submitPhone = (routineCode = this.wxCode) => this.submitUserPhone({
 						captcha: that.codeNum,
 						phone: that.account,
+						...this.getRegisterSceneParams(),
 						// #ifdef H5
 						type: 'public',
 						// #endif

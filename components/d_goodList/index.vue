@@ -31,7 +31,7 @@
 			</view>
 			<image class="product-image" :src="getProductImage(item)" mode="aspectFill"></image>
 		</view>
-		<view class="empty-line" v-if="tempArr.length">我也是有底线的~</view>
+		<view class="empty-line" v-if="tempArr.length || showEmptyLine">我也是有底线的~</view>
 	</view>
 </template>
 
@@ -48,6 +48,10 @@
 				default: () => []
 			},
 			isLogin: {
+				type: Boolean,
+				default: false
+			},
+			showEmptyLine: {
 				type: Boolean,
 				default: false
 			}

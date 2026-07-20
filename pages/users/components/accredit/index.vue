@@ -56,6 +56,12 @@
 			}
 		},
 		methods:{
+			getRegisterSceneParams() {
+				const params = {};
+				if (app.globalData.storeId) params.storeId = app.globalData.storeId;
+				if (app.globalData.shopId) params.shopId = app.globalData.shopId;
+				return params;
+			},
 			modelCancel(){
 				this.$emit('closeModel',{isStatus:this.isStatus});
 			},
@@ -81,7 +87,8 @@
 					iv: iv,
 					code: code,
 					key:this.authKey,
-					type: 'routine'
+					type: 'routine',
+					...this.getRegisterSceneParams()
 				})
 					.then(res => {
 						this.$store.commit('LOGIN', {

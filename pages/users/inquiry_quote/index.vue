@@ -68,7 +68,7 @@
 						<view class="step-illustration illustration-left">
 							<image
 								class="guide-illustration"
-								src="https://xpb.cn-shenzhen.oss.aliyuncs.com/235235/pt20260613170917009628500346.jpg?versionId=CAEQdBiBgMDTnvyA9hkiIDM0Y2JiNGIxMzEyOTQ3Yzc4YzdjZjExM2JmZDljZjU3"
+								src="https://xpb.cn-shenzhen.oss.aliyuncs.com/235235/pt20260720113056500418359631.jpg?versionId=CAEQdRiBgMCLp6f2.xkiIDIxNWMzZjk3MzY4MzRjZjhhODhjMWQ5MjY4ZDQwZjlj"
 								mode="aspectFit"
 								@load="handleAssetReady"
 								@error="handleAssetReady"
@@ -88,7 +88,7 @@
 						<view class="step-illustration illustration-right">
 							<image
 								class="selection-illustration"
-								src="https://xpb.cn-shenzhen.oss.aliyuncs.com/235235/pt202606131644418361280395948.jpg?versionId=CAEQdBiBgIDum8.A9hkiIGM1YjYxYTdhMGRhZjQ1NDA4YThiYzRmMDZiYjY3YmZk"
+								src="https://xpb.cn-shenzhen.oss.aliyuncs.com/235235/pt202607201137330651599198150.jpg?versionId=CAEQdRiBgMCZtLP2.xkiIGE0M2ExMWIzMjJiMzQ3MDViOTdkNWMzOTM3NTQ3ODQ0"
 								mode="aspectFit"
 								@load="handleAssetReady"
 								@error="handleAssetReady"
@@ -100,7 +100,7 @@
 						<view class="step-illustration illustration-third">
 							<image
 								class="third-illustration"
-								src="https://xpb.cn-shenzhen.oss.aliyuncs.com/235235/pt202606151048334411841309647.jpg?versionId=CAEQdBiBgIDJx9yk9hkiIGQ2YzdmMmYwOThhYTQ5ZjdhODAwOTc3NGI2OGE2OWRh"
+								src="https://xpb.cn-shenzhen.oss.aliyuncs.com/235235/pt20260720110811943994786007.jpg?versionId=CAEQdRiBgMDn1P31.xkiIDI2ZWM0MDE4ZDY1NjRiZGI4M2FlN2M4MmQ1OGY3NDBl"
 								mode="aspectFit"
 								@load="handleAssetReady"
 								@error="handleAssetReady"
@@ -1269,22 +1269,22 @@ export default {
 }
 
 .illustration-left {
-	width: 300rpx;
-	height: 260rpx;
+	width: 390rpx;
+	height: 240rpx;
 	margin-left: 8rpx;
 }
 
 .guide-illustration {
 	position: absolute;
-	left: -10rpx;
+	left: 0;
 	top: 0;
-	width: 270rpx;
-	height: 260rpx;
+	width: 390rpx;
+	height: 240rpx;
 }
 
 .illustration-right {
-	width: 290rpx;
-	height: 270rpx;
+	width: 390rpx;
+	height: 240rpx;
 	margin-right: 8rpx;
 }
 
@@ -1302,10 +1302,10 @@ export default {
 
 .selection-illustration {
 	position: absolute;
-	right: -24rpx;
-	bottom: -22rpx;
-	width: 310rpx;
-	height: 310rpx;
+	right: 0;
+	bottom: 0;
+	width: 390rpx;
+	height: 240rpx;
 }
 
 .guide-panel {

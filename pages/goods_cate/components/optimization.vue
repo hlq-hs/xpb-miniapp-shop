@@ -48,7 +48,13 @@
 					</view>
 					<view class="mask" @click="closeTap"></view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
+				<view class="list-loading" v-if="loading && !tempArr.length">
+					<view class="list-loading-panel">
+						<text class="list-loading-icon iconfont icon-jiazai"></text>
+						<text class="list-loading-text">Loading...</text>
+					</view>
+				</view>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" :showEmptyLine="loadend && !loading" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
@@ -87,7 +93,13 @@
 					</view>
 					<view class="mask" @click="closeTap"></view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
+				<view class="list-loading" v-if="loading && !tempArr.length">
+					<view class="list-loading-panel">
+						<text class="list-loading-icon iconfont icon-jiazai"></text>
+						<text class="list-loading-text">Loading...</text>
+					</view>
+				</view>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" :showEmptyLine="loadend && !loading" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
@@ -1339,6 +1351,57 @@
 
 		.wrapper > .loadingicon {
 			display: none;
+		}
+
+		.list-loading {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 190rpx;
+			z-index: 20;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			pointer-events: none;
+
+			.list-loading-panel {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				width: 160rpx;
+				height: 160rpx;
+				border-radius: 8rpx;
+				background: rgba(0, 0, 0, 0.68);
+			}
+
+			.list-loading-icon {
+				flex: 0 0 auto;
+				margin-bottom: 22rpx;
+				font-size: 46rpx;
+				line-height: 46rpx;
+				color: rgba(255, 255, 255, 0.88);
+				animation: list-loading-rotate 1s linear infinite;
+			}
+
+			.list-loading-text {
+				flex: 0 0 auto;
+				white-space: nowrap;
+				line-height: 28rpx;
+				font-size: 26rpx;
+				color: #fff;
+			}
+		}
+
+		@keyframes list-loading-rotate {
+			from {
+				transform: rotate(0deg);
+			}
+
+			to {
+				transform: rotate(360deg);
+			}
 		}
 
 		.bgcolor {

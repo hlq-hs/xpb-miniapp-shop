@@ -48,6 +48,12 @@
 		mounted() {
 		},
 		methods:{
+			getRegisterSceneParams() {
+				const params = {};
+				if (app.globalData.storeId) params.storeId = app.globalData.storeId;
+				if (app.globalData.shopId) params.shopId = app.globalData.shopId;
+				return params;
+			},
 			// #ifdef MP
 			// 小程序获取手机号码
 			getphonenumber(e){
@@ -67,7 +73,8 @@
 					iv: iv,
 					code: code,
 					key:this.authKey,
-					type: 'routine'
+					type: 'routine',
+					...this.getRegisterSceneParams()
 				})
 					.then(res => {
 						this.$store.commit('LOGIN', {

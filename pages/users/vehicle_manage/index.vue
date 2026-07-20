@@ -146,7 +146,7 @@
 		</view>
 
 		<view class="footer acea-row row-center-wrapper" v-if="!addPageVisible">
-			<view class="addressBnt bg_color on" @click="addVehicle">
+			<view class="addressBnt bg_color on" :class="{ disabled: addVehicleDisabled }" @click="addVehicle">
 				<text class="add-plus">+</text>添加车辆信息
 			</view>
 		</view>
@@ -241,6 +241,8 @@
 	const PLATE_LETTER_NUMBER_REG = /^[A-HJ-NP-Z0-9]$/;
 	const PLATE_SPECIAL_SUFFIXES = "学警港澳挂使领";
 
+	const MAX_USER_CAR_COUNT = 3;
+
 	export default {
 		data() {
 			return {
@@ -271,6 +273,12 @@
 			};
 		},
 		computed: {
+			vehicleLimitReached() {
+				return this.vehicleList.length >= MAX_USER_CAR_COUNT;
+			},
+			addVehicleDisabled() {
+				return this.vehicleLimitReached || this.loading || this.settingDefaultCarId !== "";
+			},
 			filteredVehicleList() {
 				const keyword = String(this.searchKeyword || "").trim().toLowerCase();
 				if (!keyword) return this.vehicleList;
@@ -348,9 +356,9 @@
 			this.sourceFrom = String(options.add || "") === "1" && String(options.from || "") === "inquiry"
 				? "inquiry"
 				: "";
-			this.getVehicleList(true);
+			const listRequest = this.getVehicleList(true);
 			if (String(options.add || "") === "1") {
-				this.$nextTick(() => {
+				Promise.resolve(listRequest).finally(() => {
 					this.addVehicle();
 				});
 			}
@@ -369,6 +377,13 @@
 			return false;
 		},
 		methods: {
+			showVehicleLimitToast() {
+				uni.showToast({
+					title: "\u6700\u591a\u53ea\u80fd\u6dfb\u52a03\u8f86\u8f66",
+					icon: "none",
+					duration: 2500
+				});
+			},
 			isSpecialPlateChar(char) {
 				const value = String(char || "").trim();
 				return !!value && PLATE_SPECIAL_SUFFIXES.indexOf(value) !== -1;
@@ -501,6 +516,10 @@
 			},
 			confirmRecognition() {
 				if (this.submitting || !this.recognitionResult) return;
+				if (this.vehicleLimitReached) {
+					this.showVehicleLimitToast();
+					return;
+				}
 				const getField = (keys) => {
 					for (let i = 0; i < keys.length; i += 1) {
 						const value = this.recognitionResult[keys[i]];
@@ -587,12 +606,11 @@
 				if (isPage) {
 					this.page = 1;
 					this.loadend = false;
-					this.vehicleList = [];
 				}
-				if (this.loading || this.loadend) return;
+				if (this.loading || this.loadend) return Promise.resolve();
 				this.loading = true;
 				this.loadTitle = "";
-				getUserCarList({
+				return getUserCarList({
 					page: this.page,
 					limit: this.limit,
 					uid: this.$store.state.app.uid || ""
@@ -604,6 +622,10 @@
 						this.loadend = list.length < this.limit || this.page >= (pageData.totalPage || 0);
 						this.loadTitle = this.loadend ? "我也是有底线的~" : "加载更多";
 						this.page += 1;
+						if (this.addPageVisible && !this.form.id && this.vehicleLimitReached) {
+							this.closeAddPage();
+							this.showVehicleLimitToast();
+						}
 					});
 				}).catch((err) => {
 					this.loadTitle = "加载更多";
@@ -654,6 +676,11 @@
 				this.setDefaultVehicle(vehicle);
 			},
 			addVehicle() {
+				if (this.loading || this.settingDefaultCarId !== "") return;
+				if (this.vehicleLimitReached) {
+					this.showVehicleLimitToast();
+					return;
+				}
 				this.form = emptyForm();
 				this.recognitionMode = "";
 				this.recognitionResult = null;
@@ -864,6 +891,10 @@
 					isNewEnergy: Number(this.form.isNewEnergy) === 1 ? 1 : 0
 				};
 				const isNewVehicle = !payload.id;
+				if (isNewVehicle && this.vehicleLimitReached) {
+					this.showVehicleLimitToast();
+					return;
+				}
 				const request = payload.id ? updateUserCar(payload.id, payload) : saveUserCar(payload);
 				request.then(() => {
 					uni.showToast({
@@ -1275,6 +1306,10 @@
 	.footer .addressBnt.on {
 		width: 690rpx;
 		margin: 0 auto;
+	}
+
+	.footer .addressBnt.disabled {
+		opacity: 0.55;
 	}
 
 	.footer .addressBnt .iconfont {

@@ -45,6 +45,22 @@ var entities = {
 };
 // #endif
 var emoji; // emoji 补丁包 https://jin-yufeng.github.io/Parser/#/instructions?id=emoji
+var commonEntities = {
+	middot: '\u00B7',
+	rarr: '\u2192',
+	larr: '\u2190',
+	uarr: '\u2191',
+	darr: '\u2193',
+	ndash: '\u2013',
+	mdash: '\u2014',
+	hellip: '\u2026',
+	bull: '\u2022',
+	copy: '\u00A9',
+	reg: '\u00AE',
+	trade: '\u2122',
+	times: '\u00D7',
+	divide: '\u00F7'
+};
 class MpHtmlParser {
 	constructor(data, options = {}) {
 		this.attrs = {};
@@ -141,6 +157,7 @@ class MpHtmlParser {
 				en = text.substring(i + 1, j);
 				// #ifdef MP-WEIXIN || MP-QQ || APP-PLUS
 				if (en == 'nbsp') text = text.substr(0, i) + '\xA0' + text.substr(j + 1); // 解决 &nbsp; 失效
+				else if (commonEntities[en]) text = text.substr(0, i) + commonEntities[en] + text.substr(j + 1);
 				else if (en != 'lt' && en != 'gt' && en != 'amp' && en != 'ensp' && en != 'emsp' && en != 'quot' && en != 'apos') {
 					i && siblings.push({
 						type: 'text',

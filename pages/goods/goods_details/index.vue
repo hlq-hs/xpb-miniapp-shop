@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<view :data-theme="theme">
 		<skeleton :show="showSkeleton" :isNodes="isNodes" ref="skeleton" loading="chiaroscuro" selector="skeleton"
 			bgcolor="#FFF"></skeleton>
@@ -201,7 +201,7 @@
 							<image :src="urlDomain+'crmebimage/perset/staticImg/xyou.png'"></image>
 						</view>
 						<view class='conter'>
-							<jyf-parser :html="description" ref="article" :tag-style="tagStyle"></jyf-parser>
+							<jyf-parser :html="formattedDescription" ref="article" :tag-style="tagStyle"></jyf-parser>
 						</view>
 					</view>
 					<view style='height:120rpx;'></view>
@@ -551,6 +551,11 @@
 				lock: false,
 				scrollTop: 0,
 				tagStyle: {
+					p: 'margin:0 0 14rpx;color:#333;font-size:28rpx;line-height:1.75;',
+					div: 'color:#333;font-size:28rpx;line-height:1.75;',
+					span: 'color:#333;font-size:28rpx;line-height:1.75;',
+					strong: 'color:#111;font-weight:700;',
+					b: 'color:#111;font-weight:700;',
 					img: 'width:100%;display:block;',
 					table: 'width:100%',
 					video: 'width:100%'
@@ -642,6 +647,9 @@
 						return aDistance - bDistance;
 					})
 					.map(({ item }) => item);
+			},
+			formattedDescription() {
+				return this.formatDescriptionByBold(this.description);
 			}
 		},
 		watch: {
@@ -771,6 +779,56 @@
       touchStart() {
         this.currentPage = false;
       },
+			hasVisibleDetailContent(html = '') {
+				if (!html || typeof html !== 'string') return false;
+				const text = html
+					.replace(/<img[^>]*>/gi, '')
+					.replace(/<[^>]+>/g, '')
+					.replace(/&nbsp;|\s/g, '');
+				return !!text;
+			},
+			wrapDetailTextCard(html = '') {
+				if (!this.hasVisibleDetailContent(html)) return html;
+				return `<div class="detail-text-card">${html}</div>`;
+			},
+			wrapDetailSegment(html = '') {
+				if (!html || typeof html !== 'string') return '';
+				const parts = html.split(/(<img\b[^>]*>)/ig);
+				return parts.map(part => {
+					if (!part) return '';
+					if (/^<img\b/i.test(part)) return part;
+					return this.wrapDetailTextCard(part);
+				}).join('');
+			},
+			formatDescriptionByBold(content = '') {
+				if (!content || typeof content !== 'string') return content || '';
+				const boldReg = /<(strong|b)(\s[^>]*)?>[\s\S]*?<\/\1>/ig;
+				const matches = [];
+				let match;
+				while ((match = boldReg.exec(content))) {
+					matches.push({
+						index: match.index
+					});
+				}
+				if (!matches.length) return content;
+				let result = '';
+				let start = 0;
+				matches.forEach((item, index) => {
+					if (item.index > start) {
+						result += this.wrapDetailSegment(content.slice(start, item.index));
+					}
+					start = item.index;
+					const next = matches[index + 1];
+					if (next) {
+						result += this.wrapDetailSegment(content.slice(start, next.index));
+						start = next.index;
+					}
+				});
+				if (start < content.length) {
+					result += this.wrapDetailSegment(content.slice(start));
+				}
+				return result || content;
+			},
 			//独立客服跳转
 			wxChatService() {
 				let chatUrlArr = this.chatUrl.split('?')
@@ -2854,6 +2912,77 @@
 		background-color: $theme-color;
 	}
 
+	.product-con .product-intro {
+		margin-top: 20rpx;
+		background-color: #fff;
+		padding: 0 24rpx 30rpx;
+		box-sizing: border-box;
+	}
+
+	.product-con .product-intro .title {
+		height: 92rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #222;
+		font-size: 30rpx;
+		font-weight: 600;
+	}
+
+	.product-con .product-intro .title image {
+		width: 20rpx;
+		height: 20rpx;
+	}
+
+	.product-con .product-intro .title .sp {
+		margin: 0 12rpx;
+	}
+
+	.product-con .product-intro .conter {
+		box-sizing: border-box;
+		color: #333;
+		font-size: 28rpx;
+		line-height: 1.75;
+		word-break: break-word;
+	}
+
+	.product-con .product-intro .conter /deep/ .detail-text-card {
+		display: block;
+		margin-bottom: 18rpx;
+		padding: 22rpx 24rpx;
+		border-radius: 14rpx;
+		background: #f8f9fb;
+		box-sizing: border-box;
+		color: #333;
+		font-size: 28rpx;
+		line-height: 1.75;
+	}
+
+	.product-con .product-intro .conter /deep/ ._p,
+	.product-con .product-intro .conter /deep/ ._div {
+		color: #333;
+		font-size: 28rpx;
+		line-height: 1.75;
+	}
+
+	.product-con .product-intro .conter /deep/ ._span,
+	.product-con .product-intro .conter /deep/ text {
+		color: #333;
+		font-size: 28rpx;
+		line-height: 1.75;
+	}
+
+	.product-con .product-intro .conter /deep/ ._strong,
+	.product-con .product-intro .conter /deep/ ._b {
+		color: #111;
+		font-weight: 700;
+	}
+
+	.product-con .product-intro .conter /deep/ ._img {
+		display: block;
+		width: 100%;
+	}
+
 	button {
 		padding: 0;
 		margin: 0;
@@ -3264,3 +3393,4 @@
 		transform: translate3d(0, 0, 0);
 	}
 </style>
+

@@ -658,6 +658,15 @@ export default {
 	 * @param {Object} value
 	 */
 	formatMpQrCodeData(value) {
+		if (value && typeof value === 'object') {
+			let result = {};
+			if (value.pid) result.spread = value.pid;
+			if (value.id) result.id = value.id;
+			if (value.s) result.storeId = value.s;
+			if (value.h) result.shopId = value.h;
+			return result;
+		}
+		if (typeof value !== 'string') return {};
 		let values = value.split(',');
 		let result = {};
 		if (values.length === 2) {
