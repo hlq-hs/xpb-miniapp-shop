@@ -426,6 +426,9 @@
 				if (!item || typeof item !== 'object') {
 					return '';
 				}
+				if (String(item.name || '').trim() === '\u624b\u638c\u8ba2\u5355') {
+					return '/pages/users/palm_order_list/index';
+				}
 				if (String(item.name || '').trim() === '\u6d88\u8d39\u5386\u53f2') {
 					return settlementRepairInfoUrl;
 				}

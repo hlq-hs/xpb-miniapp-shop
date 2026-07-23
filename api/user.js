@@ -511,6 +511,35 @@ export function getSettlementRepairInfo(phone){
 }
 
 /**
+ * 获取手掌订单列表
+ * @param {string} phone
+ * @param {number|string} status
+ */
+export function getPalmOrderList(phone, status){
+  const data = { phone };
+  if (status !== '' && status !== null && status !== undefined) {
+    data.status = status;
+  }
+  return request.get('user/getPalmOrderList', data);
+}
+
+/**
+ * 获取手掌订单详情项目
+ * @param {string|number} workOrderId
+ */
+export function getWorkOrderItemList(workOrderId){
+  return request.get('user/getWorkOrderItemList', { workOrderId });
+}
+
+/**
+ * SQB precreate
+ * @param {Object} data
+ */
+export function sqbPrecreate(data){
+  return request.post('user/sqb/precreate', data);
+}
+
+/**
  * 获取消费历史详情
  * @param {string|number} jobNo
  * @param {string|number} shopId

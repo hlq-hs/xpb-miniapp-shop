@@ -308,6 +308,34 @@
 					}
 				},
 				{
+					"path": "palm_order_list/index",
+					"style": {
+						"navigationBarTitleText": "\u624b\u638c\u8ba2\u5355",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
+						"disableScroll": true,
+						"app-plus": {
+							"titleNView": {
+								"type": "default"
+							}
+						}
+					}
+				},
+				{
+					"path": "palm_order_detail/index",
+					"style": {
+						"navigationBarTitleText": "订单详情",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
+						"disableScroll": true,
+						"app-plus": {
+							"titleNView": {
+								"type": "default"
+							}
+						}
+					}
+				},
+				{
 					"path": "inquiry_quote/index",
 					"style": {
 						"navigationBarTitleText": "成本询价",

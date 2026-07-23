@@ -58,10 +58,28 @@
 				</view>
 
 				<view class="contact-box">
-					<view class="contact-line">联系人 {{ order.contactName || '-' }}</view>
-					<view class="contact-line">电话 {{ order.contactPhone || '-' }}</view>
-					<view class="contact-line">询价单 {{ order.inquiryNo || '-' }}</view>
-					<view v-if="order.merchantOrderNo" class="contact-line">商家订单 {{ order.merchantOrderNo }}</view>
+					<view class="contact-content">
+						<view class="contact-line">
+							<view class="contact-icon contact-user-icon"></view>
+							<text class="contact-label">联系人</text>
+							<text class="contact-value">{{ order.contactName || '-' }}</text>
+						</view>
+						<view class="contact-line">
+							<view class="contact-icon contact-phone-icon"></view>
+							<text class="contact-label">电话</text>
+							<text class="contact-value">{{ order.contactPhone || '-' }}</text>
+						</view>
+						<view class="contact-line">
+							<view class="contact-icon contact-order-icon"></view>
+							<text class="contact-label">询价单</text>
+							<text class="contact-value">{{ order.inquiryNo || '-' }}</text>
+						</view>
+						<view v-if="order.merchantOrderNo" class="contact-line">
+							<view class="contact-icon contact-order-icon"></view>
+							<text class="contact-label">商家订单</text>
+							<text class="contact-value">{{ order.merchantOrderNo }}</text>
+						</view>
+					</view>
 				</view>
 				<view class="section-divider"></view>
 
@@ -965,15 +983,118 @@ export default {
 
 .contact-box {
 	margin-top: 18rpx;
-	padding: 22rpx 24rpx;
+	padding: 20rpx 22rpx;
 	border-radius: 20rpx;
 	background: #f5f7fc;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	column-gap: 18rpx;
+}
+
+.contact-content {
+	flex: 1;
+	min-width: 0;
 }
 
 .contact-line {
+	display: flex;
+	align-items: center;
+	min-width: 0;
 	font-size: 26rpx;
-	line-height: 1.7;
+	line-height: 1.8;
 	color: #697385;
+}
+
+.contact-icon {
+	flex-shrink: 0;
+	width: 32rpx;
+	height: 32rpx;
+	margin-right: 14rpx;
+	border-radius: 50%;
+	position: relative;
+	background: #e6f0ff;
+}
+
+.contact-user-icon::before {
+	content: '';
+	position: absolute;
+	left: 11rpx;
+	top: 7rpx;
+	width: 10rpx;
+	height: 10rpx;
+	border-radius: 50%;
+	background: #68a5ff;
+}
+
+.contact-user-icon::after {
+	content: '';
+	position: absolute;
+	left: 8rpx;
+	bottom: 6rpx;
+	width: 16rpx;
+	height: 10rpx;
+	border-radius: 10rpx 10rpx 6rpx 6rpx;
+	background: #68a5ff;
+}
+
+.contact-phone-icon::before {
+	content: '';
+	position: absolute;
+	left: 10rpx;
+	top: 7rpx;
+	width: 10rpx;
+	height: 18rpx;
+	border-radius: 5rpx;
+	background: #68a5ff;
+	transform: rotate(-26deg);
+}
+
+.contact-phone-icon::after {
+	content: '';
+	position: absolute;
+	left: 13rpx;
+	top: 9rpx;
+	width: 7rpx;
+	height: 14rpx;
+	border-radius: 4rpx;
+	background: #e6f0ff;
+	transform: rotate(-26deg);
+}
+
+.contact-order-icon::before {
+	content: '';
+	position: absolute;
+	left: 9rpx;
+	top: 7rpx;
+	width: 14rpx;
+	height: 18rpx;
+	border-radius: 3rpx;
+	background: #68a5ff;
+}
+
+.contact-order-icon::after {
+	content: '';
+	position: absolute;
+	left: 12rpx;
+	top: 12rpx;
+	width: 8rpx;
+	height: 2rpx;
+	border-radius: 2rpx;
+	background: #e6f0ff;
+	box-shadow: 0 5rpx 0 #e6f0ff;
+}
+
+.contact-label {
+	flex-shrink: 0;
+	margin-right: 10rpx;
+	color: #697385;
+}
+
+.contact-value {
+	min-width: 0;
+	color: #697385;
+	word-break: break-all;
 }
 
 .section-divider {
