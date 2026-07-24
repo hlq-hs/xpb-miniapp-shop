@@ -3,10 +3,8 @@
 		<view class="cart_nav" :style='"height:"+navH+"rpx;"'>
 			<view class='navbarCon acea-row'>
 				<!-- #ifdef MP -->
-				<view class="select_nav flex justify-center align-center" id="home" :style="{ top: homeTop + 'rpx' }">
-					<text class="iconfont icon-fanhui2 px-20" @tap="returns"></text>
-					<text class="iconfont icon-gengduo5 px-20" @tap.stop="showNav"></text>
-					<text class="nav_line"></text>
+				<view class="back_nav flex justify-center align-center" id="home" :style="{ top: homeTop + 'rpx' }" @tap="returns">
+					<text class="iconfont icon-fanhui2 back_icon"></text>
 				</view>
 				<!-- #endif -->
 				<!-- #ifdef H5 -->
@@ -1042,9 +1040,14 @@
 			},
 			// #endif
 			returns: function() {
-				uni.switchTab({
-					url: '/pages/index/index'
-				})
+				const pages = getCurrentPages();
+				if (pages.length > 1) {
+					uni.navigateBack();
+				} else {
+					uni.switchTab({
+						url: '/pages/index/index'
+					})
+				}
 			},
 			showNav() {
 				this.currentPage = !this.currentPage;
@@ -1132,6 +1135,21 @@
 		line-height: 58rpx;
 		z-index: 1000;
 		left: 14rpx;
+	}
+
+	.back_nav {
+		width: 64rpx !important;
+		height: 60rpx !important;
+		color: #0f172a;
+		position: fixed;
+		font-size: 40rpx;
+		line-height: 60rpx;
+		z-index: 1000;
+		left: 20rpx;
+	}
+
+	.back_icon {
+		line-height: 60rpx;
 	}
 
 	.px-20 {

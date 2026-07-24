@@ -17,7 +17,10 @@
 			"style": {
 				"navigationBarTitleText": "购物车",
 				"navigationStyle": "custom",
-				"app-plus": {}
+				"disableSwipeBack": true,
+				"app-plus": {
+					"popGesture": "none"
+				}
 			}
 		},
 		{

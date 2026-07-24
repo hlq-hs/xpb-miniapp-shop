@@ -798,7 +798,7 @@
 				this.plateKeyboardVisible = false;
 			},
 			inputPlateKey(key) {
-				const value = String(key || "").trim().toUpperCase();
+				const value = String(key === undefined || key === null ? "" : key).trim().toUpperCase();
 				if (!this.validatePlateChar(value, this.activePlateIndex)) return;
 				const chars = this.plateChars.slice();
 				chars[this.activePlateIndex] = value;
