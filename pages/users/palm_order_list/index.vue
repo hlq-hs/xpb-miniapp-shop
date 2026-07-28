@@ -91,8 +91,6 @@
 import { mapGetters } from 'vuex';
 import { getPalmOrderList, sqbPrecreate } from '@/api/user.js';
 
-const PALM_ORDER_PHONE = '13700000000';
-
 export default {
 	data() {
 		return {
@@ -158,7 +156,6 @@ export default {
 	},
 	methods: {
 		async ensureCurrentPhone() {
-			return PALM_ORDER_PHONE;
 			if (this.currentPhone || !this.isLogin) {
 				return this.currentPhone;
 			}

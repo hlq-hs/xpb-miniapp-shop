@@ -130,6 +130,10 @@
 				type: Boolean,
 				default:true 
 			},
+			productType: {
+				type: Number,
+				default: 0
+			},
 		},
 		data() {
 			return {
@@ -410,6 +414,7 @@
 					limit: that.limit,
 					type: 1,
 					cid: that.sid,
+					productType: that.productType
 				}).then(res => {
 					let data = res.data || res;
 					let list = Array.isArray(data.list) ? data.list : [];
@@ -628,7 +633,19 @@
 			},
 			getAllCategory: function() {
 				let that = this;
-				getCategoryList().then(res => {
+				getCategoryList({
+					productType: that.productType
+				}).then(res => {
+					res.data = Array.isArray(res.data) ? res.data : [];
+					if (!res.data.length) {
+						that.productList = [];
+						that.categoryErList = [];
+						that.categoryTitle = '';
+						that.tempArr = [];
+						that.loadend = true;
+						that.loadTitle = "人家是有底线的~";
+						return;
+					}
 					res.data.forEach((item)=>{
 						if(item.child){
 							item.child.unshift({
@@ -645,9 +662,10 @@
 					if(pid){
 						let indexNow = that.productList.findIndex(item=>item.id==pid)
 						let item = that.productList.find(item=>item.id==pid)
-						console.log(indexNow,item);
-						this.tapNav(indexNow,item)
-						uni.removeStorageSync('categoryId');
+						if (indexNow >= 0 && item) {
+							this.tapNav(indexNow,item)
+							uni.removeStorageSync('categoryId');
+						}
 					}
 					that.categoryErList = res.data[0].child ? res.data[0].child : [];
 					that.page = 1;

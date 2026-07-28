@@ -85,8 +85,8 @@ export function postCartAdd(data) {
  * 获取分类列表
  * 
  */
-export function getCategoryList() {
-	return request.get('category', {}, {
+export function getCategoryList(data = {}) {
+	return request.get('category', data, {
 		noAuth: true
 	});
 }

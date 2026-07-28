@@ -54,6 +54,12 @@
 		components: {
 			recommend,
 		},
+		props: {
+			productType: {
+				type: Number,
+				default: 0
+			},
+		},
 		data() {
 			return {
 				urlDomain: this.$Cache.get("imgHost"),
@@ -76,7 +82,6 @@
 			this.iStatusBarHeight = uni.getSystemInfoSync().statusBarHeight;
 			// #endif
 			this.getAllCategory();
-			this.getProductList();
 		},
 		methods: {
 			// 去详情页
@@ -102,14 +107,24 @@
 			},
 			getAllCategory: function() {
 				let that = this;
-				getCategoryList().then(res => {
-					that.navLists = res.data;
+				getCategoryList({
+					productType: that.productType
+				}).then(res => {
+					that.navLists = Array.isArray(res.data) ? res.data : [];
+					if (!that.navLists.length) {
+						that.$set(that, 'productList', []);
+						return;
+					}
+					that.cid = that.navLists[0].id;
 					let pid= uni.getStorageSync('categoryId');
 					if(pid){
 						let indexNow = that.navLists.findIndex(item=>item.id==pid)
-						this.tabSelect(indexNow,pid)
-						uni.removeStorageSync('categoryId');
+						if (indexNow >= 0) {
+							this.tabSelect(indexNow,pid)
+							uni.removeStorageSync('categoryId');
+						}
 					}
+					this.getProductList();
 				})
 			},
 			getProductList: function() {
@@ -121,7 +136,8 @@
 				getProductslist({
 					page: that.page,
 					limit: that.limit,
-					cid: that.cid
+					cid: that.cid,
+					productType: that.productType
 				}).then(res => {
 					let list = res.data.list,
 						loadend = list.length < that.limit;

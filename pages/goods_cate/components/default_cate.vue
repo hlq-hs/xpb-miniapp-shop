@@ -30,7 +30,7 @@
 								</view>
 								<view class='list acea-row'>
 									<block v-for="(itemn,indexn) in item.child" :key="indexn">
-										<navigator hover-class='none' :url='"/pages/goods/goods_list/index?cid="+itemn.id+"&title="+itemn.name' class='item acea-row row-column row-middle'>
+										<navigator hover-class='none' :url='"/pages/goods/goods_list/index?cid="+itemn.id+"&title="+itemn.name+"&productType="+productType' class='item acea-row row-column row-middle'>
 											<view class='picture skeleton-rect' :style="{'background-color':itemn.extra?'none':'#f7f7f7'}">
 												<image :src='itemn.extra'></image>
 											</view>
@@ -52,6 +52,12 @@
 	import {getCategoryList} from '@/api/store.js';
 	import animationType from '@/utils/animationType.js'
 	export default {
+		props: {
+			productType: {
+				type: Number,
+				default: 0
+			},
+		},
 		data() {
 			return {
 				showSkeleton: true,
@@ -120,7 +126,9 @@
 			},
 			getAllCategory: function() {
 				let that = this;
-				getCategoryList().then(res => {
+				getCategoryList({
+					productType: that.productType
+				}).then(res => {
 					that.productList = Array.isArray(res.data) ? res.data : [];
 					let pid= uni.getStorageSync('categoryId');
 					if(pid){
@@ -160,7 +168,7 @@
 					uni.navigateTo({
 						animationType: animationType.type,
 						animationDuration: animationType.duration,
-						url: '/pages/goods/goods_list/index?searchValue=' + e.detail.value
+						url: '/pages/goods/goods_list/index?searchValue=' + e.detail.value + '&productType=' + this.productType
 					})
 				else
 					return this.$util.Tips({

@@ -7,7 +7,7 @@
 		<!-- #endif -->
 		
 		<view class='order-submission' :style="'margin-top:'+(marTop)+'rpx;'">
-			<view class="allAddress" :style="store_self_mention ? '':'padding-top:0;'">
+			<view class="allAddress" v-if="!isGroupBuyOrder" :style="store_self_mention ? '':'padding-top:0;'">
 				<view class="nav acea-row">
 					<view class="item font_color" :class="shippingType == 0 ? 'on' : 'on2'" @tap="addressType(0)"
 						v-if='store_self_mention'></view>
@@ -51,6 +51,10 @@
 				</view>
 			</view>
 			<view class="pad30">
+				<view class="group-buy-verify borRadius14" v-if="isGroupBuyOrder">
+					<view class="group-buy-verify-title">到店核销</view>
+					<view class="group-buy-verify-desc">购买后生成核销码，请到适用门店使用</view>
+				</view>
 				<orderGoods :cartInfo="cartInfo" :orderProNum="orderProNum"></orderGoods>
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between-wrapper' @tap='couponTap'
@@ -80,14 +84,14 @@
 						<view>会员优惠</view>
 						<view class='discount'>-￥{{priceGroup.vipPrice}}</view>
 					</view> -->
-					<view class='item acea-row row-between-wrapper' v-if='shippingType==0'>
+					<view class='item acea-row row-between-wrapper' v-if='!isGroupBuyOrder && shippingType==0'>
 						<view>快递费用</view>
 						<view class='discount' v-if='parseFloat(orderInfoVo.freightFee) > 0'>
 							+￥{{orderInfoVo.freightFee}}
 						</view>
 						<view class='discount' v-else>免运费</view>
 					</view>
-					<view v-else>
+					<view v-else-if="!isGroupBuyOrder">
 						<view class="item acea-row row-between-wrapper">
 							<view>联系人</view>
 							<view class="discount textR">
@@ -131,7 +135,7 @@
 						<view>积分抵扣：</view>
 						<view class='money'>-￥{{orderInfoVo.deductionPrice}}</view>
 					</view>
-					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.freightFee > 0">
+					<view class='item acea-row row-between-wrapper' v-if="!isGroupBuyOrder && orderInfoVo.freightFee > 0">
 						<view>运费：</view>
 						<view class='money'>+￥{{orderInfoVo.freightFee}}</view>
 					</view>
@@ -294,7 +298,8 @@
 				theme: app.globalData.theme,
 				formContent: '',
 				addressChangeId: 0,
-				orderNo: '' //下单订单号
+				orderNo: '', //下单订单号
+				isGroupBuyOrder: false
 			};
 		},
 		computed: {
@@ -372,6 +377,11 @@
 						if (orderInfoVo.addressId != this.addressChangeId) this.computedPrice();
 					}
 					this.cartInfo = orderInfoVo.orderDetailList;
+					this.isGroupBuyOrder = (this.cartInfo || []).some(item => Number(item.productType) === 7);
+					if (this.isGroupBuyOrder) {
+						this.shippingType = 2;
+						this.addressId = 0;
+					}
 					this.orderProNum = orderInfoVo.orderProNum;
 					this.cartArr[1].title = '可用余额:' + orderInfoVo.userBalance;
 					this.cartArr[1].payStatus = parseInt(res.data.yuePayStatus) === 1 ? 1 : 2;
@@ -428,7 +438,7 @@
 					addressId: this.addressId,
 					useIntegral: this.useIntegral ? true : false,
 					couponId: this.couponId,
-					shippingType: parseInt(shippingType) + 1,
+					shippingType: this.isGroupBuyOrder ? 2 : parseInt(shippingType) + 1,
 					preOrderNo: this.preOrderNo
 				}).then(res => {
 					let data = res.data;
@@ -616,10 +626,10 @@
 			SubOrder(e) {
 				let that = this,
 					data = {};
-				if (!that.addressId && !that.shippingType) return that.$util.Tips({
+				if (!that.isGroupBuyOrder && !that.addressId && !that.shippingType) return that.$util.Tips({
 					title: '请选择收货地址'
 				});
-				if (that.shippingType == 1) {
+				if (!that.isGroupBuyOrder && that.shippingType == 1) {
 					if (that.contacts == "" || that.contactsTel == "") {
 						return that.$util.Tips({
 							title: '请填写联系人及联系人电话'
@@ -642,13 +652,13 @@
 				data = {
 					realName: that.contacts,
 					phone: that.contactsTel,
-					addressId: that.addressId,
+					addressId: that.isGroupBuyOrder ? 0 : that.addressId,
 					couponId: that.couponId,
 					useIntegral: that.useIntegral,
 					preOrderNo: that.preOrderNo,
 					mark: that.mark,
-					storeId: that.system_store.id || 0,
-					shippingType: that.$util.$h.Add(that.shippingType, 1),
+					storeId: that.isGroupBuyOrder ? 0 : (that.system_store.id || 0),
+					shippingType: that.isGroupBuyOrder ? 2 : that.$util.$h.Add(that.shippingType, 1),
 				};
 				// #ifdef MP
 				openPaySubscribe().then(() => {
@@ -664,6 +674,25 @@
 </script>
 
 <style lang="scss" scoped>
+
+	.group-buy-verify {
+		background: #fff;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
+	}
+
+	.group-buy-verify-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #222;
+		margin-bottom: 12rpx;
+	}
+
+	.group-buy-verify-desc {
+		font-size: 26rpx;
+		color: #666;
+		line-height: 1.5;
+	}
 	.font_color {
 		@include main_color(theme);
 	}

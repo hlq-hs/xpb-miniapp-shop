@@ -5,10 +5,10 @@
 			:style="{height:winHeight + 'px'}"
 		>
 		<view class="cart-nav" :style="{ height: iStatusBarHeight + 'px'}"></view>
-		<cate v-if="currentPage === 'one'" ref="catePage" :showSlide="showSlide"></cate>
-		<contracted v-if="currentPage === 'two'" ref="catePage" :showSlide="showSlide"></contracted>
-		<optimization v-if="currentPage === 'three'" ref="catePage" :showSlide="showSlide"></optimization>
-		<fresh v-if="currentPage === 'four'" ref="catePage" :showSlide="showSlide"></fresh>
+		<cate v-if="currentPage === 'one'" ref="catePage" :showSlide="showSlide" :productType="productType"></cate>
+		<contracted v-if="currentPage === 'two'" ref="catePage" :showSlide="showSlide" :productType="productType"></contracted>
+		<optimization v-if="currentPage === 'three'" ref="catePage" :showSlide="showSlide" :productType="productType"></optimization>
+		<fresh v-if="currentPage === 'four'" ref="catePage" :showSlide="showSlide" :productType="productType"></fresh>
 		<pageFooter v-if="footerShow"></pageFooter>
 	</view>
 </template>
@@ -37,6 +37,7 @@
 				currentPage:'one',
 				theme:app.globalData.theme,
 				showSlide:true,
+				productType: 0,
 				winHeight:'',
 				configApi: {}, //分享类容配置
 				iStatusBarHeight: 0, // 状态栏高度
@@ -45,8 +46,9 @@
 		computed: {
 			...mapGetters(['isLogin', 'uid'])
 		},
-		onLoad(){
+		onLoad(options = {}){
 			let that = this;
+			that.productType = Number(options.productType || 0);
 			let config = that.$Cache.getItem('categoryConfig');
 			// #ifdef APP-PLUS
 			this.iStatusBarHeight = uni.getSystemInfoSync().statusBarHeight;

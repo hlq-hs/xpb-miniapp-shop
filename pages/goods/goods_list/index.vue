@@ -98,6 +98,7 @@
 					page: 1,
 					limit: 20,
 					cid: '',
+					productType: 0,
 				},
 				price: 0,
 				stock: 0,
@@ -113,6 +114,7 @@
 			this.$set(this.where, 'cid', options.cid || '');
 			this.title = options.title || '';
 			this.$set(this.where, 'keyword', options.searchValue || '');
+			this.$set(this.where, 'productType', Number(options.productType || 0));
 			this.get_product_list();
 		},
 		methods: {

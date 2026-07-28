@@ -8,7 +8,7 @@
 						<image :src="orderInfo.statusPic"></image>
 					</view>
 					<view class='data' :class='isGoodsReturn ? "on":""'>
-						<view class='state'>{{orderInfo.orderStatusMsg}}</view>
+						<view class='state'>{{orderStatusText}}</view>
 						<view v-if="orderInfo.refundReasonTime !== null">{{orderInfo.refundReasonTime}}</view>
 						<view v-else>{{orderInfo.payTime ? orderInfo.payTime :''}}</view>
 					</view>
@@ -19,7 +19,7 @@
 				<view class='nav'>
 					<view class='navCon acea-row row-between-wrapper'>
 						<view :class="!orderInfo.paid ? 'on':''">待付款</view>
-						<view :class="orderInfo.paid && orderInfo.status == 0 ? 'on':''">
+						<view :class="verifyStepActive ? 'on':''">
 							{{orderInfo.shippingType==1 ? '待发货':'待核销'}}</view>
 						<view :class="orderInfo.status == 1 ? 'on':''" v-if="orderInfo.shippingType == 1">待收货</view>
 						<view :class="orderInfo.status == 2 ? 'on':''">待评价</view>
@@ -31,7 +31,7 @@
 						</view>
 						<view class='line' :class='orderInfo.paid > 0 ? "bg_color":""'></view>
 						<view class='iconfont'
-							:class='(orderInfo.status == 0 ? "icon-webicon318":"icon-yuandianxiao") + " " + (orderInfo.paid&&orderInfo.status >= 0 ? "font_color":"")'>
+							:class='(verifyStepActive ? "icon-webicon318":"icon-yuandianxiao") + " " + (orderInfo.paid&&orderInfo.status >= 0 ? "font_color":"")'>
 						</view>
 						<view class='line' :class='orderInfo.status > 0 ? "bg_color":""'
 							v-if="orderInfo.shippingType == 1"></view>
@@ -48,7 +48,7 @@
 						</view>
 					</view>
 				</view>
-				<view v-if="orderInfo.shippingType == 2 && orderInfo.paid && orderInfo.pinkStatus != 1" class="writeOff borRadius14">
+				<view v-if="showWriteOff" class="writeOff borRadius14">
 					<view class="title">核销信息</view>
 					<view class="grayBg">
 						<view class="pictrue">
@@ -60,8 +60,38 @@
 					<view class="gear">
 						<image :src="urlDomain+'crmebimage/perset/staticImg/writeOff.jpg'"></image>
 					</view>
-					<view class="num">{{orderInfo.verifyCode}}</view>
-					<view class="rules" v-if='orderInfo.systemStore'>
+					<view class="num">{{currentVerifyCode}}</view>
+					<view class="group-verify-status" v-if="isGroupBuyOrder">
+						<text>{{getVerifyStatusText(groupBuyVerify.verifyStatus)}}</text>
+						<text v-if="groupBuyVerify.verifyNum"> {{groupBuyVerify.verifiedNum || 0}}/{{groupBuyVerify.verifyNum}}</text>
+					</view>
+					<view class="group-use-card" v-if="isGroupBuyOrder">
+						<view class="group-use-title">团购使用说明</view>
+						<view class="group-use-row"><text>核销状态</text><text>{{getVerifyStatusText(groupBuyVerify.verifyStatus)}}</text></view>
+						<view class="group-use-row"><text>核销数量</text><text>{{groupBuyVerify.verifiedNum || 0}}/{{groupBuyVerify.verifyNum || 0}}</text></view>
+						<view class="group-use-row"><text>使用有效期</text><text>{{groupBuyUseValidTime || '-'}}</text></view>
+						<view class="group-use-row"><text>可用时间</text><text>{{groupBuyAvailableTime}}</text></view>
+						<view class="group-use-row"><text>预约要求</text><text>{{groupBuyAppointmentText}}</text></view>
+						<view class="group-use-row"><text>核销方式</text><text>{{groupBuyVerifyText}}</text></view>
+						<view class="group-use-row"><text>每人限购</text><text>{{groupBuyLimitText}}</text></view>
+						<view class="group-use-row"><text>退款规则</text><text>{{groupBuyRefundTypeText}}</text></view>
+						<view class="group-use-rule" v-if="groupBuyInfo.refundRule">
+							<view>退款说明</view>
+							<text>{{groupBuyInfo.refundRule}}</text>
+						</view>
+						<view class="group-use-rule" v-if="groupBuyInfo.useRule">
+							<view>使用规则</view>
+							<text>{{groupBuyInfo.useRule}}</text>
+						</view>
+						<view class="group-ticket-list" v-if="groupBuyVerifyList.length > 1">
+							<view class="group-ticket-title">核销券</view>
+							<view class="group-ticket-item" v-for="(item, index) in groupBuyVerifyList" :key="index">
+								<view>{{index + 1}}. {{item.verifyCode || '-'}}</view>
+								<text>{{getVerifyStatusText(item.verifyStatus)}} {{item.verifiedNum || 0}}/{{item.verifyNum || 0}}</text>
+							</view>
+						</view>
+					</view>
+					<view class="rules" v-if='orderInfo.systemStore && !isGroupBuyOrder'>
 						<view class="item">
 							<view class="rulesTitle acea-row row-middle">
 								<text class="iconfont icon-shijian"></text>核销时间
@@ -85,17 +115,24 @@
 					</view>
 					<view class="con">拒绝原因：{{orderInfo.refundReason}}</view>
 				</view>
-				<view v-if="orderInfo.shippingType == 2" class="map acea-row row-between-wrapper borRadius14">
+				<view v-if="orderInfo.shippingType == 2 && !isGroupBuyOrder" class="map acea-row row-between-wrapper borRadius14">
 					<view>自提地址信息</view>
 					<view class="place cart-color acea-row row-center-wrapper" @tap="showMaoLocation">
 						<text class="iconfont icon-weizhi"></text>查看位置
+					</view>
+				</view>
+				<view v-if="isGroupBuyOrder" class="map acea-row row-between-wrapper borRadius14" @tap="handleGroupBuyStoreToggle(true)">
+					<view>适用门店</view>
+					<view class="place cart-color acea-row row-center-wrapper">
+						<text>{{ groupBuyShoppingStoreList.length ? ('查看' + groupBuyShoppingStoreList.length + '家') : '暂无门店' }}</text>
+						<text class="iconfont icon-xiangyou"></text>
 					</view>
 				</view>
 				<view v-if="orderInfo.shippingType === 1" class='address borRadius14'>
 					<view class='name'>{{orderInfo.realName}}<text class='phone'>{{orderInfo.userPhone}}</text></view>
 					<view>{{orderInfo.userAddress}}</view>
 				</view>
-				<view v-else class='address' style="margin-top:15rpx;">
+				<view v-else-if="!isGroupBuyOrder" class='address' style="margin-top:15rpx;">
 					<view class='name' @tap="makePhone">{{orderInfo.systemStore?orderInfo.systemStore.name:''}}<text
 							class='phone'>{{orderInfo.systemStore?orderInfo.systemStore.phone:''}}</text><text
 							class="iconfont icon-tonghua font-color"></text></view>
@@ -263,17 +300,40 @@
 					<view class="qs-btn" v-if="!orderInfo.paid" @click.stop="cancelOrder">取消订单</view>
 					<view class='bnt bg_color' v-if="!orderInfo.paid" @tap='pay_open(orderInfo.orderId,orderInfo.payPrice)'>立即付款</view>
 					<navigator hover-class="none" :url="'/pages/goods/goods_return/index?orderId='+orderInfo.orderId"
-						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1">申请退款
+						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1 && canApplyRefund">申请退款
 					</navigator>
 					<view class='bnt bg_color' v-if="orderInfo.combinationId > 0&&orderInfo.paid" @tap='goJoinPink'>查看拼团</view>
 					<navigator class='bnt cancel' v-if="orderInfo.deliveryType == 'express' && orderInfo.status >0"
 						hover-class='none' :url="'/pages/goods/goods_logistics/index?orderId='+ orderInfo.orderId">查看物流
 					</navigator>
-					<view class='bnt bg_color' v-if="orderInfo.status==1" @tap='confirmOrder'>确认收货</view>
+					<view class='bnt bg_color' v-if="orderInfo.status==1 && !isGroupBuyOrder" @tap='confirmOrder'>确认收货</view>
 					<view class='bnt cancel' v-if="orderInfo.status==3" @tap='delOrder'>删除订单</view>
 					<view class='bnt bg_color' v-if="orderInfo.status==3 && orderInfo.type!==1 && againStatus !== 1 " @tap='goOrderConfirm'>再次购买</view>
 				</view>
 			</view>
+		</view>
+		<view v-if="isGroupBuyOrder" class="store-pop-box">
+			<uni-popup ref="groupBuyStorePopup" :safe-area="false" type="bottom" borderRadius="20px 20px 0 0">
+				<view class="ensure store-popup">
+					<view class="title">
+						适用门店
+						<view class="close-box" @click="handleGroupBuyStoreToggle(false)">
+							<view class="iconfont icon-guanbi f-s-24"></view>
+						</view>
+					</view>
+					<scroll-view scroll-y="true" class="store-popup-list">
+						<view class="store-popup-item" v-for="(item, index) in sortedGroupBuyShoppingStoreList" :key="index">
+							<text class="store-popup-name" @click.stop="goStoreDetail(index)">{{ item.name || ('门店' + (index + 1)) }}</text>
+							<view class="store-popup-distance-wrap" v-if="formatStoreDistance(item) || getStoreCoordinate(item).valid" @click.stop="openStoreLocation(item, index)">
+								<text class="iconfont icon-dizhi store-popup-nav-icon"></text>
+								<text class="store-popup-distance">{{ formatStoreDistance(item) || '查看位置' }}</text>
+							</view>
+						</view>
+						<view class="store-popup-empty" v-if="!groupBuyShoppingStoreList.length">暂无适用门店</view>
+					</scroll-view>
+					<view class="activityBtn bnt" @click="handleGroupBuyStoreToggle(false)">确定</view>
+				</view>
+			</uni-popup>
 		</view>
 		<payment :pay_close="pay_close" @onChangeFun='onChangeFun' :order_id="pay_order_id"
 			:totalPrice='totalPrice'></payment>
@@ -292,6 +352,10 @@
 	} from '@/api/activity';
 	import payment from '@/pages/order/components/payment';
 	import orderGoods from "@/pages/order/components/orderGoods";
+	import {
+		adminStoreListApi,
+		adminStoreInfoApi
+	} from '@/api/store.js';
 	import ClipboardJS from "@/plugin/clipboard/clipboard.js";
 	import {toLogin} from '@/libs/login.js';
 	import {mapGetters} from "vuex";
@@ -312,6 +376,8 @@
 				codeImg: '',
 				qrcodeSize: 100,
 				order_id: '',
+				userLatitude: '',
+				userLongitude: '',
 				evaluate: 0,
 				cartInfo: [], //购物车产品
 				orderInfo: {
@@ -368,7 +434,100 @@
 				pinkStatus: 0, // 拼团状态
 			};
 		},
-		computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
+		computed: {
+			...mapGetters(['isLogin', 'chatUrl', 'userInfo']),
+			verifyStepActive() {
+				return this.orderInfo.paid && (Number(this.orderInfo.status) === 0 || (this.isGroupBuyOrder && Number(this.orderInfo.status) === 1));
+			},
+			orderStatusText() {
+				if (!this.isGroupBuyOrder) return this.orderInfo.orderStatusMsg;
+				const refundStatus = Number(this.orderInfo.refundStatus || 0);
+				const verifyStatus = Number((this.groupBuyVerify || {}).verifyStatus || 0);
+				if (!this.orderInfo.paid) return '待付款';
+				if (refundStatus === 1) return '退款中';
+				if (refundStatus === 2) return '已退款';
+				if (refundStatus === 3 || this.orderInfo.refundReason) {
+					return verifyStatus === 2 ? '退款已拒绝，已核销' : '退款已拒绝，待核销';
+				}
+				if (verifyStatus === 1) return '部分核销';
+				if (verifyStatus === 2) return Number(this.orderInfo.status) >= 3 ? '已完成' : '已核销，待评价';
+				if (verifyStatus === 3) return '已过期';
+				if (verifyStatus === 4) return '已退款';
+				return '待核销';
+			},
+			groupBuyVerifyList() {
+				return Array.isArray(this.orderInfo.verifyList) ? this.orderInfo.verifyList : [];
+			},
+			isGroupBuyOrder() {
+				return this.groupBuyVerifyList.length > 0;
+			},
+			groupBuyVerify() {
+				return this.groupBuyVerifyList[0] || {};
+			},
+			groupBuyInfo() {
+				return this.orderInfo.groupBuyInfo || {};
+			},
+			groupBuyShoppingStoreList() {
+				return Array.isArray(this.orderInfo.groupBuyShoppingStoreList) ? this.orderInfo.groupBuyShoppingStoreList : [];
+			},
+			sortedGroupBuyShoppingStoreList() {
+				return (this.groupBuyShoppingStoreList || [])
+					.map(item => ({
+						...item,
+						distance: this.getStoreDistanceKm(item)
+					}))
+					.sort((a, b) => {
+						const aDistance = a.distance === null ? Number.MAX_SAFE_INTEGER : a.distance;
+						const bDistance = b.distance === null ? Number.MAX_SAFE_INTEGER : b.distance;
+						return aDistance - bDistance;
+					});
+			},
+			showGroupBuyInfo() {
+				return this.isGroupBuyOrder && Object.keys(this.groupBuyInfo).length > 0;
+			},
+			groupBuyValidTime() {
+				const info = this.groupBuyInfo || {};
+				if (!info.validStartTime && !info.validEndTime) return '';
+				return (info.validStartTime || '-') + ' 至 ' + (info.validEndTime || '-');
+			},
+			groupBuyUseValidTime() {
+				return (this.groupBuyVerify || {}).expireTime || this.groupBuyValidTime;
+			},
+			groupBuyAvailableTime() {
+				return (this.groupBuyInfo || {}).availableTime || '不限';
+			},
+			groupBuyAppointmentText() {
+				return Number((this.groupBuyInfo || {}).appointmentRequired) === 1 ? '需要预约' : '无需预约';
+			},
+			groupBuyVerifyText() {
+				return Number((this.groupBuyInfo || {}).verifyType) === 2 ? '按件核销' : '整单核销';
+			},
+			groupBuyLimitText() {
+				const limitNum = Number((this.groupBuyInfo || {}).limitNum || 0);
+				return limitNum > 0 ? limitNum + '件' : '不限购';
+			},
+			groupBuyRefundTypeText() {
+				const refundType = Number((this.groupBuyInfo || {}).refundType || 0);
+				const refundTypeMap = {
+					1: '未核销可退',
+					2: '过期自动退',
+					3: '不可退',
+					4: '未核销可退，过期不可退'
+				};
+				return refundTypeMap[refundType] || '-';
+			},
+			currentVerifyCode() {
+				return this.isGroupBuyOrder ? this.groupBuyVerify.verifyCode : this.orderInfo.verifyCode;
+			},
+			showWriteOff() {
+				return this.orderInfo.shippingType == 2 && this.orderInfo.paid && this.orderInfo.pinkStatus != 1 && !!this.currentVerifyCode;
+			},
+
+			canApplyRefund() {
+				if (!this.isGroupBuyOrder) return true;
+				return !this.groupBuyVerifyList.some(item => Number(item.verifiedNum || 0) > 0);
+			}
+		},
 		onLoad: function(options) {
 			options.type == undefined || options.type == null ? this.type = 'normal' : this.type = options.type;
 			if (!options.order_id && !options.uniId) return this.$util.Tips({
@@ -497,6 +656,220 @@
 			 * 关闭支付组件
 			 * 
 			 */
+			ensureGroupBuyStoreDistanceLocation() {
+				const cachedLatitude = uni.getStorageSync('user_latitude');
+				const cachedLongitude = uni.getStorageSync('user_longitude');
+				if (this.isValidCoordinate(cachedLatitude, cachedLongitude)) {
+					this.userLatitude = cachedLatitude;
+					this.userLongitude = cachedLongitude;
+					return;
+				}
+				uni.getLocation({
+					type: 'gcj02',
+					success: (res) => {
+						this.userLatitude = res.latitude || '';
+						this.userLongitude = res.longitude || '';
+						uni.setStorageSync('user_latitude', this.userLatitude);
+						uni.setStorageSync('user_longitude', this.userLongitude);
+					},
+					fail: () => {}
+				});
+			},
+			isValidCoordinate(latitude, longitude) {
+				const lat = Number(latitude);
+				const lng = Number(longitude);
+				if (Number.isNaN(lat) || Number.isNaN(lng)) return false;
+				return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0);
+			},
+			toRadians(value) {
+				return Number(value) * Math.PI / 180;
+			},
+			getDistanceKm(lat1, lng1, lat2, lng2) {
+				const earthRadius = 6371;
+				const dLat = this.toRadians(lat2 - lat1);
+				const dLng = this.toRadians(lng2 - lng1);
+				const a =
+					Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+					Math.cos(this.toRadians(lat1)) *
+						Math.cos(this.toRadians(lat2)) *
+						Math.sin(dLng / 2) *
+						Math.sin(dLng / 2);
+				const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+				return earthRadius * c;
+			},
+			getStoreCoordinate(store = {}) {
+				const latitude = Number(
+					store.dimensionY ||
+					store.dimension_y ||
+					store.dimensionLatitude ||
+					store.latitudeY ||
+					store.latitude ||
+					store.shopLatitude ||
+					store.storeLatitude ||
+					store.mapLatitude ||
+					store.lat ||
+					store.latY
+				);
+				const longitude = Number(
+					store.longitudeX ||
+					store.longitude_x ||
+					store.dimensionX ||
+					store.dimensionLongitude ||
+					store.longitudeY ||
+					store.longitude ||
+					store.shopLongitude ||
+					store.storeLongitude ||
+					store.mapLongitude ||
+					store.lng ||
+					store.lngX
+				);
+				return {
+					latitude,
+					longitude,
+					valid: this.isValidCoordinate(latitude, longitude)
+				};
+			},
+			getStoreDistanceKm(store = {}) {
+				const storeCoordinate = this.getStoreCoordinate(store);
+				const userLatitude = Number(this.userLatitude || uni.getStorageSync('user_latitude'));
+				const userLongitude = Number(this.userLongitude || uni.getStorageSync('user_longitude'));
+				if (storeCoordinate.valid && this.isValidCoordinate(userLatitude, userLongitude)) {
+					const km = this.getDistanceKm(userLatitude, userLongitude, storeCoordinate.latitude, storeCoordinate.longitude);
+					if (!Number.isNaN(km) && km >= 0) return km;
+				}
+				const distanceKm = Number(store.distanceKm || store.distance_km);
+				if (!Number.isNaN(distanceKm) && distanceKm > 0) return distanceKm;
+				const distance = Number(store.distance);
+				if (!Number.isNaN(distance) && distance > 0) return distance > 100 ? distance / 1000 : distance;
+				return null;
+			},
+			formatStoreDistance(store = {}) {
+				const km = this.getStoreDistanceKm(store);
+				if (km === null) return '';
+				if (km < 1) return `距离${Math.round(km * 1000)}m`;
+				return `距离${km.toFixed(2)}km`;
+			},
+			openStoreLocation(store = {}, index) {
+				let currentStore = store && Object.keys(store).length
+					? store
+					: (this.sortedGroupBuyShoppingStoreList[index] || {});
+				let storeCoordinate = this.getStoreCoordinate(currentStore);
+				if (!storeCoordinate.valid && index !== undefined) {
+					currentStore = this.sortedGroupBuyShoppingStoreList[index] || currentStore;
+					storeCoordinate = this.getStoreCoordinate(currentStore);
+				}
+				if (!storeCoordinate.valid) {
+					uni.showToast({
+						title: '暂无定位信息',
+						icon: 'none'
+					});
+					return;
+				}
+				uni.openLocation({
+					latitude: storeCoordinate.latitude,
+					longitude: storeCoordinate.longitude,
+					name: currentStore.name || '门店位置',
+					address: currentStore.address || currentStore.detailedAddress || ''
+				});
+			},
+			getStoreId(store = {}) {
+				const keys = ['id', 'storeId', 'storeID', 'storeid', 'store_id', 'shopId', 'shopID', 'shopid', 'shop_id', 'shoppingStoreId', 'shoppingStoreID', 'shopping_store_id', 'shoppingId', 'shopping_id', 'sid'];
+				for (let i = 0; i < keys.length; i++) {
+					const value = store[keys[i]];
+					if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+				}
+				const idKey = Object.keys(store).find(key => {
+					const value = store[key];
+					return /id$/i.test(key) && value !== undefined && value !== null && String(value).trim() !== '';
+				});
+				return idKey ? store[idKey] : '';
+			},
+			getStoreName(store = {}) {
+				return String(store.name || store.storeName || store.shopName || store.title || '').trim();
+			},
+			isSameStoreByCoordinate(store = {}, target = {}) {
+				const storeCoordinate = this.getStoreCoordinate(store);
+				const targetCoordinate = this.getStoreCoordinate(target);
+				if (!storeCoordinate.valid || !targetCoordinate.valid) return true;
+				return Math.abs(storeCoordinate.latitude - targetCoordinate.latitude) < 0.0001 &&
+					Math.abs(storeCoordinate.longitude - targetCoordinate.longitude) < 0.0001;
+			},
+			findMatchedAdminStore(store = {}, list = []) {
+				const name = this.getStoreName(store);
+				if (!name) return null;
+				return list.find(item => {
+					return this.getStoreName(item) === name && this.isSameStoreByCoordinate(item, store);
+				}) || list.find(item => this.getStoreName(item) === name) || null;
+			},
+			resolveStoreId(store = {}) {
+				const storeId = this.getStoreId(store);
+				if (storeId) return Promise.resolve(storeId);
+				const name = this.getStoreName(store);
+				if (!name) return Promise.resolve('');
+				return adminStoreListApi({
+					isDelete: 0,
+					keywords: name,
+					limit: 10000,
+					page: 1
+				}).then(res => {
+					const data = res.data || {};
+					const list = Array.isArray(data.list) ? data.list : (Array.isArray(data) ? data : []);
+					const matchedStore = this.findMatchedAdminStore(store, list);
+					return matchedStore ? this.getStoreId(matchedStore) : '';
+				});
+			},
+			goStoreDetail(storeOrIndex = {}) {
+				const store = typeof storeOrIndex === 'number'
+					? (this.sortedGroupBuyShoppingStoreList[storeOrIndex] || {})
+					: storeOrIndex;
+				uni.showLoading({
+					title: '加载中'
+				});
+				this.resolveStoreId(store).then(storeId => {
+					if (!storeId) return Promise.reject('门店ID不存在');
+					return adminStoreInfoApi(storeId).then(res => ({
+						res,
+						storeId
+					}));
+				}).then(({ res, storeId }) => {
+					const result = res.data || {};
+					const detail = result.info || result.detail || result.store || result;
+					const fullStore = Object.assign({}, store, detail);
+					const detailUrl = `/pages/store/detail/index?id=${fullStore.id || storeId}`;
+					this.handleGroupBuyStoreToggle(false);
+					uni.setStorageSync('store_detail', fullStore);
+					uni.navigateTo({
+						url: detailUrl
+					});
+				}).catch((err) => {
+					uni.showToast({
+						title: (typeof err === 'string' && err) || '门店详情获取失败',
+						icon: 'none'
+					});
+				}).finally(() => {
+					uni.hideLoading();
+				});
+			},			handleGroupBuyStoreToggle(status) {
+				if (status && !this.groupBuyShoppingStoreList.length) return this.$util.Tips({
+					title: '暂无适用门店'
+				});
+				const popup = this.$refs.groupBuyStorePopup;
+				if (!popup) return;
+				status ? popup.open('bottom') : popup.close();
+			},
+			showGroupBuyStoreLocation(store) {
+				const storeCoordinate = this.getStoreCoordinate(store || {});
+				if (!storeCoordinate.valid) return this.$util.Tips({
+					title: '缺少经纬度信息无法查看地图！'
+				});
+				uni.openLocation({
+					latitude: storeCoordinate.latitude,
+					longitude: storeCoordinate.longitude,
+					scale: 8,
+					name: store.name || '',
+					address: store.address || store.detailedAddress || ''
+				});
+			},
 			payClose: function() {
 				this.pay_close = false;
 			},
@@ -545,11 +918,11 @@
 					that.$set(that, 'system_store', res.data.systemStore);
 					that.$set(that, 'id', res.data.id);
 					that.$set(that, 'cartInfo', res.data.orderInfoList);
+					if (that.groupBuyShoppingStoreList.length) that.ensureGroupBuyStoreDistanceLocation();
 					if (res.data.refundStatus != 0) {
 						that.isGoodsReturn = true;
 					};
-					if (that.orderInfo.shippingType == 2 && that.orderInfo.paid) that.markCode(res.data
-						.verifyCode);
+					if (that.orderInfo.shippingType == 2 && that.orderInfo.paid && that.currentVerifyCode) that.markCode(that.currentVerifyCode);
 					if(that.orderInfo.refundStatus>0){
 						uni.setNavigationBarColor({
 						    frontColor: '#fff',
@@ -605,6 +978,16 @@
 			 * 设置底部按钮
 			 * 
 			 */
+			getVerifyStatusText(status) {
+				const statusMap = {
+					0: '待核销',
+					1: '部分核销',
+					2: '已核销',
+					3: '已过期',
+					4: '已退款'
+				};
+				return statusMap[Number(status || 0)] || '待核销';
+			},
 			getOrderStatus: function() {
 				let orderInfo = this.orderInfo || {},
 					_status = orderInfo.pstatus || {
@@ -879,6 +1262,113 @@
 		margin-top: -2rpx;
 	}
 
+	.ensure {
+		width: 100%;
+		background-color: #fff;
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+		padding-top: 38rpx;
+		padding-bottom: 22rpx;
+		padding-bottom: calc(22rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(22rpx + env(safe-area-inset-bottom));
+	}
+
+	.ensure .title {
+		font-size: 32rpx;
+		color: #282828;
+		text-align: center;
+		margin: 0 0 36rpx 0;
+		position: relative;
+	}
+
+	.ensure .title .close-box {
+		position: absolute;
+		right: 30rpx;
+		top: 8rpx;
+	}
+
+	.ensure .bnt,
+	.ensure .activityBtn {
+		width: 690rpx;
+		height: 86rpx;
+		text-align: center;
+		line-height: 86rpx;
+		border-radius: 43rpx;
+		font-size: 30rpx;
+		color: #fff;
+		margin: 0 auto;
+	}
+
+	.ensure .bnt {
+		@include main_bg_color(theme);
+	}
+	.store-pop-box {
+		position: fixed;
+		bottom: 0;
+		z-index: 999;
+	}
+
+	.store-popup {
+		height: 665rpx;
+		max-height: 665rpx;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.store-popup .store-popup-list {
+		flex: 1;
+		min-height: 0;
+		padding: 0 30rpx 20rpx;
+		box-sizing: border-box;
+	}
+
+	.store-popup .store-popup-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 28rpx 0;
+		border-bottom: 1px solid #f2f2f2;
+		color: #333;
+		font-size: 28rpx;
+		line-height: 40rpx;
+	}
+
+	.store-popup .store-popup-name {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		color: #333;
+	}
+
+	.store-popup .store-popup-distance {
+		color: #999;
+		font-size: 24rpx;
+	}
+
+	.store-popup .store-popup-distance-wrap {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		margin-left: 24rpx;
+		padding: 8rpx 0 8rpx 16rpx;
+	}
+
+	.store-popup .store-popup-nav-icon {
+		margin-right: 8rpx;
+		color: #2f73ff;
+		font-size: 28rpx;
+		line-height: 34rpx;
+	}
+
+	.store-popup .store-popup-empty {
+		padding: 80rpx 0;
+		text-align: center;
+		font-size: 26rpx;
+		color: #999;
+	}
 	.order-details .address {
 		font-size: 26rpx;
 		color: #868686;
@@ -1045,6 +1535,102 @@
 		border-radius: 0 0 20rpx 20rpx;
 		text-align: center;
 		padding-top: 4rpx;
+	}
+
+	.order-details .writeOff .group-verify-status {
+		width: 590rpx;
+		margin: 18rpx auto 0 auto;
+		font-size: 26rpx;
+		color: #666;
+		text-align: center;
+	}
+	.order-details .writeOff .group-use-card {
+		width: 590rpx;
+		margin: 24rpx auto 0 auto;
+		background-color: #fff8ea;
+		border-radius: 14rpx;
+		padding: 22rpx 24rpx;
+		box-sizing: border-box;
+	}
+
+	.order-details .writeOff .group-use-title {
+		font-size: 30rpx;
+		color: #282828;
+		font-weight: 600;
+		margin-bottom: 16rpx;
+	}
+
+	.order-details .writeOff .group-use-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		font-size: 26rpx;
+		color: #666;
+		line-height: 42rpx;
+		padding: 8rpx 0;
+	}
+
+	.order-details .writeOff .group-use-row text:first-child {
+		color: #999;
+		width: 160rpx;
+		flex-shrink: 0;
+	}
+
+	.order-details .writeOff .group-use-row text:last-child {
+		max-width: 360rpx;
+		text-align: right;
+		word-break: break-all;
+	}
+
+	.order-details .writeOff .group-use-rule {
+		font-size: 26rpx;
+		color: #666;
+		line-height: 42rpx;
+		margin-top: 14rpx;
+		padding-top: 14rpx;
+		border-top: 1px solid #f0e4cb;
+	}
+
+	.order-details .writeOff .group-use-rule view {
+		color: #999;
+		margin-bottom: 8rpx;
+	}
+
+	.order-details .writeOff .group-use-rule text {
+		word-break: break-all;
+	}
+
+	.order-details .writeOff .group-ticket-list {
+		margin-top: 16rpx;
+		padding-top: 14rpx;
+		border-top: 1px solid #f0e4cb;
+	}
+
+	.order-details .writeOff .group-ticket-title {
+		font-size: 26rpx;
+		color: #999;
+		margin-bottom: 8rpx;
+	}
+
+	.order-details .writeOff .group-ticket-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		font-size: 24rpx;
+		color: #666;
+		line-height: 38rpx;
+		padding: 6rpx 0;
+	}
+
+	.order-details .writeOff .group-ticket-item view {
+		max-width: 300rpx;
+		word-break: break-all;
+	}
+
+	.order-details .writeOff .group-ticket-item text {
+		max-width: 220rpx;
+		text-align: right;
+		color: #999;
 	}
 
 	.order-details .writeOff .rules {

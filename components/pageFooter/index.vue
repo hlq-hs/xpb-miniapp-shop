@@ -116,10 +116,13 @@
 			goRouter(item) {
 				var pages = getCurrentPages();
 				var page = (pages[pages.length - 1]).$page.fullPath;
-				const link = this.normalizeLink(item.link);
+				let link = this.normalizeLink(item.link);
+				if (link.split('?')[0] === '/pages/goods_cate/goods_cate' && link.indexOf('productType=') === -1) {
+					link += (link.indexOf('?') > -1 ? '&' : '?') + 'productType=7';
+				}
 				if (link == page) return
 				if (['/pages/index/index', '/pages/order_addcart/order_addcart', '/pages/user/index'
-					].indexOf(link) > -1) {
+					].indexOf(link.split('?')[0]) > -1) {
 					this.openLink(link, true);
 				} else {
 					this.openLink(link);

@@ -106,6 +106,40 @@
 									</view>
 								</view>
 							</view>
+							<view class="group-buy-card mb30 borRadius14" v-if="isGroupBuy && groupBuyInfo">
+								<view class="group-buy-head acea-row row-between-wrapper">
+									<view class="group-buy-title">团购信息</view>
+									<view class="group-buy-tag">到店核销</view>
+								</view>
+								<view class="group-buy-row" v-if="groupBuyValidTime">
+									<text class="group-buy-label">使用有效期</text>
+									<text class="group-buy-value">{{groupBuyValidTime}}</text>
+								</view>
+								<view class="group-buy-row" v-if="groupBuyInfo.availableTime">
+									<text class="group-buy-label">可用时间</text>
+									<text class="group-buy-value">{{groupBuyInfo.availableTime}}</text>
+								</view>
+								<view class="group-buy-row">
+									<text class="group-buy-label">预约要求</text>
+									<text class="group-buy-value">{{groupBuyAppointmentText}}</text>
+								</view>
+								<view class="group-buy-row">
+									<text class="group-buy-label">核销方式</text>
+									<text class="group-buy-value">{{groupBuyVerifyText}}</text>
+								</view>
+								<view class="group-buy-row">
+									<text class="group-buy-label">每人限购</text>
+									<text class="group-buy-value">{{groupBuyLimitText}}</text>
+								</view>
+								<view class="group-buy-rule" v-if="groupBuyInfo.useRule">
+									<view class="group-buy-label">使用规则</view>
+									<view class="group-buy-desc">{{groupBuyInfo.useRule}}</view>
+								</view>
+								<view class="group-buy-rule" v-if="groupBuyInfo.refundRule">
+									<view class="group-buy-label">退款规则</view>
+									<view class="group-buy-desc">{{groupBuyInfo.refundRule}}</view>
+								</view>
+							</view>
 							<view class="detail-service-card mb30 borRadius14" id="past1">
 								<view class="detail-service-row" @click="selecAttr">
 									<view class="detail-service-main">
@@ -238,23 +272,23 @@
 						<view class='iconfont icon-shoucang' v-else></view>
 						<view>收藏</view>
 					</view>
-					<navigator open-type='switchTab' class="animated item skeleton-rect" :class="animated==true?'bounceIn':''"
+					<navigator v-if="!isGroupBuy" open-type='switchTab' class="animated item skeleton-rect" :class="animated==true?'bounceIn':''"
 						url='/pages/order_addcart/order_addcart' hover-class="none">
 						<view class='iconfont icon-gouwuche1'>
 							<text v-if="Math.floor(CartCount)>0" class='num bg_color'>{{CartCount}}</text>
 						</view>
 						<view>购物车</view>
 					</navigator>
-					<view class="bnt acea-row skeleton-rect" v-if="attr.productSelect.stock <= 0">
-						<form @submit="joinCart" report-submit="true"><button class="joinCart bnts"
+					<view class="bnt acea-row skeleton-rect" :class="{'group-buy-footer-bnt': isGroupBuy}" v-if="attr.productSelect.stock <= 0">
+						<form v-if="!isGroupBuy" @submit="joinCart" report-submit="true"><button class="joinCart bnts"
 								form-type="submit">加入购物车</button></form>
 						<form report-submit="true"><button class="bnts bg-color-hui" form-type="submit">已售罄</button>
 						</form>
 					</view>
-					<view class="bnt acea-row skeleton-rect" v-else>
-						<form @submit="joinCart" report-submit="true"><button class="joinCart bnts"
+					<view class="bnt acea-row skeleton-rect" :class="{'group-buy-footer-bnt': isGroupBuy}" v-else>
+						<form v-if="!isGroupBuy" @submit="joinCart" report-submit="true"><button class="joinCart bnts"
 								form-type="submit">加入购物车</button></form>
-						<form @submit="goBuy" report-submit="true"><button class="buy bnts" form-type="submit">立即购买</button>
+						<form @submit="goBuy" report-submit="true"><button class="buy bnts" form-type="submit">{{isGroupBuy ? '立即抢购' : '立即购买'}}</button>
 						</form>
 					</view>
 				</block>
@@ -502,6 +536,7 @@
 				replyCount: 0, //总评论数量
 				reply: [], //评论列表
 				productInfo: {}, //商品详情
+				groupBuyInfo: {}, // 团购配置
 				productValue: [], //系统属性
 				guaranteeList: [], // 保障服务列表
 				shoppingStoreList: [], // 适用门店列表
@@ -650,6 +685,24 @@
 			},
 			formattedDescription() {
 				return this.formatDescriptionByBold(this.description);
+			},
+			isGroupBuy() {
+				return Number(this.productInfo.productType) === 7;
+			},
+			groupBuyValidTime() {
+				const info = this.groupBuyInfo || {};
+				if (!info.validStartTime && !info.validEndTime) return '';
+				return (info.validStartTime || '') + ' 至 ' + (info.validEndTime || '');
+			},
+			groupBuyAppointmentText() {
+				return Number((this.groupBuyInfo || {}).appointmentRequired) === 1 ? '需要预约' : '无需预约';
+			},
+			groupBuyVerifyText() {
+				return Number((this.groupBuyInfo || {}).verifyType) === 2 ? '按件核销' : '整单核销';
+			},
+			groupBuyLimitText() {
+				const limitNum = Number((this.groupBuyInfo || {}).limitNum || 0);
+				return limitNum > 0 ? limitNum + '件' : '不限购';
 			}
 		},
 		watch: {
@@ -1142,6 +1195,7 @@
 					}
 					that.$set(that, 'sliderImage', sliderImage);
 					that.$set(that, 'productInfo', productInfo);
+					that.$set(that, 'groupBuyInfo', res.data.groupBuyInfo || {});
 					that.$set(that, 'description', productInfo.content);
 					that.$set(that, 'userCollect', res.data.userCollect);
 					that.$set(that.attr, 'productAttr', res.data.productAttr);
@@ -1457,6 +1511,11 @@
 			 * 加入购物车
 			 */
 			goCat: function(num) {
+				if (num === 1 && this.isGroupBuy) {
+					return this.$util.Tips({
+						title: '团购商品请直接购买'
+					});
+				}
 				let that = this,
 					productSelect = that.productValue[this.attrValue];
 				//打开属性
@@ -1546,7 +1605,7 @@
 			 * 预下单
 			 */
 			getPreOrder: function() {
-				this.$Order.getPreOrder(this.type === 'normal' ? 'buyNow' : 'video', [{
+				this.$Order.getPreOrder(this.isGroupBuy ? 'buyNow' : (this.type === 'normal' ? 'buyNow' : 'video'), [{
 					"attrValueId": parseFloat(this.attr.productSelect.unique),
 					"productId": parseFloat(this.id),
 					"productNum": parseFloat(this.attr.productSelect.cart_num)
@@ -2189,6 +2248,63 @@
 <style scoped lang="scss">
 	@import url("@/plugin/animate/animate.min.css");
 
+
+	.group-buy-card {
+		background: #fff;
+		padding: 28rpx 30rpx;
+	}
+
+	.group-buy-head {
+		margin-bottom: 18rpx;
+	}
+
+	.group-buy-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #222;
+	}
+
+	.group-buy-tag {
+		padding: 6rpx 16rpx;
+		border-radius: 999rpx;
+		font-size: 22rpx;
+		color: #fff;
+		background: linear-gradient(90deg, #ff7a1a, #ff3d2e);
+	}
+
+	.group-buy-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		padding: 14rpx 0;
+		border-top: 1rpx solid #f2f2f2;
+		font-size: 26rpx;
+	}
+
+	.group-buy-label {
+		flex-shrink: 0;
+		color: #666;
+		margin-right: 24rpx;
+	}
+
+	.group-buy-value {
+		color: #222;
+		text-align: right;
+		line-height: 1.5;
+	}
+
+	.group-buy-rule {
+		padding-top: 16rpx;
+		border-top: 1rpx solid #f2f2f2;
+		font-size: 26rpx;
+	}
+
+	.group-buy-desc {
+		margin-top: 10rpx;
+		color: #222;
+		line-height: 1.6;
+		white-space: pre-wrap;
+	}
 	.lang {
 		width: 170rpx !important;
 		height: 60rpx !important;
@@ -2774,6 +2890,11 @@
 		background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 	}
 
+
+	.product-con .footer .bnt.group-buy-footer-bnt .bnts {
+		width: 444rpx;
+		border-radius: 50rpx !important;
+	}
 	.product-con .store-info {
 		margin-top: 20rpx;
 		background-color: #fff;
