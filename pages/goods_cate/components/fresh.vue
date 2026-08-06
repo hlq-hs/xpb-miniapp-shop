@@ -1,7 +1,7 @@
 ﻿<template :data-theme="theme">
 	<view class="goodCate1">
 		<view class="header acea-row row-center-wrapper" :style="{top: iStatusBarHeight + 'px'}">
-			<navigator url="/pages/goods/goods_search/index" class="search acea-row row-middle" hover-class="none">
+			<navigator :url="'/pages/goods/goods_search/index?productType=' + productType" class="search acea-row row-middle" hover-class="none">
 				<text class="iconfont icon-sousuo5"></text>
 				搜索商品
 			</navigator>
@@ -39,7 +39,7 @@
 					</view>
 					<view class="mask" @click="closeTap"></view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" :productType="productType" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
@@ -72,13 +72,13 @@
 					</view>
 					<view class="mask" @click="closeTap"></view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" :productType="productType" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
 			</view>
 		</view>
-		<view class="footer acea-row row-between-wrapper">
+		<view class="footer acea-row row-between-wrapper" v-if="!isGroupBuy">
 			<view class="cart_theme acea-row row-center-wrapper" v-if="cartData.cartList.length">
 				<view class="iconfont icon-gouwuche-yangshi1 hava" @click="getCartLists(0)"></view>
 				<view class="num">{{cartCount}}</view>
@@ -91,9 +91,9 @@
 				<view class="bnt gray_bg" :class="{ 'main_bg': cartCount > 0}" @click="subOrder">去结算</view>
 			</view>
 		</view>
-		<cartList :cartData="cartData" @closeList="closeList" @ChangeCartNumDan="ChangeCartList" @ChangeSubDel="ChangeSubDel"
+		<cartList v-if="!isGroupBuy" :cartData="cartData" @closeList="closeList" @ChangeCartNumDan="ChangeCartList" @ChangeSubDel="ChangeSubDel"
 		 @ChangeOneDel="ChangeOneDel"></cartList>
-		<productWindow :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
+		<productWindow v-if="!isGroupBuy" :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
 		 @ChangeCartNum="ChangeCartNumDuo" @attrVal="attrVal" @iptCartNum="iptCartNum" @goCat="goCatNum" id='product-window'></productWindow>
 	</view>
 </template>
@@ -119,7 +119,12 @@
 	import {toLogin} from '@/libs/login.js';
 	import animationType from '@/utils/animationType.js'
 	export default {
-		computed: mapGetters(['isLogin', 'uid']),
+		computed: {
+			...mapGetters(['isLogin', 'uid']),
+			isGroupBuy() {
+				return Number(this.productType) === 7;
+			}
+		},
 		components: {
 			productWindow,
 			goodList,
@@ -180,7 +185,7 @@
 			// #ifdef APP-PLUS
 			this.iStatusBarHeight = uni.getSystemInfoSync().statusBarHeight;
 			// #endif
-			if(this.isLogin){
+			if(this.isLogin && !this.isGroupBuy){
 				this.getCartNum();
 				this.getCartLists(1);
 			}
@@ -197,6 +202,7 @@
 		methods: {
 			// 鐢熸垚璁㈠崟锛?
 			subOrder: function() {
+				if (this.isGroupBuy) return;
 				let that = this,list = that.cartData.cartList,ids = [];
 				if(list.length){
 					let shoppingCartId = list.map(item => {
@@ -253,6 +259,7 @@
 				})
 			},
 			getCartLists(iSshow) {
+				if (this.isGroupBuy) return;
 				let that = this;
 				let data = {
 					page: 1,
@@ -277,6 +284,7 @@
 				this.productslist();
 			},
 			getCartNum: function() {
+				if (this.isGroupBuy) return;
 				let that = this;
 				getCartCounts(true, 'sum').then(res => {
 					that.$set(that,'cartCount',res.data.count);
@@ -574,6 +582,10 @@
 				}
 			},
 			goCartDuo(item) {
+				if (this.isGroupBuy) {
+					this.goDetail(item);
+					return;
+				}
 				if (!this.isLogin) {
 					this.getIsLogin();
 				} else {

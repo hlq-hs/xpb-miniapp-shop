@@ -49,7 +49,7 @@
 				</view>
 				<view class='default acea-row row-middle borRadius14'>
 					<checkbox-group @change='ChangeIsDefault'>
-						<checkbox :checked="userAddress.isDefault" />设置为默认地址
+						<checkbox :checked="userAddress.isDefault" />{{ selectType === 'inquiry' ? '选中地址' : '设置为默认地址' }}
 					</checkbox-group>
 				</view>
 
@@ -172,7 +172,10 @@
 			};
 		},
 		computed: {
-			...mapGetters(['isLogin']),
+			...mapGetters(['isLogin', 'userInfo']),
+			currentUserPhone() {
+				return String((this.userInfo && (this.userInfo.phone || this.userInfo.mobile)) || '').trim();
+			},
 			storeSelectPlaceholder() {
 				if (this.storeLoading) return '门店加载中...';
 				return '请选择门店地址';
@@ -188,7 +191,9 @@
 			isLogin: {
 				handler: function(newV, oldV) {
 					if (newV) {
+						this.applyDefaultCurrentUserPhone();
 						this.getUserAddress();
+						if (this.selectType === 'inquiry') this.initInquiryLocationAndStores();
 					}
 				},
 				deep: true
@@ -218,6 +223,7 @@
 				uni.setNavigationBarTitle({
 					title: options.id ? '修改地址' : '添加地址'
 				})
+				this.applyDefaultCurrentUserPhone();
 				this.getUserAddress();
 				if (this.selectType === 'inquiry') this.initInquiryLocationAndStores();
 			} else {
@@ -225,6 +231,22 @@
 			}
 		},
 		methods: {
+			applyDefaultCurrentUserPhone() {
+				if (this.id || (this.userAddress && this.userAddress.phone)) return;
+				const phone = this.currentUserPhone;
+				if (phone) {
+					this.$set(this.userAddress, 'phone', phone);
+					return;
+				}
+				this.$store.dispatch('USERINFO').then(userInfo => {
+					if (this.id) return;
+					const nextPhone = String((userInfo && (userInfo.phone || userInfo.mobile)) || '').trim();
+					if (nextPhone && !(this.userAddress && this.userAddress.phone)) {
+						this.$set(this.userAddress, 'phone', nextPhone);
+					}
+					this.applyDefaultUserStore();
+				}).catch(() => {});
+			},
 			initInquiryLocationAndStores() {
 				this.requestLocationForStores();
 			},
@@ -239,6 +261,7 @@
 						this.loadStoreList();
 					},
 					fail: () => {
+						this.loadStoreList();
 						uni.showModal({
 							title: '需要定位授权',
 							content: '请允许获取地理位置，用于查询附近门店地址',
@@ -323,6 +346,7 @@
 				}).then(res => {
 					const list = res && res.data && res.data.list ? res.data.list : [];
 					this.storeList = list.slice().sort((a, b) => this.getStoreDistanceKm(a) - this.getStoreDistanceKm(b));
+					this.applyDefaultUserStore();
 				}).catch(() => {
 					this.storeList = [];
 					uni.showToast({
@@ -332,6 +356,41 @@
 				}).finally(() => {
 					this.storeLoading = false;
 				});
+			},
+			applyDefaultUserStore() {
+				if (this.selectType !== 'inquiry' || this.id || this.selectedStoreName || !this.storeList.length) return;
+				const userStoreIds = this.getCurrentUserStoreIds();
+				if (!userStoreIds.shopId && !userStoreIds.storeId) return;
+				const matchedIndex = this.storeList.findIndex(store => this.isMatchedUserStore(store, userStoreIds));
+				if (matchedIndex === -1) return;
+				this.selectStore(this.storeList[matchedIndex], matchedIndex);
+			},
+			getCurrentUserStoreIds() {
+				const userInfo = this.userInfo || {};
+				return {
+					shopId: this.normalizeStoreId(userInfo.shopId || userInfo.shopID || userInfo.shop_id),
+					storeId: this.normalizeStoreId(userInfo.storeId || userInfo.storeID || userInfo.store_id)
+				};
+			},
+			normalizeStoreId(value) {
+				if (value === undefined || value === null) return '';
+				const text = String(value).trim();
+				return text === 'null' || text === 'undefined' ? '' : text;
+			},
+			getStoreShopId(store = {}) {
+				return this.normalizeStoreId(store.shopId || store.shopID || store.shopid || store.shop_id);
+			},
+			getStoreStoreId(store = {}) {
+				return this.normalizeStoreId(store.storeId || store.storeID || store.storeid || store.store_id || store.id);
+			},
+			isMatchedUserStore(store = {}, userStoreIds = {}) {
+				const userShopId = userStoreIds.shopId || '';
+				const userStoreId = userStoreIds.storeId || '';
+				const storeShopId = this.getStoreShopId(store);
+				const storeStoreId = this.getStoreStoreId(store);
+				const shopMatched = !userShopId || (storeShopId && storeShopId === userShopId);
+				const storeMatched = !userStoreId || (storeStoreId && storeStoreId === userStoreId);
+				return shopMatched && storeMatched;
 			},
 			applyStoreAddress(store = {}) {
 				const storeAddress = this.getStoreAddress(store);
@@ -350,7 +409,8 @@
 					street: storeAddress,
 					latitude: store.dimensionY || store.latitude || '',
 					longitude: store.longitudeX || store.longitude || '',
-					storeId: store.id || store.shopid || store.storeId || '',
+					shopId: store.shopId || store.shopID || store.shopid || store.shop_id || store.storeShopId || '',
+					storeId: store.id || store.storeId || store.storeID || store.storeid || store.store_id || store.shopid || '',
 					storeName: store.name || store.storeName || ''
 				});
 				if (matchedRegion && matchedRegion.region.filter(Boolean).length === 3) {
@@ -930,7 +990,8 @@
 				};
 				value.isDefault = that.userAddress.isDefault;
 				value.status = that.selectType === 'inquiry' ? 1 : 0;
-				value.storeId = that.userAddress.storeId || (that.selectedStore ? (that.selectedStore.id || that.selectedStore.shopid || that.selectedStore.storeId || '') : '');
+				value.shopId = that.userAddress.shopId || (that.selectedStore ? (that.selectedStore.shopId || that.selectedStore.shopID || that.selectedStore.shopid || that.selectedStore.shop_id || that.selectedStore.storeShopId || '') : '');
+				value.storeId = that.userAddress.storeId || (that.selectedStore ? (that.selectedStore.id || that.selectedStore.storeId || that.selectedStore.storeID || that.selectedStore.storeid || that.selectedStore.store_id || that.selectedStore.shopid || '') : '');
 				value.storeName = that.userAddress.storeName || '';
 
 				uni.showLoading({
@@ -953,7 +1014,8 @@
 							street: that.userAddress.street || '',
 							longitude: value.longitude,
 							latitude: value.latitude,
-							storeId: that.userAddress.storeId || (that.selectedStore ? (that.selectedStore.id || that.selectedStore.shopid || that.selectedStore.storeId || '') : ''),
+							shopId: value.shopId,
+							storeId: value.storeId,
 							storeName: that.userAddress.storeName || ''
 						});
 					}

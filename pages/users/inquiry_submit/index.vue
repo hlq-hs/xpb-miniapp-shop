@@ -132,7 +132,7 @@
 </template>
 
 <script>
-import { getAddressList } from '@/api/user.js';
+import { getAddressList, markAddressUsed } from '@/api/user.js';
 
 const QUALITY_OPTIONS = [
 	{ label: '原厂(国内4S)', values: ['ORIGINAL_INLAND_4S'] },
@@ -746,8 +746,29 @@ export default {
 				userNeeds: this.buildUserNeeds(),
 				picDemands: [],
 				storeIds: this.supplierOptions.specified ? this.selectedSupplierStoreIds : [],
+				shopid: this.getInquiryCreateShopId(userInfo),
 				quotedType: this.getQuotedType()
 			};
+		},
+		getInquiryCreateShopId(userInfo = {}) {
+			const userShopId = this.normalizeNullableId(userInfo.shopId || userInfo.shopID || userInfo.shop_id);
+			if (userShopId) return userShopId;
+			return this.normalizeNullableId(
+				this.selectedAddress.shopId ||
+				this.selectedAddress.shopID ||
+				this.selectedAddress.shopid ||
+				this.selectedAddress.shop_id ||
+				this.selectedAddress.storeShopId ||
+				this.selectedAddress.storeId ||
+				this.selectedAddress.storeID ||
+				this.selectedAddress.storeid ||
+				this.selectedAddress.store_id
+			);
+		},
+		normalizeNullableId(value) {
+			if (value === undefined || value === null) return '';
+			const text = String(value).trim();
+			return text === 'null' || text === 'undefined' ? '' : text;
 		},
 		buildInquiryAppendRequest() {
 			const getters = (this.$store && this.$store.getters) || {};
@@ -791,6 +812,15 @@ export default {
 					fail: reject
 				});
 			});
+		},
+		async markSelectedAddressUsed() {
+			const addressId = this.selectedAddress && this.selectedAddress.id;
+			if (!addressId) return;
+			try {
+				await markAddressUsed(addressId);
+			} catch (error) {
+				console.log('mark address used failed', error);
+			}
 		},
 		async publishInquiry() {
 			if (!this.parts.length) {
@@ -851,6 +881,7 @@ export default {
 					hasExternalInquiryId ? 'latestInquiryAppendResult' : 'latestInquiryCreateResult',
 					result.data || {}
 				);
+				await this.markSelectedAddressUsed();
 				uni.showToast({
 					title: '询价发布成功',
 					icon: 'success'

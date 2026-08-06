@@ -16,8 +16,8 @@
 						<view>
 							<!-- 多规格 -->
 							<view class="bnt" @click.stop="goCartDuo(item)">
-								加入购物车
-								<view class="num" v-if="item.cartNum">{{item.cartNum}}</view>
+								{{ isGroupBuy ? '立即抢购' : '加入购物车' }}
+								<view class="num" v-if="!isGroupBuy && item.cartNum">{{item.cartNum}}</view>
 							</view>
 						</view>
 					</view>
@@ -43,6 +43,15 @@
 			isLogin: {
 				type: Boolean,
 				default: false
+			},
+			productType: {
+				type: [Number, String],
+				default: 0
+			}
+		},
+		computed: {
+			isGroupBuy() {
+				return Number(this.productType) === 7;
 			}
 		},
 		methods: {
@@ -50,7 +59,7 @@
 				this.$emit('detail', item);
 			},
 			goCartDuo(item) {
-				this.$emit('gocartduo', item);
+				this.$emit(this.isGroupBuy ? 'detail' : 'gocartduo', item);
 			},
 			goCartDan(item, index) {
 				this.$emit('gocartdan', item, index);

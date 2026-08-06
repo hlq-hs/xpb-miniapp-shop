@@ -9,16 +9,17 @@
 					<view class='address' @click='goOrder(item)'>
 						<view class='consignee'>收货人：{{item.realName}}<text class='phone'>{{item.phone}}</text></view>
 						<view>收货地址：{{item.province}}{{item.city}}{{item.district}}{{item.detail}}</view>
+						<text class="recent-use-tag" v-if="item.id == recentAddressId">最近使用</text>
 					</view>
 					<view class='operation acea-row row-between-wrapper'>
 						<!-- #ifndef MP -->
 						<radio class="radio" :value="index.toString()" :checked="item.isDefault">
-							<text>设为默认</text>
+							<text>{{ selectType === 'inquiry' ? '选中地址' : '设为默认' }}</text>
 						</radio>
 						<!-- #endif -->
 						<!-- #ifdef MP -->
 						<radio class="radio" :value="index" :checked="item.isDefault">
-							<text>设为默认</text>
+							<text>{{ selectType === 'inquiry' ? '选中地址' : '设为默认' }}</text>
 						</radio>
 						<!-- #endif -->
 						<view class='acea-row row-middle'>
@@ -105,7 +106,17 @@
 				selectType: ''
 			};
 		},
-		computed: mapGetters(['isLogin']),
+		computed: {
+			...mapGetters(['isLogin']),
+			recentAddressId() {
+				const recentAddress = (this.addressList || []).reduce((latest, item) => {
+					if (!item || !item.lastUseTime) return latest;
+					if (!latest || String(item.lastUseTime) > String(latest.lastUseTime || '')) return item;
+					return latest;
+				}, null);
+				return recentAddress ? recentAddress.id : '';
+			}
+		},
 		watch: {
 			isLogin: {
 				handler: function(newV, oldV) {
@@ -443,7 +454,9 @@
 	}
 
 	.address-management .item .address {
+		position: relative;
 		padding: 35rpx 0;
+		padding-right: 140rpx;
 		border-bottom: 1rpx solid #eee;
 		font-size: 28rpx;
 		color: #282828;
@@ -457,6 +470,20 @@
 
 	.address-management .item .address .consignee .phone {
 		margin-left: 25rpx;
+	}
+
+	.address-management .item .address .recent-use-tag {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		height: 44rpx;
+		line-height: 44rpx;
+		padding: 0 18rpx;
+		border-radius: 22rpx;
+		font-size: 24rpx;
+		color: #ef3b2d;
+		background: #fff1ef;
 	}
 
 	.address-management .item .operation {

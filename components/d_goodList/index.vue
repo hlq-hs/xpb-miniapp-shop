@@ -20,8 +20,8 @@
 					<view class="product-action" v-if="item.stock>0">
 						<view class="bnt" v-if="item.activity && (item.activity.type === '1' || item.activity.type === '2' || item.activity.type === '3')">立即购买</view>
 						<view class="bnt" v-else @click.stop="goCartDuo(item)">
-							加入购物车
-							<view class="num" v-if="item.cartNum">{{item.cartNum}}</view>
+							{{ isGroupBuy ? '立即抢购' : '加入购物车' }}
+							<view class="num" v-if="!isGroupBuy && item.cartNum">{{item.cartNum}}</view>
 						</view>
 					</view>
 					<view class="product-action" v-else>
@@ -54,6 +54,15 @@
 			showEmptyLine: {
 				type: Boolean,
 				default: false
+			},
+			productType: {
+				type: [Number, String],
+				default: 0
+			}
+		},
+		computed: {
+			isGroupBuy() {
+				return Number(this.productType) === 7;
 			}
 		},
 		methods: {
@@ -77,7 +86,7 @@
 				this.$emit('detail', item);
 			},
 			goCartDuo(item) {
-				this.$emit('gocartduo', item);
+				this.$emit(this.isGroupBuy ? 'detail' : 'gocartduo', item);
 			}
 		}
 	};

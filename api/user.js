@@ -258,6 +258,14 @@ export function setAddressDefault(id, status){
 }
 
 /**
+ * 标记最近使用地址
+ * @param int id
+*/
+export function markAddressUsed(id){
+  return request.post(`address/used/${id}`)
+}
+
+/**
  * 修改 添加地址
  * @param object data
 */

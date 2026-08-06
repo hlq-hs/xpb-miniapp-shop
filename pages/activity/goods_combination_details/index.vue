@@ -55,7 +55,15 @@
 									<view class='iconfont icon-fenxiang' @click="listenerActionSheet"></view>
 								</view>
 								<view class='introduce line2 skeleton-rect'>{{storeInfo.storeName}}</view>
-								<view class='label acea-row row-between-wrapper'>
+								<view class='label product-meta acea-row row-between-wrapper'>
+									<view class="meta-item sale-price skeleton-rect">售价:￥{{attribute.productSelect.price || 0}}</view>
+									<view class="meta-item original-price skeleton-rect">原价:￥{{attribute.productSelect.otPrice || 0}}</view>
+									<view class="meta-item skeleton-rect">在售库存:{{storeInfo.stock || 0}}{{storeInfo.unitName || ''}}</view>
+									<view class="meta-item skeleton-rect">
+										销量:{{Math.floor(storeInfo.sales) + Math.floor(storeInfo.ficti) || 0}}{{storeInfo.unitName || ''}}
+									</view>
+								</view>
+								<view v-if="false" class='label acea-row row-between-wrapper'>
 									<view class='stock skeleton-rect'>类型：{{storeInfo.people || 0}}人团</view>
 									<view class="skeleton-rect">累计销量：{{parseFloat(storeInfo.sales) + parseFloat(storeInfo.ficti)}}
 										{{storeInfo.unitName || ''}}
@@ -1798,6 +1806,33 @@
 		margin-left: 13rpx;
 		text-decoration: line-through;
 		font-weight: normal;
+	}
+
+	.product-con .wrapper .product-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: 6rpx;
+	}
+
+	.product-con .wrapper .product-meta .meta-item {
+		margin-bottom: 8rpx;
+		white-space: nowrap;
+		color: #82848f;
+		box-sizing: border-box;
+		font-size: 24rpx;
+		line-height: 34rpx;
+		text-align: left;
+	}
+
+	.product-con .wrapper .product-meta .sale-price {
+		color: #ff3b30;
+		font-weight: 600;
+	}
+
+	.product-con .wrapper .product-meta .original-price {
+		text-decoration: line-through;
 	}
 
 	.font_color {

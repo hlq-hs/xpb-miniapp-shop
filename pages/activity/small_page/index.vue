@@ -302,7 +302,7 @@
 			},
 			bindMore(){
 				uni.navigateTo({
-					url: `/pages/goods_cate/goods_cate`
+					url: `/pages/goods_cate/goods_cate?productType=7`
 				})
 			}
 		},

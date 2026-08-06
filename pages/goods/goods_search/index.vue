@@ -77,10 +77,12 @@
 				loadTitle: '加载更多',
 				isbastList: false,
 				theme:app.globalData.theme,
-				searchTop:''
+				searchTop:'',
+				productType: 0
 			};
 		},
 		onLoad(e){
+			this.productType = Number(e.productType || 0);
 			// #ifdef MP
 			this.searchTop=uni.getMenuButtonBoundingClientRect().top
 			// #endif
@@ -112,7 +114,8 @@
 				getProductslist({
 					keyword: that.searchValue,
 					page: that.page,
-					limit: that.limit
+					limit: that.limit,
+					productType: that.productType
 				}).then(res => {
 					let list = res.data.list,
 						loadend = list.length < that.limit;

@@ -65,11 +65,12 @@
 									<view class='iconfont icon-fenxiang share-icon' @click="listenerActionSheet"></view>
 								</view>
 								<view class='introduce skeleton-rect share-introduce'>{{productInfo.storeName}}</view>
-								<view class='label acea-row row-between-wrapper'>
-									<view class="skeleton-rect">原价:￥{{attr.productSelect.otPrice || 0}}</view>
-									<view class="skeleton-rect">
-										库存:{{productInfo.stock || 0}}{{productInfo.unitName || ''}}</view>
-									<view class="skeleton-rect">
+								<view class='label product-meta acea-row row-between-wrapper'>
+									<view class="meta-item sale-price skeleton-rect">售价:￥{{attr.productSelect.price || 0}}</view>
+									<view class="meta-item original-price skeleton-rect">原价:￥{{attr.productSelect.otPrice || 0}}</view>
+									<view class="meta-item skeleton-rect">
+										在售库存:{{productInfo.stock || 0}}{{productInfo.unitName || ''}}</view>
+									<view class="meta-item skeleton-rect">
 										销量:{{Math.floor(productInfo.sales) + Math.floor(productInfo.ficti) || 0}}{{productInfo.unitName || ''}}
 									</view>
 								</view>
@@ -416,14 +417,20 @@
 								<view class="iconfont icon-guanbi f-s-24"></view>
 							</view>
 						</view>
+						<view class="store-popup-search">
+							<text class="iconfont icon-sousuo store-popup-search-icon"></text>
+							<input class="store-popup-search-input" v-model.trim="storeSearchKeyword" placeholder="搜索门店名称/地址" placeholder-class="store-popup-search-placeholder" confirm-type="search" />
+						</view>
 						<scroll-view scroll-y="true" class="store-popup-list">
-							<view class="store-popup-item" v-for="(item, index) in sortedShoppingStoreList" :key="item.id || index">
-								<text class="store-popup-name" @click.stop="goStoreDetail(index)">{{ item.name }}</text>
+							<view class="store-popup-item" v-for="(item, index) in filteredShoppingStoreList" :key="item.id || index">
+								<text class="store-popup-name" @click.stop="goStoreDetail(item)">{{ item.name }}</text>
 								<view class="store-popup-distance-wrap" v-if="formatStoreDistance(item)" @click.stop="openStoreLocation(item, index)">
 									<text class="iconfont icon-dizhi store-popup-nav-icon"></text>
 									<text class="store-popup-distance">{{ formatStoreDistance(item) }}</text>
 								</view>
 							</view>
+							<view class="store-popup-empty" v-if="!shoppingStoreList.length">暂无适用门店</view>
+							<view class="store-popup-empty" v-else-if="!filteredShoppingStoreList.length">暂无匹配门店</view>
 						</scroll-view>
 						<view class="activityBtn bnt" @click="handleStoreToggle(false)">
 							确定
@@ -663,7 +670,8 @@
 				couponType: 0, //优惠券类型 类型，1-通用，2-商品，3-品类
 				skuImage: [], //规格小图
 				activityPrice: 0, // 氛围图价格
-				activityVipPrice: 0 // 氛围图vip价格
+				activityVipPrice: 0, // 氛围图vip价格
+				storeSearchKeyword: ''
 			};
 		},
 		computed: {
@@ -682,6 +690,21 @@
 						return aDistance - bDistance;
 					})
 					.map(({ item }) => item);
+			},
+			filteredShoppingStoreList() {
+				const keyword = String(this.storeSearchKeyword || '').trim().toLowerCase();
+				if (!keyword) return this.sortedShoppingStoreList;
+				return this.sortedShoppingStoreList.filter(item => {
+					const content = [
+						item.name,
+						item.storeName,
+						item.shopName,
+						item.title,
+						item.address,
+						item.detailedAddress
+					].filter(Boolean).join(' ').toLowerCase();
+					return content.indexOf(keyword) !== -1;
+				});
 			},
 			formattedDescription() {
 				return this.formatDescriptionByBold(this.description);
@@ -1949,6 +1972,7 @@
 					this.ensureStoreDistanceLocation();
 					this.$refs.storePopup.open()
 				} else {
+					this.storeSearchKeyword = '';
 					this.$refs.storePopup.close()
 				}
 			},
@@ -2326,6 +2350,33 @@
 		font-weight: 700;
 		@include price_color(theme);
 
+	}
+
+	.product-con .wrapper .product-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: 6rpx;
+	}
+
+	.product-con .wrapper .product-meta .meta-item {
+		margin-bottom: 8rpx;
+		white-space: nowrap;
+		color: #82848f;
+		box-sizing: border-box;
+		font-size: 24rpx;
+		line-height: 34rpx;
+		text-align: left;
+	}
+
+	.product-con .wrapper .product-meta .sale-price {
+		font-weight: 600;
+		@include price_color(theme);
+	}
+
+	.product-con .wrapper .product-meta .original-price {
+		text-decoration: line-through;
 	}
 
 	.bg-color-hui {
@@ -3469,6 +3520,37 @@
 			box-sizing: border-box;
 		}
 
+		.store-popup-search {
+			display: flex;
+			align-items: center;
+			height: 72rpx;
+			margin: 0 30rpx 10rpx;
+			padding: 0 24rpx;
+			background: #f7f7f7;
+			border-radius: 8rpx;
+			box-sizing: border-box;
+		}
+
+		.store-popup-search-icon {
+			margin-right: 14rpx;
+			color: #b2b2b2;
+			font-size: 28rpx;
+		}
+
+		.store-popup-search-input {
+			flex: 1;
+			min-width: 0;
+			height: 72rpx;
+			color: #333;
+			font-size: 26rpx;
+			line-height: 72rpx;
+		}
+
+		.store-popup-search-placeholder {
+			color: #b2b2b2;
+			font-size: 26rpx;
+		}
+
 		.store-popup-item {
 			display: flex;
 			align-items: center;
@@ -3507,6 +3589,13 @@
 			color: #2f73ff;
 			font-size: 28rpx;
 			line-height: 34rpx;
+		}
+
+		.store-popup-empty {
+			padding: 80rpx 0;
+			text-align: center;
+			font-size: 26rpx;
+			color: #999;
 		}
 	}
 

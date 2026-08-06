@@ -60,7 +60,10 @@
 					<view class="gear">
 						<image :src="urlDomain+'crmebimage/perset/staticImg/writeOff.jpg'"></image>
 					</view>
-					<view class="num">{{currentVerifyCode}}</view>
+					<view class="num">
+						<text class="verify-code-text">{{formatVerifyCode(currentVerifyCode)}}</text>
+						<text class="verify-copy" @tap.stop="copyVerifyCode">复制</text>
+					</view>
 					<view class="group-verify-status" v-if="isGroupBuyOrder">
 						<text>{{getVerifyStatusText(groupBuyVerify.verifyStatus)}}</text>
 						<text v-if="groupBuyVerify.verifyNum"> {{groupBuyVerify.verifiedNum || 0}}/{{groupBuyVerify.verifyNum}}</text>
@@ -83,10 +86,14 @@
 							<view>使用规则</view>
 							<text>{{groupBuyInfo.useRule}}</text>
 						</view>
+						<view class="group-use-rule" v-if="groupBuyProductContent">
+							<view>商品说明</view>
+							<rich-text :nodes="groupBuyProductContent"></rich-text>
+						</view>
 						<view class="group-ticket-list" v-if="groupBuyVerifyList.length > 1">
 							<view class="group-ticket-title">核销券</view>
 							<view class="group-ticket-item" v-for="(item, index) in groupBuyVerifyList" :key="index">
-								<view>{{index + 1}}. {{item.verifyCode || '-'}}</view>
+								<view>{{index + 1}}. {{formatVerifyCode(item.verifyCode) || '-'}}</view>
 								<text>{{getVerifyStatusText(item.verifyStatus)}} {{item.verifiedNum || 0}}/{{item.verifyNum || 0}}</text>
 							</view>
 						</view>
@@ -321,15 +328,20 @@
 							<view class="iconfont icon-guanbi f-s-24"></view>
 						</view>
 					</view>
+					<view class="store-popup-search">
+						<text class="iconfont icon-sousuo store-popup-search-icon"></text>
+						<input class="store-popup-search-input" v-model.trim="storeSearchKeyword" placeholder="搜索门店名称/地址" placeholder-class="store-popup-search-placeholder" confirm-type="search" />
+					</view>
 					<scroll-view scroll-y="true" class="store-popup-list">
-						<view class="store-popup-item" v-for="(item, index) in sortedGroupBuyShoppingStoreList" :key="index">
-							<text class="store-popup-name" @click.stop="goStoreDetail(index)">{{ item.name || ('门店' + (index + 1)) }}</text>
+						<view class="store-popup-item" v-for="(item, index) in filteredGroupBuyShoppingStoreList" :key="index">
+							<text class="store-popup-name" @click.stop="goStoreDetail(item)">{{ item.name || ('门店' + (index + 1)) }}</text>
 							<view class="store-popup-distance-wrap" v-if="formatStoreDistance(item) || getStoreCoordinate(item).valid" @click.stop="openStoreLocation(item, index)">
 								<text class="iconfont icon-dizhi store-popup-nav-icon"></text>
 								<text class="store-popup-distance">{{ formatStoreDistance(item) || '查看位置' }}</text>
 							</view>
 						</view>
 						<view class="store-popup-empty" v-if="!groupBuyShoppingStoreList.length">暂无适用门店</view>
+						<view class="store-popup-empty" v-else-if="!filteredGroupBuyShoppingStoreList.length">暂无匹配门店</view>
 					</scroll-view>
 					<view class="activityBtn bnt" @click="handleGroupBuyStoreToggle(false)">确定</view>
 				</view>
@@ -432,6 +444,7 @@
 					wx_chant_independent:'open'
 				} ,//客服配置
 				pinkStatus: 0, // 拼团状态
+				storeSearchKeyword: '',
 			};
 		},
 		computed: {
@@ -467,6 +480,11 @@
 			groupBuyInfo() {
 				return this.orderInfo.groupBuyInfo || {};
 			},
+			groupBuyProductContent() {
+				const list = Array.isArray(this.orderInfo.orderInfoList) ? this.orderInfo.orderInfoList : [];
+				const product = list.find(item => item && item.content);
+				return product ? this.removeHtmlImages(product.content) : '';
+			},
 			groupBuyShoppingStoreList() {
 				return Array.isArray(this.orderInfo.groupBuyShoppingStoreList) ? this.orderInfo.groupBuyShoppingStoreList : [];
 			},
@@ -481,6 +499,21 @@
 						const bDistance = b.distance === null ? Number.MAX_SAFE_INTEGER : b.distance;
 						return aDistance - bDistance;
 					});
+			},
+			filteredGroupBuyShoppingStoreList() {
+				const keyword = String(this.storeSearchKeyword || '').trim().toLowerCase();
+				if (!keyword) return this.sortedGroupBuyShoppingStoreList;
+				return this.sortedGroupBuyShoppingStoreList.filter(item => {
+					const content = [
+						item.name,
+						item.storeName,
+						item.shopName,
+						item.title,
+						item.address,
+						item.detailedAddress
+					].filter(Boolean).join(' ').toLowerCase();
+					return content.indexOf(keyword) !== -1;
+				});
 			},
 			showGroupBuyInfo() {
 				return this.isGroupBuyOrder && Object.keys(this.groupBuyInfo).length > 0;
@@ -518,6 +551,33 @@
 			},
 			currentVerifyCode() {
 				return this.isGroupBuyOrder ? this.groupBuyVerify.verifyCode : this.orderInfo.verifyCode;
+			},
+			currentVerifyAmount() {
+				return this.orderInfo.payPrice || this.orderInfo.payPrice === 0 ? this.orderInfo.payPrice : this.orderInfo.totalPrice;
+			},
+			currentQrCodeText() {
+				if (!this.isGroupBuyOrder) return this.currentVerifyCode;
+				return `verifyCode=${this.currentVerifyCode || ''}&amount=${this.currentVerifyAmount || 0}`;
+			},
+			verifyCodeTextStyle() {
+				const codeLength = String(this.currentVerifyCode || '').replace(/\s+/g, '').length;
+				let fontSize = 36;
+				if (codeLength > 28) {
+					fontSize = 18;
+				} else if (codeLength > 24) {
+					fontSize = 20;
+				} else if (codeLength > 18) {
+					fontSize = 22;
+				} else if (codeLength > 12) {
+					fontSize = 24;
+				} else if (codeLength > 10) {
+					fontSize = 16;
+				} else if (codeLength > 8) {
+					fontSize = 20;
+				}
+				return {
+					fontSize: fontSize + 'rpx'
+				};
 			},
 			showWriteOff() {
 				return this.orderInfo.shippingType == 2 && this.orderInfo.paid && this.orderInfo.pinkStatus != 1 && !!this.currentVerifyCode;
@@ -849,12 +909,14 @@
 				}).finally(() => {
 					uni.hideLoading();
 				});
-			},			handleGroupBuyStoreToggle(status) {
+			},
+			handleGroupBuyStoreToggle(status) {
 				if (status && !this.groupBuyShoppingStoreList.length) return this.$util.Tips({
 					title: '暂无适用门店'
 				});
 				const popup = this.$refs.groupBuyStorePopup;
 				if (!popup) return;
+				if (!status) this.storeSearchKeyword = '';
 				status ? popup.open('bottom') : popup.close();
 			},
 			showGroupBuyStoreLocation(store) {
@@ -922,7 +984,7 @@
 					if (res.data.refundStatus != 0) {
 						that.isGoodsReturn = true;
 					};
-					if (that.orderInfo.shippingType == 2 && that.orderInfo.paid && that.currentVerifyCode) that.markCode(that.currentVerifyCode);
+					if (that.orderInfo.shippingType == 2 && that.orderInfo.paid && that.currentVerifyCode) that.markCode(that.currentQrCodeText);
 					if(that.orderInfo.refundStatus>0){
 						uni.setNavigationBarColor({
 						    frontColor: '#fff',
@@ -987,6 +1049,28 @@
 					4: '已退款'
 				};
 				return statusMap[Number(status || 0)] || '待核销';
+			},
+			formatVerifyCode(code) {
+				return String(code || '').replace(/\s+/g, '').replace(/(.{4})(?=.)/g, '$1 ');
+			},
+			removeHtmlImages(content) {
+				return String(content || '')
+					.replace(/<img\b[^>]*>/gi, '')
+					.replace(/<image\b[^>]*>[\s\S]*?<\/image>/gi, '')
+					.replace(/<image\b[^>]*\/?>/gi, '');
+			},
+			copyVerifyCode() {
+				const code = String(this.currentVerifyCode || '').replace(/\s+/g, '');
+				if (!code) return;
+				uni.setClipboardData({
+					data: code,
+					success: () => {
+						uni.showToast({
+							title: '复制成功',
+							icon: 'none'
+						});
+					}
+				});
 			},
 			getOrderStatus: function() {
 				let orderInfo = this.orderInfo || {},
@@ -1323,6 +1407,37 @@
 		box-sizing: border-box;
 	}
 
+	.store-popup .store-popup-search {
+		display: flex;
+		align-items: center;
+		height: 72rpx;
+		margin: 0 30rpx 10rpx;
+		padding: 0 24rpx;
+		background: #f7f7f7;
+		border-radius: 8rpx;
+		box-sizing: border-box;
+	}
+
+	.store-popup .store-popup-search-icon {
+		margin-right: 14rpx;
+		color: #b2b2b2;
+		font-size: 28rpx;
+	}
+
+	.store-popup .store-popup-search-input {
+		flex: 1;
+		min-width: 0;
+		height: 72rpx;
+		color: #333;
+		font-size: 26rpx;
+		line-height: 72rpx;
+	}
+
+	.store-popup-search-placeholder {
+		color: #b2b2b2;
+		font-size: 26rpx;
+	}
+
 	.store-popup .store-popup-item {
 		display: flex;
 		align-items: center;
@@ -1526,6 +1641,9 @@
 	}
 
 	.order-details .writeOff .num {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		background-color: #f0c34c;
 		width: 590rpx;
 		height: 84rpx;
@@ -1534,7 +1652,33 @@
 		margin: 0 auto;
 		border-radius: 0 0 20rpx 20rpx;
 		text-align: center;
-		padding-top: 4rpx;
+		padding: 4rpx 18rpx 0 28rpx;
+		box-sizing: border-box;
+	}
+
+	.order-details .writeOff .verify-code-text {
+		flex: 1;
+		min-width: 0;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 48rpx !important;
+		line-height: 1;
+		letter-spacing: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: clip;
+		transform: translateX(-10rpx);
+	}
+
+	.order-details .writeOff .verify-copy {
+		flex: 0 0 auto;
+		margin-left: 14rpx;
+		min-width: 76rpx;
+		height: 42rpx;
+		line-height: 42rpx;
+		border-radius: 21rpx;
+		font-size: 24rpx;
+		color: #ffffff;
+		background: rgba(40, 40, 40, 0.32);
 	}
 
 	.order-details .writeOff .group-verify-status {
@@ -1597,6 +1741,11 @@
 	}
 
 	.order-details .writeOff .group-use-rule text {
+		word-break: break-all;
+	}
+
+	.order-details .writeOff .group-use-rule rich-text {
+		display: block;
 		word-break: break-all;
 	}
 

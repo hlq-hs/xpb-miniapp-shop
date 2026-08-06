@@ -22,18 +22,23 @@
 					<view class='nav borRadius14 acea-row'>
 						<text class='item' :class='orderStatus==0 ? "on": ""' @click="statusClick(0)">
 							<text>待付款</text>
+							<text class="order-status-num" v-if="getOrderStatusCount(0) > 0">{{ getOrderStatusCount(0) }}</text>
 						</text>
 						<text class='item' :class='orderStatus==1 ? "on": ""' @click="statusClick(1)">
 							<text>待发货</text>
+							<text class="order-status-num" v-if="getOrderStatusCount(1) > 0">{{ getOrderStatusCount(1) }}</text>
 						</text>
 						<text class='item' :class='orderStatus==2 ? "on": ""' @click="statusClick(2)">
 							<text>待收货</text>
+							<text class="order-status-num" v-if="getOrderStatusCount(2) > 0">{{ getOrderStatusCount(2) }}</text>
 						</text>
 						<text class='item' :class='orderStatus==3 ? "on": ""' @click="statusClick(3)">
 							<text>待评价</text>
+							<text class="order-status-num" v-if="getOrderStatusCount(3) > 0">{{ getOrderStatusCount(3) }}</text>
 						</text>
 						<text class='item' :class='orderStatus==4 ? "on": ""' @click="statusClick(4)">
 							<text>已完成</text>
+							<text class="order-status-num" v-if="getOrderStatusCount(4) > 0">{{ getOrderStatusCount(4) }}</text>
 						</text>
 					</view>
 				</scroll-view>
@@ -181,6 +186,17 @@
 			// #endif
 		},
 		methods: {
+			getOrderStatusCount(status) {
+				const data = this.orderData || {};
+				const statusCountMap = {
+					0: data.unPaidCount || data.unpaid_count,
+					1: data.unShippedCount || data.unshipped_count,
+					2: data.receivedCount || data.received_count,
+					3: data.evaluatedCount || data.evaluated_count,
+					4: data.completedCount || data.completeCount || data.completed_count || data.complete_count
+				};
+				return Number(statusCountMap[status] || 0);
+			},
 			//搜索
 			search() {
 				this.statusClick(this.orderStatus)
@@ -465,6 +481,7 @@
 		font-size: 26rpx;
 		color: #282828;
 		padding: 26rpx 0;
+		position: relative;
 	}
 
 	.my-order .nav .item.on {
@@ -478,6 +495,23 @@
 	}
 	.my-order .nav .item .num {
 		margin-top: 18rpx;
+	}
+
+	.my-order .nav .item .order-status-num {
+		min-width: 18rpx;
+		height: 28rpx;
+		line-height: 28rpx;
+		padding: 0 8rpx;
+		position: absolute;
+		top: 12rpx;
+		right: -10rpx;
+		border-radius: 15rpx;
+		background-color: #fff;
+		font-size: 20rpx;
+		font-weight: normal;
+		text-align: center;
+		@include main_color(theme);
+		@include coupons_border_color(theme);
 	}
 
 	.my-order .list {
@@ -619,6 +653,7 @@
 		padding: 25rpx 0;
 		display: inline-block;
 		font-size: 26rpx;
+		position: relative;
 	}
 	
 	.nav .item.on {
@@ -635,6 +670,23 @@
 	
 	.nav .item .num {
 		margin-top: 18rpx;
+	}
+
+	.nav .item .order-status-num {
+		min-width: 18rpx;
+		height: 28rpx;
+		line-height: 28rpx;
+		padding: 0 8rpx;
+		position: absolute;
+		top: 12rpx;
+		right: -10rpx;
+		border-radius: 15rpx;
+		background-color: #fff;
+		font-size: 20rpx;
+		font-weight: normal;
+		text-align: center;
+		@include main_color(theme);
+		@include coupons_border_color(theme);
 	}
 	.mp-bg {
 		top: 0;

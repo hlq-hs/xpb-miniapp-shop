@@ -1,7 +1,7 @@
 ﻿<template>
 	<view class="goodCate">
 		<view class="header acea-row row-center-wrapper" :style="{top: iStatusBarHeight + 'px'}">
-			<navigator url="/pages/goods/goods_search/index" class="search acea-row row-center-wrapper" hover-class="none">
+			<navigator :url="'/pages/goods/goods_search/index?productType=' + productType" class="search acea-row row-center-wrapper" hover-class="none">
 				<text class="iconfont icon-xiazai5"></text>
 				<text class="search-placeholder">搜索商品名称</text>
 				<text class="search-btn">搜索</text>
@@ -54,7 +54,7 @@
 						<text class="list-loading-text">Loading...</text>
 					</view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" :showEmptyLine="loadend && !loading" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" :showEmptyLine="loadend && !loading" :productType="productType" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
@@ -99,13 +99,13 @@
 						<text class="list-loading-text">Loading...</text>
 					</view>
 				</view>
-				<goodList :tempArr="tempArr" :isLogin="isLogin" :showEmptyLine="loadend && !loading" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
+				<goodList :tempArr="tempArr" :isLogin="isLogin" :showEmptyLine="loadend && !loading" :productType="productType" @detail="goDetail" @gocartduo="goCartDuo"></goodList>
 				<view class='loadingicon acea-row row-center-wrapper mb-2'>
 					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
 				</view>
 			</view>
 		</view>
-		<view class="footer acea-row row-between-wrapper">
+		<view class="footer acea-row row-between-wrapper" v-if="!isGroupBuy">
 			<view class="cartIcon acea-row row-center-wrapper" @click="getCartLists(0)" v-if="cartData.cartList.length">
 				<text class="iconfont icon-gouwuche-yangshi1"></text>
 				<view class="num"><text>{{cartCount || cartData.cartList.length}}</text></view>
@@ -118,9 +118,9 @@
 				<view class="bnt gray_bg" :class="{ 'main_bg': cartCount > 0}" @click="subOrder">去结算</view>
 			</view>
 		</view>
-		<cartList :cartData="cartData" @closeList="closeList" @ChangeCartNumDan="ChangeCartList"
+		<cartList v-if="!isGroupBuy" :cartData="cartData" @closeList="closeList" @ChangeCartNumDan="ChangeCartList"
 			@ChangeSubDel="ChangeSubDel" @ChangeOneDel="ChangeOneDel"></cartList>
-		<productWindow :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
+		<productWindow v-if="!isGroupBuy" :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
 			@ChangeCartNum="ChangeCartNumDuo" @attrVal="attrVal" @iptCartNum="iptCartNum" @goCat="goCatNum"
 			id='product-window'></productWindow>
 	</view>
@@ -154,7 +154,12 @@
 	} from '@/libs/login.js';
 	import animationType from '@/utils/animationType.js'
 	export default {
-		computed: mapGetters(['isLogin', 'uid']),
+		computed: {
+			...mapGetters(['isLogin', 'uid']),
+			isGroupBuy() {
+				return Number(this.productType) === 7;
+			}
+		},
 		components: {
 			productWindow,
 			goodList,
@@ -216,7 +221,7 @@
 			// #ifdef APP-PLUS
 			this.iStatusBarHeight = uni.getSystemInfoSync().statusBarHeight;
 			// #endif
-			if (this.isLogin) {
+			if (this.isLogin && !this.isGroupBuy) {
 				this.getCartNum();
 				this.getCartLists(1);
 			}
@@ -233,6 +238,7 @@
 		methods: {
 			// 鐢熸垚璁㈠崟锛?
 			subOrder: function() {
+				if (this.isGroupBuy) return;
 				let that = this,
 					list = that.cartData.cartList,
 					ids = [];
@@ -297,6 +303,7 @@
 				})
 			},
 			getCartLists(iSshow) {
+				if (this.isGroupBuy) return;
 				let that = this;
 				let data = {
 					page: 1,
@@ -321,6 +328,7 @@
 				this.productslist();
 			},
 			getCartNum: function() {
+				if (this.isGroupBuy) return;
 				let that = this;
 				getCartCounts(true, 'sum').then(res => {
 					that.$set(that, 'cartCount', res.data.count);
@@ -618,6 +626,10 @@
 				}
 			},
 			goCartDuo(item) {
+				if (this.isGroupBuy) {
+					this.goDetail(item);
+					return;
+				}
 				if (!this.isLogin) {
 					this.getIsLogin();
 				} else {
@@ -1441,9 +1453,9 @@
 			display: flex;
 			align-items: center;
 			justify-content: flex-start;
-			height: 40rpx;
-			margin-bottom: 18rpx;
-			font-size: 24rpx;
+			height: 44rpx;
+			margin-bottom: 16rpx;
+			font-size: 28rpx;
 			font-weight: 600;
 			color: #1f2937;
 		}
@@ -1491,11 +1503,11 @@
 		}
 
 		.filter-tags.collapsed {
-			max-height: 110rpx;
+			max-height: 120rpx;
 		}
 
 		.bgcolor.expanded .filter-tags {
-			max-height: 220rpx;
+			max-height: 240rpx;
 			overflow-y: auto;
 		}
 
@@ -1521,16 +1533,16 @@
 
 		.longItem {
 			width: auto !important;
-			min-width: 76rpx;
-			height: 42rpx;
-			line-height: 42rpx;
-			margin: 0 12rpx 10rpx 0;
-			padding: 0 20rpx;
+			min-width: 82rpx;
+			height: 46rpx;
+			line-height: 46rpx;
+			margin: 0 12rpx 12rpx 0;
+			padding: 0 22rpx;
 			box-sizing: border-box;
-			border-radius: 21rpx;
+			border-radius: 23rpx;
 			background: #f5f7fb;
 			color: #4b5563;
-			font-size: 22rpx;
+			font-size: 24rpx;
 			font-weight: 500;
 
 			&.click {
@@ -1601,16 +1613,16 @@
 
 				.item {
 					width: auto;
-					min-width: 76rpx;
-					height: 42rpx;
-					line-height: 42rpx;
+					min-width: 82rpx;
+					height: 46rpx;
+					line-height: 46rpx;
 					margin: 0 12rpx 12rpx 0;
-					padding: 0 20rpx;
+					padding: 0 22rpx;
 					box-sizing: border-box;
-					border-radius: 21rpx;
+					border-radius: 23rpx;
 					background: #f5f7fb;
 					color: #4b5563;
-					font-size: 22rpx;
+					font-size: 24rpx;
 					font-weight: 500;
 					text-align: center;
 
