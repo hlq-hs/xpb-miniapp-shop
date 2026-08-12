@@ -50,17 +50,21 @@
 				</view>
 				<view v-if="showWriteOff" class="writeOff borRadius14">
 					<view class="title">核销信息</view>
-					<view class="grayBg">
+					<view class="grayBg" v-if="!isGroupBuyExpired">
 						<view class="pictrue">
 							<!-- <div class="qrcode" ref="qrcode"></div> -->
 							<!-- <canvas canvas-id="qrcode" :style="{width: `${qrcodeSize}100%`, height: `${qrcodeSize}100%`}"/> -->
 							<image :src="codeImg"></image>
 						</view>
 					</view>
-					<view class="gear">
+					<view class="group-expired-card" v-else>
+						<view class="group-expired-title">团购已过期</view>
+						<view class="group-expired-desc">该核销码已超过使用有效期，无法继续核销。</view>
+					</view>
+					<view class="gear" v-if="!isGroupBuyExpired">
 						<image :src="urlDomain+'crmebimage/perset/staticImg/writeOff.jpg'"></image>
 					</view>
-					<view class="num">
+					<view class="num" v-if="!isGroupBuyExpired">
 						<text class="verify-code-text">{{formatVerifyCode(currentVerifyCode)}}</text>
 						<text class="verify-copy" @tap.stop="copyVerifyCode">复制</text>
 					</view>
@@ -477,6 +481,9 @@
 			groupBuyVerify() {
 				return this.groupBuyVerifyList[0] || {};
 			},
+			isGroupBuyExpired() {
+				return this.isGroupBuyOrder && Number((this.groupBuyVerify || {}).verifyStatus || 0) === 3;
+			},
 			groupBuyInfo() {
 				return this.orderInfo.groupBuyInfo || {};
 			},
@@ -580,12 +587,16 @@
 				};
 			},
 			showWriteOff() {
-				return this.orderInfo.shippingType == 2 && this.orderInfo.paid && this.orderInfo.pinkStatus != 1 && !!this.currentVerifyCode;
+				return this.orderInfo.shippingType == 2 && this.orderInfo.paid && this.orderInfo.pinkStatus != 1 && (this.isGroupBuyExpired || !!this.currentVerifyCode);
 			},
 
 			canApplyRefund() {
 				if (!this.isGroupBuyOrder) return true;
-				return !this.groupBuyVerifyList.some(item => Number(item.verifiedNum || 0) > 0);
+				if (this.groupBuyVerifyList.some(item => Number(item.verifiedNum || 0) > 0)) return false;
+				const refundType = Number((this.groupBuyInfo || {}).refundType || 0);
+				if (refundType === 3) return false;
+				if (this.isGroupBuyExpired) return refundType === 1;
+				return true;
 			}
 		},
 		onLoad: function(options) {
@@ -984,7 +995,7 @@
 					if (res.data.refundStatus != 0) {
 						that.isGoodsReturn = true;
 					};
-					if (that.orderInfo.shippingType == 2 && that.orderInfo.paid && that.currentVerifyCode) that.markCode(that.currentQrCodeText);
+					if (that.orderInfo.shippingType == 2 && that.orderInfo.paid && that.currentVerifyCode && !that.isGroupBuyExpired) that.markCode(that.currentQrCodeText);
 					if(that.orderInfo.refundStatus>0){
 						uni.setNavigationBarColor({
 						    frontColor: '#fff',
@@ -1626,6 +1637,35 @@
 		width: 100%;
 		height: 100%;
 		display: block;
+	}
+
+	.order-details .writeOff .group-expired-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 590rpx;
+		height: 384rpx;
+		margin: 50rpx auto 0 auto;
+		padding: 0 56rpx;
+		box-sizing: border-box;
+		border-radius: 20rpx;
+		background-color: #f2f5f7;
+		text-align: center;
+	}
+
+	.order-details .writeOff .group-expired-title {
+		font-size: 36rpx;
+		font-weight: 600;
+		color: #282828;
+		line-height: 48rpx;
+	}
+
+	.order-details .writeOff .group-expired-desc {
+		margin-top: 18rpx;
+		font-size: 26rpx;
+		color: #82848f;
+		line-height: 40rpx;
 	}
 
 	.order-details .writeOff .gear {
